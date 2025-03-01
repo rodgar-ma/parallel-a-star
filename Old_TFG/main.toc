@@ -1,0 +1,35 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {section}{\numberline {1}Introducción}{14}{section.1}%
+\contentsline {section}{\numberline {2}Estado del Arte}{16}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Estado actual y usos de las librerías OpenMP y Open MPI}{16}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Estado actual y usos de las librerías paralelas de Intel}{17}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Objetivos}{19}{section.3}%
+\contentsline {section}{\numberline {4}Metodología}{20}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Programación de la Versión Secuencial}{20}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Análisis de Código Paralelizable}{21}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Memoria Compartida}{22}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Programación mediante memoria compartida}{22}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Implementación de la versión Paralela en Memoria Compartida}{23}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}Memoria distribuida (paso de mensajes)}{26}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Programación mediante memoria distribuida}{26}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Implementación en Memoria Distribuida}{28}{subsubsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.5}Modelo híbrido de la programación paralela}{29}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Introducción a la programación híbrida}{29}{subsubsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {4.5.2}Implementación de la versión híbrida}{31}{subsubsection.4.5.2}%
+\contentsline {subsection}{\numberline {4.6}Selección del Tamaño de Bloque}{32}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Análisis de Prestaciones}{33}{subsection.4.7}%
+\contentsline {subsubsection}{\numberline {4.7.1}Configuración}{33}{subsubsection.4.7.1}%
+\contentsline {subsubsection}{\numberline {4.7.2}OpenMP vs. Intel TBB}{34}{subsubsection.4.7.2}%
+\contentsline {subsubsection}{\numberline {4.7.3}Open MPI vs Intel MPI}{36}{subsubsection.4.7.3}%
+\contentsline {subsubsection}{\numberline {4.7.4}Versión híbrida de Open vs híbrido de Intel}{37}{subsubsection.4.7.4}%
+\contentsline {subsection}{\numberline {4.8}Uso de la herramienta de profiling Intel VTune}{38}{subsection.4.8}%
+\contentsline {subsubsection}{\numberline {4.8.1}Configuración}{39}{subsubsection.4.8.1}%
+\contentsline {subsubsection}{\numberline {4.8.2}OpenMP vs Intel TBB}{39}{subsubsection.4.8.2}%
+\contentsline {subsubsection}{\numberline {4.8.3}Open MPI vs Intel MPI}{41}{subsubsection.4.8.3}%
+\contentsline {subsubsection}{\numberline {4.8.4}Versión híbrida de Open vs versión híbrida de Intel}{43}{subsubsection.4.8.4}%
+\contentsline {section}{\numberline {5}Conclusiones y Trabajo Futuro}{46}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Conclusiones}{46}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Trabajo Futuro}{47}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Bibliografía}{48}{section.6}%
+\contentsline {section}{\numberline {A}Versión Paralela con Intel TBB}{50}{appendix.Alph1}%
+\contentsline {section}{\numberline {B}Versión Paralela con Intel MPI}{51}{appendix.Alph2}%
