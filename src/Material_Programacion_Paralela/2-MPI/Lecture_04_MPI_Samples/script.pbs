@@ -1,0 +1,15 @@
+#PBS -S /bin/bash
+
+#PBS -V
+#PBS -q batch
+#PBS -N test_mpi
+#PBS -l walltime=00:10:00
+#PBS -l nodes=marte:ppn=6+marte:ppn=6
+
+source /etc/profile.d/modules.sh
+module load openmpi/1.6.4-gcc
+
+cd $PBS_O_WORKDIR
+
+make FILE=send_recv
+make test_mpi FILE=send_recv H1="marte" H2="marte" NP=4 N=1000
