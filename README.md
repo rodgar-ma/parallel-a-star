@@ -13,7 +13,7 @@ Puesta en contexto sobre el problema del camino más corto.
 Por qué es interesante.
 
 Aplicaciones:
--  Navegación
+- Navegación
 - Toma de decisiones
 - Telecomunicaciones (delay mínimo)
 
