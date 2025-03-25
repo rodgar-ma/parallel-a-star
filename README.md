@@ -1,4 +1,3 @@
-
 # Script del TFG.
 ## Desarrollo de aplicaciones en el campo de la computación de alto rendimiento.
 
