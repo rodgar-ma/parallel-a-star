@@ -16,17 +16,15 @@ Aplicaciones:
 - Toma de decisiones
 - Telecomunicaciones (delay mínimo)
 
-## Primeras propuestas
-
-## Mejoras hasta estado actual
+## Descripticón matemática
 
 # Algoritmo A*
-
-## Descripticón matemática
 
 ### Prueba de admisibilidad
 
 ### Prueba de optimalidad
+
+### Mejoras hasta estado actual
 
 # Metodología
 

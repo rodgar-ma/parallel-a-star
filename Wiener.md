@@ -24,6 +24,15 @@ Por Carl Hierholzer
 
 Comunicado por Carl Wiener
 
-En un recorrido de líneas arbitrariamente entrelazadas, se definen como ramas de un punto aquellas diferentes partes del recorrido por las cuales se puede salir del punto en cuestión. Un punto con múltiples ramas se denomina un nodo, y su grado corresponde al número de ramas que posee.
+En un trazado lineal arbitrario, se pueden definir ramas de un punto como las diferentes partes del camino por las que se puede salir desde ese punto. Un punto con múltiples ramas se denomina nodo y su grado corresponde al número de ramas que posee. Un nodo puede ser par o impar dependiendo del número de conexiones.
+
+Si un trazado lineal puede recorrerse en un solo trazo sin repetir ningún segmento, entonces tiene exactamente cero o dos nodos impares. Cada vez que se atraviesa un punto en el recorrido, se emplean dos ramas. Por lo tanto, cualquier punto que se cruce un número impar de veces debe tener un número par de ramas. Un nodo impar solo puede ser el inicio o el final del recorrido.
+
+Si un trazado tiene exactamente dos nodos impares, entonces debe comenzarse en uno de ellos y necesariamente terminar en el otro. Si no tiene nodos impares, el trazado debe ser un ciclo cerrado.
+
+Esta demostración también implica que cualquier trazado lineal solo puede tener un número par de nodos impares.
 
 (*) La siguiente investigación fue presentada por el fallecido Dr. Hierholzer, quien, lamentablemente, fue arrebatado prematuramente del servicio a la ciencia por la muerte († 13 de septiembre de 1871), ante un círculo de matemáticos amigos. Para evitar que cayera en el olvido, y debido a la falta de registros escritos, fue reconstruida de memoria con la ayuda de mi estimado colega Luroth, tratando de ser lo más fiel posible en la siguiente exposición.
+
+Nota del editor: La idea esencial de este estudio, aunque presentada de manera más concisa y sin una demostración detallada, ya aparece en el tratado de Listing "Vorstudien zur Topologie", publicado en Göttinger Studien en 1847. Quizás este artículo ayude a atraer nuevamente la atención de los geómetras hacia este trabajo valioso en múltiples aspectos.
+
