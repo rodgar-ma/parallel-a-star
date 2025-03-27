@@ -8,8 +8,6 @@ typedef struct __NeighborRecord *NeighborRecord;
 typedef struct __OpenSet *OpenSet;
 typedef struct __ClosedSet *ClosedSet;
 
-static const NeighborRecord NullNeighbor = {NULL, -1};
-
 struct __Node {
     float h_value;
     float g_value;
@@ -19,13 +17,12 @@ struct __Node {
 };
 
 struct __NeighborsList {
-    int capacity;
-    int count;
-    NeighborRecord *list;
+    float cost;
+    NeighborRecord nodes;
+    NeighborsList next;
 };
 
 struct __NeighborRecord {
-    float cost;
     Node node;
     NeighborRecord next;
 };
@@ -38,38 +35,37 @@ Node CreateNode(float hValue, float gValue)
     n->isOpen = 0;
     n->isClosed = 0;
     n->neighbors = malloc(sizeof(NeighborsList));
-    n->neighbors->capacity = 1;
-    n->neighbors->count = 0;
     return n;
 }
 
-void DestroyNode(Node n) {
-    free(n);
+NeighborRecord CreateNodeRecord(Node n) {
+    NeighborRecord nr = malloc(sizeof(NeighborRecord));
+    nr->node = n;
+    return nr;
 }
 
-void AddNeighbor(Node n, Node neighbor, float cost)
+NeighborsList CreateNeighborsList(float cost) {
+    NeighborsList nl = malloc(sizeof(NeighborsList));
+    nl->cost = cost;
+    return nl;
+}
+
+NeighborsList GetNeighborsOfCost(Node n, float cost) {
+    if (n->neighbors == NULL) {
+        n->neighbors = CreateNeighborsList(cost);
+    }
+    NeighborsList actual = n->neighbors;
+}
+
+void AddRecord(NeighborsList neighbors, NeighborRecord nr) {
+    
+}
+
+void AddNeighbor(Node n, Node new, float cost)
 {   
-    NeighborRecord nr = malloc(sizeof(NeighborRecord));
-    nr->cost = cost;
-    nr->node = neighbor;
-
-    if (n->neighbors->count == n->neighbors->capacity) {
-        n->neighbors->capacity = 1 + (n->neighbors->capacity * 2);
-        n->neighbors->list = realloc(n->neighbors->list, n->neighbors->capacity * sizeof(NeighborRecord));
-    }
-
-    int pos = 0;
-    for (int i = 0; i < n->neighbors->count; i++) {
-        if (n->neighbors->list[i]->cost <= nr->cost) {
-            pos += 1;
-        }
-    }
-    
-    if (n->neighbors->list[pos] != NullNeighbor) {
-        n->neighbors->list[pos]->next = nr;
-    }
-    nr->next = n->neighbors->list[pos+1];
-    
+    NeighborRecord nr = CreateNodeRecord(new);
+    NeighborsList neighbors = GetNeighborsOfCost(n, cost);
+    AddRecord(neighbors, nr);
 }
 
 int main(int argc, char const *argv[])
@@ -87,10 +83,6 @@ int main(int argc, char const *argv[])
     AddNeighbor(n1, n5, 3);
     AddNeighbor(n1, n6, 1);
     
-    
-    DestroyNode(n1);
-    DestroyNode(n2);
-    DestroyNode(n3);
     return 0;
 }
 
