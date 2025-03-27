@@ -50,22 +50,44 @@ NeighborsList CreateNeighborsList(float cost) {
     return nl;
 }
 
-NeighborsList GetNeighborsOfCost(Node n, float cost) {
-    if (n->neighbors == NULL) {
-        n->neighbors = CreateNeighborsList(cost);
+void AddNeighborsList(Node n, NeighborsList neighbors) {
+    NeighborsList list = n->neighbors;
+    while(list != NULL) {
+        if (list->cost > neighbors->cost) break;
+        list++;
     }
-    NeighborsList actual = n->neighbors;
+    if (list != NULL) {
+        NeighborsList tmp = list;
+        list = neighbors;
+        list->next = tmp;
+    } else {
+        list = neighbors;
+    }
+}
+
+NeighborsList GetNeighborsOfCost(Node n, float cost) {
+    NeighborsList list = n->neighbors;
+    while (list != NULL) {
+        if (list->cost == cost) break;
+        list++;
+    }
+    return list;
 }
 
 void AddRecord(NeighborsList neighbors, NeighborRecord nr) {
-    
+    nr->next = neighbors->nodes;
+    neighbors->nodes = nr;
 }
 
 void AddNeighbor(Node n, Node new, float cost)
 {   
     NeighborRecord nr = CreateNodeRecord(new);
     NeighborsList neighbors = GetNeighborsOfCost(n, cost);
+    if (neighbors == NULL) {
+        neighbors = CreateNeighborsList(cost);
+    }
     AddRecord(neighbors, nr);
+    AddNeighborsList(n, neighbors);
 }
 
 int main(int argc, char const *argv[])
