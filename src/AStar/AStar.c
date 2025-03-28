@@ -5,6 +5,8 @@
 typedef struct __Node *Node;
 typedef struct __NodeRecord *NodeRecord;
 typedef struct __NodeList *NodeList;
+typedef struct __OpenSet *OpenSet;
+typedef struct __ClosedSet *ClosedSet;
 
 struct __Node {
     float h_value;
@@ -23,6 +25,14 @@ struct __NodeList {
     float cost;
     NodeRecord nodes;
     NodeList next;
+};
+
+struct __OpenSet {
+    NodeList set;
+};
+
+struct __ClosedSet {
+    NodeRecord set;
 };
 
 static Node CreateNode(float hValue, float gValue)
@@ -54,7 +64,27 @@ static NodeList CreateNodeList(float cost) {
     return nl;
 }
 
-int ListHasNode(NodeList list, Node n) {
+static OpenSet CreateOpenSet() {
+    OpenSet s = malloc(sizeof(struct __OpenSet));
+    s->set = NULL;
+    return s;
+}
+
+static ClosedSet CreateClosedSet() {
+    ClosedSet s = malloc(sizeof(struct __ClosedSet));
+    s->set = NULL;
+    return s;
+}
+
+void AddNeighbor(Node n, Node new) {   
+    NodeRecord nr = CreateNodeRecord(new);
+    nr->next = n->neighbors;
+    n->neighbors = nr;
+}
+
+/* No es necesario por el atributo isOpen */
+int SetHasNode(OpenSet set, Node n) {
+    NodeList list = set->set;
     if (!list || !n) return 0;
     NodeList actualList = list;
     while(actualList) {
@@ -63,34 +93,51 @@ int ListHasNode(NodeList list, Node n) {
             if (actualNode->node == n) return 1;
             actualNode = actualNode->next;
         }
+        actualList = actualList->next;
     }
     return 0;
 }
 
-void AddNodeToList(NodeList list, Node n, float cost) {
+void AddNodeToOpenSet(OpenSet set, Node n, float cost) {
+    if (!n || n->isOpen) {
+        return;
+    } else {
+        n->isOpen = 1;
+    }
+
     NodeRecord nr = CreateNodeRecord(n);
-    if (!list || list->cost > cost) {
+    if (!set->set || set->set->cost > cost) {
         NodeList nl = CreateNodeList(cost);
         nl->nodes = nr;
-        nl->next = list;
-        list = nl;
+        nl->next = set->set;
+        set->set = nl;
         return;
     }
     
-    NodeList prevList = list;
+    NodeList prevList = set->set;
     while (prevList->next && prevList->next->cost < cost) {
         prevList = prevList->next;
     }
     
-    if (!prevList->next) prevList->next = CreateNodeList(cost);
-
-    nr->next = prevList->next->nodes;
-    prevList->next->nodes = nr;
+    if (!prevList->next || prevList->next->cost < cost) {
+        NodeList nl = CreateNodeList(cost);
+        nl->nodes = nr;
+        nl->next = prevList->next;
+        prevList->next = nl;
+    } else {
+        nr->next = prevList->next->nodes;
+        prevList->next->nodes = nr;
+    }
 }
 
-void RemoveNodeFromList(NodeList list, Node n) {
-    if (!list || !n) return;
-    NodeList tmpList = list;
+void RemoveNodeFromOpenSet(OpenSet set, Node n) {
+    if (!n || !n->isOpen || !set->set) {
+        return;
+    } else {
+        n->isOpen = 0;
+    }
+
+    NodeList tmpList = set->set;
     while (tmpList) {
         NodeRecord prev = tmpList->nodes;
         NodeRecord tmpNode = tmpList->nodes;
@@ -106,27 +153,23 @@ void RemoveNodeFromList(NodeList list, Node n) {
     }
 }
 
-void AddNodeToOpenSet(NodeList open, Node n) {
-    if (ListHasNode(open, n)) return;
-    AddNodeToList(open, n, n->h_value + n->g_value);
-    n->isOpen = 1;
-}
-
-void AddNeighbor(Node n, Node new) {   
-    NodeRecord nr = CreateNodeRecord(new);
-    nr->next = n->neighbors;
-    n->neighbors = nr;
+void AddNodeToClosedSet(ClosedSet closed, Node n) {
+    if (!n || n->isClosed) return;
+    n->isClosed = 1;
+    NodeRecord nr = CreateNodeRecord(n);
+    nr->next = closed->set;
+    closed->set = nr;
 }
 
 NodeRecord FindPath(Node source, Node goal) {
-    NodeList openSet = NULL;
-    NodeList closedSet = NULL;
+    OpenSet openSet = CreateOpenSet();
+    ClosedSet closedSet = CreateClosedSet();
     return NULL;
 }
 
-void PrintList(NodeList list) {
-    NodeList nl = list;
-    printf("Node List:\n");
+void PrintSet(OpenSet set) {
+    NodeList nl = set->set;
+    printf("Node Set:\n");
     while(nl) {
         printf("\tCost %f\n", nl->cost);
         NodeRecord nr = nl->nodes;
@@ -157,15 +200,15 @@ int main(int argc, char const *argv[])
     AddNeighbor(n1, n4);
     AddNeighbor(n1, n6);
 
-    NodeList openset = NULL;
-    AddNodeToOpenSet(openset, n1);
-    AddNodeToOpenSet(openset, n2);
-    AddNodeToOpenSet(openset, n3);
-    AddNodeToOpenSet(openset, n4);
-    AddNodeToOpenSet(openset, n5);
-    AddNodeToOpenSet(openset, n6);
+    OpenSet open = CreateOpenSet();
+    AddNodeToOpenSet(open, n1, n1->g_value + n1->h_value);
+    AddNodeToOpenSet(open, n2, n2->g_value + n2->h_value);
+    AddNodeToOpenSet(open, n3, n3->g_value + n3->h_value);
+    AddNodeToOpenSet(open, n4, n4->g_value + n4->h_value);
+    AddNodeToOpenSet(open, n5, n5->g_value + n5->h_value);
+    AddNodeToOpenSet(open, n6, n6->g_value + n6->h_value);
 
-    PrintList(openset);
+    PrintSet(open);
     
     return 0;
 }
