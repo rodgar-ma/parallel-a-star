@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "AStar.h"
+#include <string.h>
 
 typedef struct __Node *Node;
 typedef struct __NodeRecord *NodeRecord;
@@ -138,17 +138,22 @@ void RemoveNodeFromOpenSet(OpenSet set, Node n) {
     }
 
     NodeList tmpList = set->set;
+    NodeList prevList = NULL;
     while (tmpList) {
-        NodeRecord prev = tmpList->nodes;
         NodeRecord tmpNode = tmpList->nodes;
-        while (tmpNode && tmpNode->node != n) {
+        NodeRecord prev = NULL;
+        while (tmpNode) {
+            if (tmpNode->node == n) {
+                if (prev) {
+                    prev->next = tmpNode->next;
+                } else {
+                    tmpList->nodes = tmpNode->next;
+                }
+            }
             prev = tmpNode;
             tmpNode = tmpNode->next;
         }
-        if (tmpNode) {
-            prev->next = tmpNode->next;
-            return;
-        }
+        prevList = tmpList;
         tmpList = tmpList->next;
     }
 }
@@ -182,34 +187,114 @@ void PrintSet(OpenSet set) {
     }
 }
 
+typedef struct {
+    int width;
+    int height;
+    Node ** grid;
+} Map;
+
+
+Map *LoadMap(const char *filename) {
+    FILE *file;
+    errno_t err;
+
+    if ((err = fopen_s(&file, filename, "r")) != 0) {
+        perror("Error abriendo el archivo");
+        return NULL;
+    }
+
+    int width = 0, height = 0;
+    char buffer[1024];
+
+    // Leer dimensiones
+    while (fgets(buffer, sizeof(buffer), file)) {
+        if (strncmp(buffer, "width", 5) == 0) {
+            if ((err = sscanf_s(buffer, "width %d", &width)) != 1) {
+                perror("Error abriendo el archivo");
+                return NULL;
+            }
+        } else if (strncmp(buffer, "height", 6) == 0) {
+            if ((err = sscanf_s(buffer, "height %d", &height)) != 1) {
+                perror("Error abriendo el archivo");
+                return NULL;
+            }
+        } else if (strncmp(buffer, "map", 3) == 0) {
+            break;  // Inicia la lectura del mapa
+        }
+    }
+
+    if (width == 0 || height == 0) {
+        printf("Error: dimensiones no especificadas correctamente.\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Reservar memoria para el mapa
+    Map *map = malloc(sizeof(Map));
+    map->width = width;
+    map->height = height;
+    map->grid = calloc(height, sizeof(Node *));
+
+    // Leer el mapa
+    for (int y = 0; y < height; y++) {
+        fgets(buffer, sizeof(buffer), file);
+        map->grid[y] = calloc(width, sizeof(Node));
+
+        for (int x = 0; x < width; x++) {
+            if (buffer[x] == '.') {
+                map->grid[y][x] = CreateNode(0, 0);
+            } else {
+                map->grid[y][x] = NULL;
+            }
+        }
+    }
+
+    fclose(file);
+
+    // Conectar nodos vecinos
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            if (map->grid[y][x]) {
+                if (x > 0 && map->grid[y][x - 1]) AddNeighbor(map->grid[y][x], map->grid[y][x - 1]);
+                if (x < width - 1 && map->grid[y][x + 1]) AddNeighbor(map->grid[y][x], map->grid[y][x + 1]);
+                if (y > 0 && map->grid[y - 1][x]) AddNeighbor(map->grid[y][x], map->grid[y - 1][x]);
+                if (y < height - 1 && map->grid[y + 1][x]) AddNeighbor(map->grid[y][x], map->grid[y + 1][x]);
+            }
+        }
+    }
+
+    return map;
+}
+
+void FreeMap(Map *map) {
+    for (int y = 0; y < map->height; y++) {
+        for (int x = 0; x < map->width; x++) {
+            if (map->grid[y][x]) free(map->grid[y][x]);
+        }
+        free(map->grid[y]);
+    }
+    free(map->grid);
+    free(map);
+}
+
+Node GetNode(Map map, int x, int y) {
+    if (map.grid[x][y]) return map.grid[x][y];
+    return NULL;
+}
 
 /*******************************************************************/
 
 int main(int argc, char const *argv[])
 {
-    Node n1 = CreateNode(1, 1);
-    Node n2 = CreateNode(2, 2);
-    Node n3 = CreateNode(3, 3);
-    Node n4 = CreateNode(4, 4);
-    Node n5 = CreateNode(5, 5);
-    Node n6 = CreateNode(6, 6);
+    printf("\n");
+    char* filename = "./maze-map/maze512-1-0.map";
+    Map* map = LoadMap(filename);
     
-    AddNeighbor(n1, n2);
-    AddNeighbor(n1, n5);
-    AddNeighbor(n1, n3);
-    AddNeighbor(n1, n4);
-    AddNeighbor(n1, n6);
+    Node source = GetNode(*map, 1, 1);
+    Node goal = GetNode(*map, 511, 511);
 
-    OpenSet open = CreateOpenSet();
-    AddNodeToOpenSet(open, n1, n1->g_value + n1->h_value);
-    AddNodeToOpenSet(open, n2, n2->g_value + n2->h_value);
-    AddNodeToOpenSet(open, n3, n3->g_value + n3->h_value);
-    AddNodeToOpenSet(open, n4, n4->g_value + n4->h_value);
-    AddNodeToOpenSet(open, n5, n5->g_value + n5->h_value);
-    AddNodeToOpenSet(open, n6, n6->g_value + n6->h_value);
+    FreeMap(map);
 
-    PrintSet(open);
-    
     return 0;
 }
 
