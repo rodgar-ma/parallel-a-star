@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include "AStar.h"
 
-typedef struct __NodeRecord *NodeRecord;
+typedef struct __Node *Node;
+typedef struct __Neighbor *Neighbor;
 typedef struct __ListItem *ListItem;
 typedef struct __CostList *CostList;
 typedef struct __CostList *OpenSet;
 typedef struct __ListItem *ClosedSet;
-typedef struct __VisitedNodes *VisitedNodes;
 
-struct __NodeRecord {
+struct __Node {
     void *node;
     void *parent;
     float h_value;
@@ -19,14 +19,19 @@ struct __NodeRecord {
     NeighborsList neighbors;
 };
 
-struct __NeighborRecord {
+struct __NeighborsList {
+    int count;
+    Neighbor first;
+};
+
+struct __Neighbor {
     float cost;
-    NodeRecord node;
-    NeighborsList next;
+    Node node;
+    Neighbor next;
 };
 
 struct __ListItem{
-    NodeRecord node;
+    Node node;
     ListItem next;
 };
 
@@ -36,35 +41,29 @@ struct __CostList {
     CostList next;
 };
 
-struct __VisitedNodes {
-    size_t nodeSize;
-};
-
-NodeRecord CreateNodeRecord(void *node) {
-    NodeRecord nr = malloc(sizeof(NodeRecord));
-    if (!nr) return NULL;
-    nr->node = node;
-    nr->parent = NULL;
-    nr->isOpen = 0;
-    nr->isClosed = 0;
-    nr->isGoal = 0;
-
-
-
-    return nr;
+Node CreateNode(void *node) {
+    Node n = malloc(sizeof(struct __Node));
+    n->node = node;
+    n->parent = NULL;
+    n->isOpen = 0;
+    n->isClosed = 0;
+    n->isGoal = 0;
+    n->neighbors = malloc(sizeof(struct __NeighborsList));
+    n->neighbors->count = 0;
+    return n;
 }
 
-ListItem CreateListItem(NodeRecord nr) {
+ListItem CreateListItem(Node n) {
     ListItem ni = malloc(sizeof(ListItem));
-    ni->node = nr;
+    ni->node = n;
     return ni;
 }
 
 void AddNeighbor(NeighborsList neighbors, void *node, float cost) {
-    NodeRecord nr = GetNodeRecord(node);
+    Node n = GetNode(node);
     NeighborsList newNeighbor = malloc(sizeof(NeighborsList));
     newNeighbor->cost = cost;
-    newNeighbor->node = nr;
+    newNeighbor->node = n;
     newNeighbor->next = neighbors;
     neighbors = newNeighbor;
 }
@@ -78,11 +77,11 @@ CostList CreateCostList(float cost) {
     return nl;
 }
 
-void AddNodeRecordToOpenSet(CostList open, NodeRecord nr) {
-    if (nr->isOpen) return;
-    nr->isOpen = 1;
-    float fcost = nr->h_value + nr->g_value;
-    ListItem ni = CreateListItem(nr);
+void AddNodeToOpenSet(CostList open, Node n) {
+    if (n->isOpen) return;
+    n->isOpen = 1;
+    float fcost = n->h_value + n->g_value;
+    ListItem ni = CreateListItem(n);
 
     if (!open) {
         CostList nl = CreateCostList(fcost);
@@ -109,7 +108,7 @@ void AddNodeRecordToOpenSet(CostList open, NodeRecord nr) {
 
     ListItem currentItem = currentList->nodes;
     ListItem previousItem = NULL;
-    while (currentItem && currentItem->node->h_value < nr->h_value) {
+    while (currentItem && currentItem->node->h_value < n->h_value) {
         previousItem = currentItem;
         currentItem = currentItem->next;
     }
@@ -123,9 +122,9 @@ void AddNodeRecordToOpenSet(CostList open, NodeRecord nr) {
     }
 }
 
-void RemoveNodeFromOpenSet(CostList set, NodeRecord nr) {
-    if (!nr->isOpen) return;
-    nr->isOpen = 0;
+void RemoveNodeFromOpenSet(CostList set, Node n) {
+    if (!n->isOpen) return;
+    n->isOpen = 0;
 
     CostList tmpList = set;
     CostList prevList = NULL;
@@ -133,7 +132,7 @@ void RemoveNodeFromOpenSet(CostList set, NodeRecord nr) {
         ListItem tmpNode = tmpList->nodes;
         ListItem prevNode = NULL;
         while (tmpNode) {
-            if (tmpNode->node == nr) {
+            if (tmpNode->node == n) {
                 if (prevNode) {
                     prevNode->next = tmpNode->next;
                 } else {
@@ -149,17 +148,17 @@ void RemoveNodeFromOpenSet(CostList set, NodeRecord nr) {
     }
 }
 
-void AddNodeToClosedSet(ClosedSet closed, NodeRecord nr) {
-    if (nr->isClosed) return;
-    nr->isClosed = 1;
+void AddNodeToClosedSet(ClosedSet closed, Node n) {
+    if (n->isClosed) return;
+    n->isClosed = 1;
 
-    ListItem ni = CreateListItem(nr);
+    ListItem ni = CreateListItem(n);
     ni->next = closed;
     closed = ni;
 }
 
-NodeRecord GetFirstFromOpenSet(OpenSet open) {
-    NodeRecord nr = open->nodes->node;
+Node GetFirstFromOpenSet(OpenSet open) {
+    Node n = open->nodes->node;
 
     if (open->nodes->next) {
         open->nodes = open->nodes->next;
@@ -167,7 +166,7 @@ NodeRecord GetFirstFromOpenSet(OpenSet open) {
         open = open->next;
     }
 
-    return nr;
+    return n;
 }
 
 Path FindPath(const AStarSource * source, void *start, void *goal) {

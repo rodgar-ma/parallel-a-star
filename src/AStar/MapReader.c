@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "MapReader.h"
 
-Map *LoadMap(const char *filename) {
+Map LoadMap(const char *filename) {
     FILE *file;
     errno_t err;
 
@@ -38,7 +38,7 @@ Map *LoadMap(const char *filename) {
     }
 
     // Reservar memoria para el mapa
-    Map *map = malloc(sizeof(Map));
+    Map map = malloc(sizeof(struct __Map));
     map->width = width;
     map->height = height;
     map->grid = calloc(height, sizeof(Node **));
@@ -64,7 +64,7 @@ Map *LoadMap(const char *filename) {
     return map;
 }
 
-void FreeMap(Map *map) {
+void FreeMap(Map map) {
     for (int y = 0; y < map->height; y++) {
         for (int x = 0; x < map->width; x++) {
             if (map->grid[y][x]) free(map->grid[y][x]);

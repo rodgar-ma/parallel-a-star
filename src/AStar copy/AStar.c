@@ -287,7 +287,7 @@ Node FindPath(Map map, Node start, Node goal) {
         AddNodeToClosedSet(closed, current);
         if (current == goal) return current;
 
-        NeighborsList neighbors = GetNeighbors(current);
+        NeighborsList neighbors = GetNeighbors(map, current);
         for (int i = 0; i < neighbors->count; i++) {
 
         }
