@@ -3,13 +3,25 @@
 
 
 struct __NeighborsList {
-    const AStarSource *source;
-    size_t capacity;
-    size_t count;
-    float *costs;
-    void *nodes;
+    int count;
+    Neighbor first;
 };
 
-struct Node {
-    
+struct __Neighbor {
+    float cost;
+    void *node;
+};
+
+NeighborsList CreateNeighborsList(const AStarSource * source) {
+    NeighborsList nl = malloc(sizeof(struct __NeighborsList));
+    nl->capacity = 0;
+
 }
+
+void AddNeighbor(NeighborsList neighbors, void *node) {
+    if (!neighbors) {
+
+    }
+}
+
+
