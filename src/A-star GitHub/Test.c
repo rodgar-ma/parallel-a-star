@@ -1,23 +1,28 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
 #include "AStar.h"
 
-typedef struct __Node {
+struct __Node {
     int x;
     int y;
 };
 
-typedef struct __Node *Node;
-
-typedef struct {
+struct __Map {
     int width;
     int height;
     Node ** grid;
-} Map;
+};
+
+typedef struct __Node *Node;
+typedef struct __Map *Map;
+
+Map map;
 
 Map *LoadMap(const char *filename) {
     FILE *file;
-    errno_t err;
+    int err;
 
     if ((err = fopen_s(&file, filename, "r")) != 0) {
         perror("Error abriendo el archivo");
@@ -89,20 +94,20 @@ void FreeMap(Map *map) {
 }
 
 void nodeNeighbors(ASNeighborList neighbors, void *node, void *context) {
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
+    for (int y = 0; y < map->height; y++) {
+        for (int x = 0; x < map->width; x++) {
             if (map->grid[y][x]) {
-                if (x > 0 && map->grid[y][x - 1]) ASNeighborListAdd(map->grid[y][x], map->grid[y][x - 1]);
-                if (x < width - 1 && map->grid[y][x + 1]) ASNeighborListAdd(map->grid[y][x], map->grid[y][x + 1]);
-                if (y > 0 && map->grid[y - 1][x]) ASNeighborListAdd(map->grid[y][x], map->grid[y - 1][x]);
-                if (y < height - 1 && map->grid[y + 1][x]) ASNeighborListAdd(map->grid[y][x], map->grid[y + 1][x]);
+                if (x > 0 && map->grid[y][x - 1]) ASNeighborListAdd(neighbors, map->grid[y][x - 1], 1);
+                if (x < map->width - 1 && map->grid[y][x + 1]) ASNeighborListAdd(neighbors, map->grid[y][x + 1], 1);
+                if (y > 0 && map->grid[y - 1][x]) ASNeighborListAdd(neighbors, map->grid[y - 1][x], 1);
+                if (y < map->height - 1 && map->grid[y + 1][x]) ASNeighborListAdd(neighbors, map->grid[y + 1][x], 1);
             }
         }
     }
 }
 
 float pathCostHeuristic(void *fromNode, void *toNode, void *context) {
-    return 0;
+    return abs(((Node)toNode)->x - ((Node)fromNode)->x) + abs(((Node)toNode)->y - ((Node)fromNode)->y);
 }
 
 int earlyExit(size_t visitedCount, void *visitingNode, void *goalNode, void *context) {
@@ -110,18 +115,33 @@ int earlyExit(size_t visitedCount, void *visitingNode, void *goalNode, void *con
 }
 
 int nodeComparator(void *node1, void *node2, void *context) {
+    int distX = ((Node)node1)->x - ((Node)node2)->x;
+    int distY = ((Node)node1)->y - ((Node)node2)->y;
+    if (distX > 0) {
+        if (distY > 0) return 1;
+        else return 1;
+    } else {
+        if (distY > 0) return 1;
+        else return -1;
+    }
     return 0;
 }
+
+/***********************************************************************/
 
 int main(int argc, char const *argv[])
 {
     printf("\n");
     char* filename = "../Astar/maze-map/maze512-1-0.map";
-    Map *map = LoadMap(filename);
+    map = LoadMap(filename);
 
     ASPathNodeSource source = {.nodeSize = sizeof(Node),
                                .nodeNeighbors = &nodeNeighbors,
-                               .pathCostHeuristic = &pathCostHeuristic};
+                               .pathCostHeuristic = &pathCostHeuristic,
+                               .earlyExit = &earlyExit,
+                               .nodeComparator = &nodeComparator};
+    
+    ASPathCreate(&source, map->grid[1][1], map->grid[511][511], NULL);
 
     return 0;
 }

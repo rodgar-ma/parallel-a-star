@@ -4,12 +4,13 @@
 #include <stdlib.h>
 
 
-typedef struct NeighborsList *NeighborsList;
+typedef struct __NeighborRecord *NeighborsList;
 typedef struct __NodeRecord *Path;
 
 typedef struct {
-    void    (*GetNeighbors)(NeighborsList neighbors, void *node, void *context);
-    float   (*Heuristic)(void *fromNode, void *toNode, void *context);
+    size_t nodeSize;
+    NeighborsList (*GetNeighbors)(void *node);
+    float (*Heuristic)(void *fromNode, void *toNode);
 } AStarSource;
 
 void AddNeighbor(NeighborsList neighbors, void *node, float edgeCost);

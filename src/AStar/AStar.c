@@ -2,11 +2,11 @@
 #include "AStar.h"
 
 typedef struct __NodeRecord *NodeRecord;
-typedef struct __NeighborRecord *NeighborRecord;
 typedef struct __ListItem *ListItem;
 typedef struct __CostList *CostList;
 typedef struct __CostList *OpenSet;
 typedef struct __ListItem *ClosedSet;
+typedef struct __VisitedNodes *VisitedNodes;
 
 struct __NodeRecord {
     void *node;
@@ -16,12 +16,13 @@ struct __NodeRecord {
     unsigned isOpen:1;
     unsigned isClosed:1;
     unsigned isGoal:1;
-    NeighborRecord neighbors;
+    NeighborsList neighbors;
 };
 
 struct __NeighborRecord {
     float cost;
-    NeighborRecord next;
+    NodeRecord node;
+    NeighborsList next;
 };
 
 struct __ListItem{
@@ -35,6 +36,9 @@ struct __CostList {
     CostList next;
 };
 
+struct __VisitedNodes {
+    size_t nodeSize;
+};
 
 NodeRecord CreateNodeRecord(void *node) {
     NodeRecord nr = malloc(sizeof(NodeRecord));
@@ -44,6 +48,9 @@ NodeRecord CreateNodeRecord(void *node) {
     nr->isOpen = 0;
     nr->isClosed = 0;
     nr->isGoal = 0;
+
+
+
     return nr;
 }
 
@@ -53,8 +60,17 @@ ListItem CreateListItem(NodeRecord nr) {
     return ni;
 }
 
-void AddNeighbor(void * node, void * neighbor, float cost) {
+NodeRecord GetNodeRecord(void *node) {
     
+}
+
+void AddNeighbor(NeighborsList neighbors, void *node, float cost) {
+    NodeRecord nr = GetNodeRecord(node);
+    NeighborsList newNeighbor = malloc(sizeof(NeighborsList));
+    newNeighbor->cost = cost;
+    newNeighbor->node = nr;
+    newNeighbor->next = neighbors;
+    neighbors = newNeighbor;
 }
 
 CostList CreateCostList(float cost) {
@@ -146,7 +162,7 @@ void AddNodeToClosedSet(ClosedSet closed, NodeRecord nr) {
     closed = ni;
 }
 
-NodeRecord GetFirst(OpenSet open) {
+NodeRecord GetFirstFromOpenSet(OpenSet open) {
     NodeRecord nr = open->nodes->node;
 
     if (open->nodes->next) {
