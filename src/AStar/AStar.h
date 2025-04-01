@@ -1,21 +1,14 @@
 #ifndef AStar_h
 #define AStar_h
 
-#include <stdlib.h>
-
-
-typedef struct __NeighborsList *NeighborsList;
-typedef struct __NodeRecord *Path;
+typedef void* Node;
 
 typedef struct {
-    void (*GetNeighbors)(void *node);
-    float (*Heuristic)(void *fromNode, void *toNode);
+    float (*Heuristic)(Node a, Node b);
+    Node* (*NeighborFunc)(Node current, int* count);
+    float (*CostFunc)(Node from, Node to);
+    int (*CompareFunc)(Node a, Node b);
 } AStarSource;
 
-void AddNeighbor(NeighborsList neighbors, void *node, float edgeCost);
-
-Node CreateNode(void *node);
-
-Path FindPath(const AStarSource *source, void *start, void *goal);
 
 #endif

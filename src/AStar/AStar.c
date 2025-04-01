@@ -1,177 +1,238 @@
 #include <stdlib.h>
 #include "AStar.h"
 
-typedef struct __Node *Node;
-typedef struct __Neighbor *Neighbor;
-typedef struct __ListItem *ListItem;
-typedef struct __CostList *CostList;
-typedef struct __CostList *OpenSet;
-typedef struct __ListItem *ClosedSet;
+// Priority queue implementation for A*
+typedef struct {
+    Node node;
+    float priority;
+} PQElement;
 
-struct __Node {
-    void *node;
-    void *parent;
-    float h_value;
-    float g_value;
-    unsigned isOpen:1;
-    unsigned isClosed:1;
-    unsigned isGoal:1;
-    NeighborsList neighbors;
-};
-
-struct __NeighborsList {
+typedef struct {
+    int capacity;
     int count;
-    Neighbor first;
-};
+    PQElement* first;
+} PriorityQueue;
 
-struct __Neighbor {
-    float cost;
-    Node node;
-    Neighbor next;
-};
-
-struct __ListItem{
-    Node node;
-    ListItem next;
-};
-
-struct __CostList {
-    float cost;
-    ListItem nodes;
-    CostList next;
-};
-
-Node CreateNode(void *node) {
-    Node n = malloc(sizeof(struct __Node));
-    n->node = node;
-    n->parent = NULL;
-    n->isOpen = 0;
-    n->isClosed = 0;
-    n->isGoal = 0;
-    n->neighbors = malloc(sizeof(struct __NeighborsList));
-    n->neighbors->count = 0;
-    return n;
+PriorityQueue* pq_create(int capacity) {
+    PriorityQueue* pq = malloc(sizeof(PriorityQueue));
+    pq->first = malloc(sizeof(PQElement) * capacity);
+    pq->capacity = capacity;
+    pq->count = 0;
+    return pq;
 }
 
-ListItem CreateListItem(Node n) {
-    ListItem ni = malloc(sizeof(ListItem));
-    ni->node = n;
-    return ni;
+void pq_free(PriorityQueue* pq) {
+    free(pq->first);
+    free(pq);
 }
 
-void AddNeighbor(NeighborsList neighbors, void *node, float cost) {
-    Node n = GetNode(node);
-    NeighborsList newNeighbor = malloc(sizeof(NeighborsList));
-    newNeighbor->cost = cost;
-    newNeighbor->node = n;
-    newNeighbor->next = neighbors;
-    neighbors = newNeighbor;
-}
-
-CostList CreateCostList(float cost) {
-    CostList nl = malloc(sizeof(CostList));
-    if (!nl) return NULL;
-    nl->cost = cost;
-    nl->nodes = NULL;
-    nl->next = NULL;
-    return nl;
-}
-
-void AddNodeToOpenSet(CostList open, Node n) {
-    if (n->isOpen) return;
-    n->isOpen = 1;
-    float fcost = n->h_value + n->g_value;
-    ListItem ni = CreateListItem(n);
-
-    if (!open) {
-        CostList nl = CreateCostList(fcost);
-        nl->nodes = ni;
-        nl->next = open;
-        open = nl;
-        return;
-    }
-
-    CostList currentList = open;
-    CostList previousList = NULL;
-    while (currentList && currentList->cost < fcost) {
-        previousList = currentList;
-        currentList = currentList->next;
-    }
-
-    if (!currentList || currentList->cost > fcost) {
-        CostList nl = CreateCostList(fcost);
-        nl->nodes = ni;
-        nl->next = currentList;
-        previousList->next = nl;
-        return;
-    }
-
-    ListItem currentItem = currentList->nodes;
-    ListItem previousItem = NULL;
-    while (currentItem && currentItem->node->h_value < n->h_value) {
-        previousItem = currentItem;
-        currentItem = currentItem->next;
+void pq_push(PriorityQueue* pq, Node node, float priority) {
+    if (pq->size == pq->capacity) {
+        pq->capacity *= 2;
+        pq->elements = realloc(pq->elements, sizeof(PQElement) * pq->capacity);
     }
     
-    if (!previousItem) {
-        ni->next = currentList->nodes;
-        currentList->nodes = ni;
-    } else {
-        ni->next = currentItem;
-        previousItem->next = ni;
+    int i = pq->size++;
+    pq->elements[i].node = node;
+    pq->elements[i].priority = priority;
+    
+    // Bubble up
+    while (i > 0) {
+        int parent = (i - 1) / 2;
+        if (pq->elements[i].priority >= pq->elements[parent].priority) break;
+        PQElement temp = pq->elements[i];
+        pq->elements[i] = pq->elements[parent];
+        pq->elements[parent] = temp;
+        i = parent;
     }
 }
 
-void RemoveNodeFromOpenSet(CostList set, Node n) {
-    if (!n->isOpen) return;
-    n->isOpen = 0;
+Node pq_pop(PriorityQueue* pq) {
+    if (pq->size == 0) return NULL;
+    
+    Node result = pq->elements[0].node;
+    pq->elements[0] = pq->elements[--pq->size];
+    
+    // Bubble down
+    int i = 0;
+    while (1) {
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+        int smallest = i;
+        
+        if (left < pq->size && pq->elements[left].priority < pq->elements[smallest].priority)
+            smallest = left;
+        if (right < pq->size && pq->elements[right].priority < pq->elements[smallest].priority)
+            smallest = right;
+        if (smallest == i) break;
+        
+        PQElement temp = pq->elements[i];
+        pq->elements[i] = pq->elements[smallest];
+        pq->elements[smallest] = temp;
+        i = smallest;
+    }
+    
+    return result;
+}
 
-    CostList tmpList = set;
-    CostList prevList = NULL;
-    while (tmpList) {
-        ListItem tmpNode = tmpList->nodes;
-        ListItem prevNode = NULL;
-        while (tmpNode) {
-            if (tmpNode->node == n) {
-                if (prevNode) {
-                    prevNode->next = tmpNode->next;
-                } else {
-                    tmpList->nodes = tmpNode->next;
-                }
-                return;
-            }
-            prevNode = tmpNode;
-            tmpNode = tmpNode->next;
+int pq_empty(PriorityQueue* pq) {
+    return pq->count == 0;
+}
+
+// A* algorithm implementation
+typedef struct {
+    Node node;
+    Node came_from;
+    float g_score;
+    float f_score;
+} NodeRecord;
+
+typedef struct {
+    AStarData* data;
+    int capacity;
+    int size;
+} AStarDataMap;
+
+AStarDataMap* as_datamap_create(int capacity) {
+    AStarDataMap* map = malloc(sizeof(AStarDataMap));
+    map->data = malloc(sizeof(AStarData) * capacity);
+    map->capacity = capacity;
+    map->size = 0;
+    return map;
+}
+
+void as_datamap_free(AStarDataMap* map) {
+    free(map->data);
+    free(map);
+}
+
+AStarData* as_datamap_get(AStarDataMap* map, Node node, CompareFunc compare) {
+    for (int i = 0; i < map->size; i++) {
+        if (compare(map->data[i].node, node)) {
+            return &map->data[i];
         }
-        prevList = tmpList;
-        tmpList = tmpList->next;
     }
+    return NULL;
 }
 
-void AddNodeToClosedSet(ClosedSet closed, Node n) {
-    if (n->isClosed) return;
-    n->isClosed = 1;
-
-    ListItem ni = CreateListItem(n);
-    ni->next = closed;
-    closed = ni;
-}
-
-Node GetFirstFromOpenSet(OpenSet open) {
-    Node n = open->nodes->node;
-
-    if (open->nodes->next) {
-        open->nodes = open->nodes->next;
-    } else {
-        open = open->next;
+void as_datamap_add(AStarDataMap* map, Node node, Node came_from, float g_score, float f_score) {
+    if (map->size == map->capacity) {
+        map->capacity *= 2;
+        map->data = realloc(map->data, sizeof(AStarData) * map->capacity);
     }
-
-    return n;
+    
+    map->data[map->size].node = node;
+    map->data[map->size].came_from = came_from;
+    map->data[map->size].g_score = g_score;
+    map->data[map->size].f_score = f_score;
+    map->size++;
 }
 
-Path FindPath(const AStarSource * source, void *start, void *goal) {
-    OpenSet open = NULL;
-    ClosedSet closed = NULL;
+// Reconstruct the path from the came_from map
+Node* reconstruct_path(AStarDataMap* came_from, Node start, Node goal, CompareFunc compare, int* path_length) {
+    Node* path = NULL;
+    *path_length = 0;
+    
+    Node current = goal;
+    while (current != NULL && !compare(current, start)) {
+        path = realloc(path, sizeof(Node) * (*path_length + 1));
+        path[*path_length] = current;
+        (*path_length)++;
+        
+        AStarData* data = as_datamap_get(came_from, current, compare);
+        current = data ? data->came_from : NULL;
+    }
+    
+    // Add start node
+    path = realloc(path, sizeof(Node) * (*path_length + 1));
+    path[*path_length] = start;
+    (*path_length)++;
+    
+    // Reverse the path
+    for (int i = 0; i < *path_length / 2; i++) {
+        Node temp = path[i];
+        path[i] = path[*path_length - i - 1];
+        path[*path_length - i - 1] = temp;
+    }
+    
+    return path;
+}
 
-
+// Main A* function
+Node* a_star(AStarSource *source, Node start, Node goal) {
+    
+    PriorityQueue* open_set = pq_create(100);
+    AStarDataMap* came_from = as_datamap_create(100);
+    AStarDataMap* g_scores = as_datamap_create(100);
+    AStarDataMap* f_scores = as_datamap_create(100);
+    
+    // Initialize with start node
+    float h = heuristic(start, goal);
+    pq_push(open_set, start, h);
+    as_datamap_add(g_scores, start, NULL, 0.0f, 0.0f);
+    as_datamap_add(f_scores, start, NULL, 0.0f, h);
+    
+    while (!pq_empty(open_set)) {
+        Node current = pq_pop(open_set);
+        
+        if (compare(current, goal)) {
+            // Path found
+            Node* path = reconstruct_path(came_from, start, goal, compare, path_length);
+            
+            // Clean up
+            pq_free(open_set);
+            as_datamap_free(came_from);
+            as_datamap_free(g_scores);
+            as_datamap_free(f_scores);
+            
+            return path;
+        }
+        
+        int neighbor_count = 0;
+        Node* neighbors = get_neighbors(current, &neighbor_count);
+        
+        for (int i = 0; i < neighbor_count; i++) {
+            Node neighbor = neighbors[i];
+            
+            // Get current g_score for the neighbor
+            AStarData* current_g_data = as_datamap_get(g_scores, current, compare);
+            float tentative_g_score = current_g_data->g_score + cost(current, neighbor);
+            
+            AStarData* neighbor_g_data = as_datamap_get(g_scores, neighbor, compare);
+            
+            if (neighbor_g_data == NULL || tentative_g_score < neighbor_g_data->g_score) {
+                // This path to neighbor is better than any previous one
+                as_datamap_add(came_from, neighbor, current, 0.0f, 0.0f);
+                as_datamap_add(g_scores, neighbor, NULL, tentative_g_score, 0.0f);
+                
+                float f_score = tentative_g_score + heuristic(neighbor, goal);
+                as_datamap_add(f_scores, neighbor, NULL, 0.0f, f_score);
+                
+                // Check if neighbor is already in open set
+                bool in_open_set = false;
+                for (int j = 0; j < open_set->size; j++) {
+                    if (compare(open_set->elements[j].node, neighbor)) {
+                        in_open_set = true;
+                        open_set->elements[j].priority = f_score;
+                        break;
+                    }
+                }
+                
+                if (!in_open_set) {
+                    pq_push(open_set, neighbor, f_score);
+                }
+            }
+        }
+        
+        free(neighbors);
+    }
+    
+    // No path found
+    pq_free(open_set);
+    as_datamap_free(came_from);
+    as_datamap_free(g_scores);
+    as_datamap_free(f_scores);
+    
+    *path_length = 0;
+    return NULL;
 }
