@@ -3,31 +3,30 @@
 
 typedef struct __Node *Node;
 typedef struct __Neighbor *Neighbor;
-typedef struct __NeighborsList *NeighborsList;
+typedef struct __VisitedNodes *VisitedNodes;
 typedef struct __ListItem *ListItem;
-typedef struct __ListItem *ClosedSet;
 typedef struct __CostList *CostList;
 typedef struct __OpenSet *OpenSet;
 
 struct __Node {
+    void *node;
     float h_value;
     float g_value;
     unsigned isOpen:1;
     unsigned isClosed:1;
     unsigned isGoal:1;
     Node parent;
-    NeighborsList neighbors;
-};
-
-struct __NeighborsList {
-    int count;
-    Neighbor first;
 };
 
 struct __Neighbor {
     float cost;
     Node node;
     Neighbor next;
+};
+
+struct __NeighborList {
+    int count;
+    Neighbor first;
 };
 
 struct __ListItem{
@@ -46,11 +45,18 @@ struct __OpenSet {
     CostList set;
 };
 
-Node CreateNode() {
+Node CreateNode(void *node) {
     Node n = malloc(sizeof(struct __Node));
-    n->neighbors = malloc(sizeof(struct __NeighborsList));
-    n->neighbors->count = 0;
+    n->node = node;
+    n->parent = NULL;
+    n->isOpen = 0;
+    n->isClosed = 0;
+    n->isGoal = 0;
     return n;
+}
+
+Node GetNode(VisitedNodes visited, void *node) {
+    return NULL;
 }
 
 Neighbor CreateNeighbor(Node n, float cost) {
@@ -62,18 +68,6 @@ Neighbor CreateNeighbor(Node n, float cost) {
 
 void SetNodeGoal(Node n) {
     n->isGoal = 1;
-}
-
-void AddNeighbor(Node node, Node neighbor, float cost) {
-    Neighbor newNeighbor = CreateNeighbor(neighbor, cost);
-    newNeighbor->next = node->neighbors->first;
-    node->neighbors->first = newNeighbor;
-    node->neighbors->count++;
-    return;
-}
-
-NeighborsList GetNeighbors(Node n) {
-    return n->neighbors;
 }
 
 ListItem CreateListItem(Node n) {
@@ -92,7 +86,7 @@ CostList CreateCostList(float cost) {
 }
 
 OpenSet CreateOpenSet() {
-    OpenSet open = maloc(sizeof(struct __OpenSet));
+    OpenSet open = malloc(sizeof(struct __OpenSet));
     open->count = 0;
     open->set = NULL;
 }
@@ -103,6 +97,7 @@ void AddNodeToOpenSet(OpenSet open, Node n) {
     float fcost = n->h_value + n->g_value;
     ListItem ni = CreateListItem(n);
 
+    // Si el set está vacía creamos una nueva lista y lo insertamos.
     if (!open->set) {
         CostList nl = CreateCostList(fcost);
         nl->nodes = ni;
@@ -112,6 +107,7 @@ void AddNodeToOpenSet(OpenSet open, Node n) {
         return;
     }
 
+    // Buscamos la lista con coste fcost.
     CostList currentList = open->set;
     CostList previousList = NULL;
     while (currentList && currentList->cost < fcost) {
@@ -119,6 +115,7 @@ void AddNodeToOpenSet(OpenSet open, Node n) {
         currentList = currentList->next;
     }
 
+    // Si no existe la creamos
     if (!currentList || currentList->cost > fcost) {
         CostList nl = CreateCostList(fcost);
         nl->nodes = ni;
@@ -128,6 +125,7 @@ void AddNodeToOpenSet(OpenSet open, Node n) {
         return;
     }
 
+    // Si existe buscamos el nodo
     ListItem currentItem = currentList->nodes;
     ListItem previousItem = NULL;
     while (currentItem && currentItem->node->h_value < n->h_value) {
@@ -173,15 +171,6 @@ void RemoveNodeFromOpenSet(OpenSet open, Node n) {
     }
 }
 
-void AddNodeToClosedSet(ClosedSet closed, Node n) {
-    if (n->isClosed) return;
-    n->isClosed = 1;
-
-    ListItem ni = CreateListItem(n);
-    ni->next = closed;
-    closed = ni;
-}
-
 Node GetFirstFromOpenSet(OpenSet open) {
     Node n = open->set->nodes->node;
     if (open->set->nodes->next) {
@@ -192,25 +181,20 @@ Node GetFirstFromOpenSet(OpenSet open) {
     return n;
 }
 
-Node FindPath(AStarSource source, Node start, Node goal) {
+Node FindPath(AStarSource * source, void *start, void *goal) {
     OpenSet open = CreateOpenSet();
-    ClosedSet closed = NULL;
+    VisitedNodes visited = CreateVisitedNodes();
 
-    AddNodeToOpenSet(open, start);
+    Node startNode = GetNode(visited, start);
+    Node goalNode = GetNode(visited, goal);
+
+    startNode->h_value = source->Heuristic(startNode->node, goalNode->node);
+    goalNode->isGoal = 1;
+
+    AddNodeToOpenSet(open, startNode);
 
     while(open->count > 0) {
-        Node currentNode = GetFirstFromOpenSet(open);
-        if (currentNode = goal) return currentNode;
-        for (int i = 0; i < currentNode->neighbors->count; i++) {
-            Neighbor nb = currentNode->neighbors->first + i * sizeof(Neighbor);
-            if (nb->node->isClosed) continue;
-            float newCostToNeighbor = currentNode->g_value + source.Heuristic(currentNode, nb->node);
-            if (newCostToNeighbor < nb->node->g_value || !nb->node->isOpen) {
-                nb->node->g_value = newCostToNeighbor;
-                nb->node->h_value = source.Heuristic(nb->node, goal);
-                nb->node->parent = currentNode;
-                if (!nb->node->isOpen) AddNodeToOpenSet(open, nb->node);
-            }
-        }
+
     }
+
 }
