@@ -60,10 +60,6 @@ ListItem CreateListItem(NodeRecord nr) {
     return ni;
 }
 
-NodeRecord GetNodeRecord(void *node) {
-    
-}
-
 void AddNeighbor(NeighborsList neighbors, void *node, float cost) {
     NodeRecord nr = GetNodeRecord(node);
     NeighborsList newNeighbor = malloc(sizeof(NeighborsList));
