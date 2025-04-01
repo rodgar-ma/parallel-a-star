@@ -1,14 +1,14 @@
 #ifndef AStar_h
 #define AStar_h
 
-typedef void* Node;
+typedef struct __NeighborsList *NeighborsList;
 
 typedef struct {
-    float (*Heuristic)(Node a, Node b);
-    Node* (*NeighborFunc)(Node current, int* count);
-    float (*CostFunc)(Node from, Node to);
-    int (*CompareFunc)(Node a, Node b);
+    float (*Heuristic)(void *a, void *b);
+    void (*GetNeighbors)(NeighborsList neighbors, void *node);
+    int (*NodeComparator)(void *a, void *b);
 } AStarSource;
 
+void AddNeighbor(NeighborsList neighbors, void *node, float cost);
 
 #endif
