@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "MapReader.h"
 
 Map LoadMap(const char *filename) {

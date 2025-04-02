@@ -4,14 +4,12 @@
 typedef struct __Node *Node;
 typedef struct __Map *Map;
 
-typedef struct __Node {
+struct __Node {
     int x;
     int y;
 };
 
-typedef struct __Node *Node;
-
-typedef struct __Map {
+struct __Map {
     int width;
     int height;
     Node ** grid;

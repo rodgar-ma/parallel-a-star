@@ -2,6 +2,7 @@
 #define AStar_h
 
 typedef struct __NeighborsList *NeighborsList;
+typedef struct __Path *Path;
 
 typedef struct {
     int (*Heuristic)(void *fromNode, void *toNode);
@@ -9,6 +10,8 @@ typedef struct {
     int (*CompareFunc)(void *node1, void *node2);
 } AStarSource;
 
-void AddNeighbor(NeighborsList neighbors, void *node, float cost);
+void AddNeighbor(NeighborsList neighbors, void *node, int cost);
+
+Path FindPath(AStarSource *source, void *start, void *goal);
 
 #endif

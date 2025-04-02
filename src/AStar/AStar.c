@@ -1,12 +1,18 @@
 #include <stdlib.h>
 #include "AStar.h"
 
-typedef struct {
+struct __NeighborsList {
     size_t capacity;
     size_t count;
     int *costs;
     void **nodes;
-} NeighborsList;
+};
+
+struct __Path {
+    int cost;
+    size_t size;
+    void **nodes;
+};
 
 typedef struct {
     void *node;
@@ -34,22 +40,25 @@ typedef struct {
     HashItem **nodes;
 } HashTable;
 
-NeighborsList *CreateNeighborsList() {
-    NeighborsList *list = malloc(sizeof(NeighborsList));
+NeighborsList CreateNeighborsList() {
+    NeighborsList list = malloc(sizeof(struct __NeighborsList));
     list->capacity = 0;
-    list->costs = 0;
+    list->count = 0;
+    list->costs = NULL;
+    list->nodes = NULL;
     return list;
 }
 
 Node *CreateNode(void *n) {
     Node *node = malloc(sizeof(Node));
     node->node = n;
+    node->parent = NULL;
     node->isOpen = 0;
     node->isClosed = 0;
     return node;
 }
 
-void AddNeighbor(NeighborsList *list, void *node, int cost) {
+void AddNeighbor(NeighborsList list, void *node, int cost) {
     if (list->count == list->capacity) {
         list->capacity = 1 + (2 * list->capacity);
         list->costs = realloc(list->costs, list->capacity * sizeof(int));
@@ -59,6 +68,12 @@ void AddNeighbor(NeighborsList *list, void *node, int cost) {
     list->nodes[list->count] = node;
     list->count++;
 }
+
+ void FreeNeighborsList(NeighborsList neighbors) {
+    free(neighbors->costs);
+    free(neighbors->nodes);
+    free(neighbors);
+ }
 
 PriorityQueue *CreatePriorityQueue() {
     PriorityQueue *pq = malloc(sizeof(PriorityQueue));
@@ -82,7 +97,7 @@ void AddNodeToOpenList(PriorityQueue *open, Node *n) {
 
     if (open->count == open->capacity) {
         open->capacity = 1 + (2 * open->capacity);
-        open->nodes = realloc(open->nodes, open->count * sizeof(Node *));
+        open->nodes = realloc(open->nodes, open->capacity * sizeof(Node *));
     }
 
     size_t i = open->count++;
@@ -123,7 +138,7 @@ int HasOpenNodes(PriorityQueue *pq) {
     return pq->count > 0;
 }
 
-void DestroyPriorityQueue(PriorityQueue *pq) {
+void FreePriorityQueue(PriorityQueue *pq) {
     free(pq->nodes);
     free(pq);
 }
@@ -189,10 +204,47 @@ void ResizeHashTable(HashTable *visited) {
     visited->capacity = newCapacity;
 }
 
-void FindPath(AStarSource *source, void *start, void *goal) {
+void FreeHashTable(HashTable *visited) {
+    if (!visited) return;
+
+    for (size_t i = 0; i < visited->capacity; i++) {
+        HashItem *current = visited->nodes[i];
+        while (current) {
+            HashItem *next = current->next;
+            free(current->node);
+            free(current);
+            current = next;
+        }
+    }
+
+    free(visited->nodes);
+    free(visited);
+}
+
+Path RetracePath(Node *goal) {
+    Path path = malloc(sizeof(struct __Path));
+    path->cost = goal->gCost;
+    path->size = 0;
+    Node *current = goal;
+    while (current) {
+        path->size++;
+        current = current->parent;
+    }
+
+    current = goal;
+    path->nodes = calloc(path->size, sizeof(void *));
+    for (size_t i = 0; i < path->size; i++) {
+        path->nodes[i] = current->node;
+        current = current->parent;
+    }
+    return path;
+}
+
+Path FindPath(AStarSource *source, void *start, void *goal) {
     PriorityQueue *open = CreatePriorityQueue();
     HashTable *visited = CreateHashTable();
-    NeighborsList *neighborsList = CreateNeighborsList();
+    NeighborsList neighborsList = CreateNeighborsList();
+    Path path = NULL;
 
     Node *current = GetNode(visited, start);
     current->gCost = 0;
@@ -203,7 +255,8 @@ void FindPath(AStarSource *source, void *start, void *goal) {
     while(HasOpenNodes(open)) {
         Node *current = GetFirstFromOpen(open);
         if (current->node == goal) {
-            return;
+            AddNodeToVisitedList(visited, current);
+            break;
         }
         AddNodeToVisitedList(visited, current);
         source->GetNeighbors(neighborsList, current->node);
@@ -213,10 +266,16 @@ void FindPath(AStarSource *source, void *start, void *goal) {
             if (newCost < neighbor->gCost || !neighbor->isOpen) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source->Heuristic(neighbor->node, goal);
+                neighbor->parent = current;
                 if (!neighbor->isOpen) {
                     AddNodeToOpenList(open, neighbor);
                 }
             }
         }
     }
+    path = RetracePath(current);
+    FreePriorityQueue(open);
+    FreeHashTable(visited);
+    FreeNeighborsList(neighborsList);
+    return path;
 }
