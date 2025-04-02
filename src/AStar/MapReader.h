@@ -16,6 +16,7 @@ struct __Map {
 };
 
 Map LoadMap(const char *filename);
+Node GetNodeAtPos(Map map, int x, int y);
 void FreeMap(Map map);
 
 

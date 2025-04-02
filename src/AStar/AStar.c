@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include "AStar.h"
 
+typedef struct __Node *Node;
+typedef struct __PriorityQueue *PriorityQueue;
+typedef struct __HashItem *HashItem;
+typedef struct __HashTable *HashTable;
+
 struct __NeighborsList {
     size_t capacity;
     size_t count;
@@ -8,37 +13,31 @@ struct __NeighborsList {
     void **nodes;
 };
 
-struct __Path {
-    int cost;
-    size_t size;
-    void **nodes;
-};
-
-typedef struct {
+struct __Node {
     void *node;
-    Node *parent;
+    Node parent;
     int gCost;
     int fCost;
     unsigned isOpen:1;
     unsigned isClosed:1;
-} Node;
+};
 
-typedef struct {
+struct __PriorityQueue {
     size_t capacity;
     size_t count;
-    Node **nodes;
-} PriorityQueue;
+    Node *nodes;
+} ;
 
-typedef struct {
-    Node *node;
-    HashItem *next;
-} HashItem;
+struct __HashItem{
+    Node node;
+    HashItem next;
+};
 
-typedef struct {
+struct __HashTable {
     size_t capacity;
     size_t count;
-    HashItem **nodes;
-} HashTable;
+    HashItem *nodes;
+};
 
 NeighborsList CreateNeighborsList() {
     NeighborsList list = malloc(sizeof(struct __NeighborsList));
@@ -49,8 +48,8 @@ NeighborsList CreateNeighborsList() {
     return list;
 }
 
-Node *CreateNode(void *n) {
-    Node *node = malloc(sizeof(Node));
+Node CreateNode(void *n) {
+    Node node = malloc(sizeof(struct __Node));
     node->node = n;
     node->parent = NULL;
     node->isOpen = 0;
@@ -75,22 +74,22 @@ void AddNeighbor(NeighborsList list, void *node, int cost) {
     free(neighbors);
  }
 
-PriorityQueue *CreatePriorityQueue() {
-    PriorityQueue *pq = malloc(sizeof(PriorityQueue));
+PriorityQueue CreatePriorityQueue() {
+    PriorityQueue pq = malloc(sizeof(struct __PriorityQueue));
     pq->capacity = 0;
     pq->count = 0;
     pq->nodes = NULL;
     return pq;
 }
 
-void Swap(Node **a, Node **b) {
-    Node *temp = *a;
+void Swap(Node *a, Node *b) {
+    Node temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void AddNodeToOpenList(PriorityQueue *open, Node *n) {
-    if (n->isClosed) n->isClosed = 0;
+void AddNodeToOpenList(PriorityQueue open, Node n) {
+    n->isClosed = 0;
     if (n->isOpen) return;
 
     n->isOpen = 1;
@@ -109,10 +108,10 @@ void AddNodeToOpenList(PriorityQueue *open, Node *n) {
     }
 }
 
-Node *GetFirstFromOpen(PriorityQueue *open) {
+Node GetFirstFromOpen(PriorityQueue open) {
     if (open->count == 0) return NULL;
 
-    Node *minNode = open->nodes[0];
+    Node minNode = open->nodes[0];
     open->nodes[0] = open->nodes[--open->count];
 
     size_t i = 0;
@@ -134,17 +133,17 @@ Node *GetFirstFromOpen(PriorityQueue *open) {
     return minNode;
 }
 
-int HasOpenNodes(PriorityQueue *pq) {
+int HasOpenNodes(PriorityQueue pq) {
     return pq->count > 0;
 }
 
-void FreePriorityQueue(PriorityQueue *pq) {
+void FreePriorityQueue(PriorityQueue pq) {
     free(pq->nodes);
     free(pq);
 }
 
-HashTable *CreateHashTable() {
-    HashTable *ht = malloc(sizeof(HashTable));
+HashTable CreateHashTable() {
+    HashTable ht = malloc(sizeof(struct __HashTable));
     ht->capacity = 0;
     ht->count = 0;
     ht->nodes = NULL;
@@ -155,39 +154,15 @@ size_t HashFunction(void *node, size_t capacity) {
     return ((size_t)node) % capacity;
 }
 
-Node *GetNode(HashTable *visited, void *node) {
-    if (visited->capacity == 0 || (visited->count + 1) > visited->capacity * 0.75) {
-        ResizeHashTable(visited);
-    }
-
-    size_t index = HashFunction(node, visited->capacity);
-    HashItem *current = visited->nodes[index];
-
-    while (current) {
-        if (current->node == node) {
-            return current->node;
-        }
-        current = current->next;
-    }
-
-    HashItem *hi = malloc(sizeof(HashItem));
-    hi->node = CreateNode(node);
-    hi->next = visited->nodes[index];
-    visited->nodes[index] = hi;
-    visited->count++;
-
-    return hi->node;
-}
-
-void ResizeHashTable(HashTable *visited) {
+void ResizeHashTable(HashTable visited) {
     size_t newCapacity = (visited->capacity == 0) ? 16 : visited->capacity * 2;
-    HashItem **newNodes = calloc(newCapacity, sizeof(HashItem *));
+    HashItem *newNodes = calloc(newCapacity, sizeof(struct __HashItem));
 
     // Reinsertar nodos en la nueva tabla
     for (size_t i = 0; i < visited->capacity; i++) {
-        HashItem *current = visited->nodes[i];
+        HashItem current = visited->nodes[i];
         while (current) {
-            HashItem *next = current->next; // Guardamos el siguiente nodo en la lista de colisiones
+            HashItem next = current->next; // Guardamos el siguiente nodo en la lista de colisiones
             size_t newIndex = HashFunction(current->node, newCapacity);
             
             // Insertar en la nueva tabla con manejo de colisiones
@@ -204,13 +179,13 @@ void ResizeHashTable(HashTable *visited) {
     visited->capacity = newCapacity;
 }
 
-void FreeHashTable(HashTable *visited) {
+void FreeHashTable(HashTable visited) {
     if (!visited) return;
 
     for (size_t i = 0; i < visited->capacity; i++) {
-        HashItem *current = visited->nodes[i];
+        HashItem current = visited->nodes[i];
         while (current) {
-            HashItem *next = current->next;
+            HashItem next = current->next;
             free(current->node);
             free(current);
             current = next;
@@ -221,11 +196,35 @@ void FreeHashTable(HashTable *visited) {
     free(visited);
 }
 
-Path RetracePath(Node *goal) {
+Node GetNode(HashTable visited, void *node) {
+    if (visited->capacity == 0 || (visited->count + 1) > visited->capacity * 0.75) {
+        ResizeHashTable(visited);
+    }
+
+    size_t index = HashFunction(node, visited->capacity);
+    HashItem current = visited->nodes[index];
+
+    while (current) {
+        if (current->node == node) {
+            return current->node;
+        }
+        current = current->next;
+    }
+
+    HashItem hi = malloc(sizeof(struct __HashItem));
+    hi->node = CreateNode(node);
+    hi->next = visited->nodes[index];
+    visited->nodes[index] = hi;
+    visited->count++;
+
+    return hi->node;
+}
+
+Path RetracePath(Node goal) {
     Path path = malloc(sizeof(struct __Path));
     path->cost = goal->gCost;
     path->size = 0;
-    Node *current = goal;
+    Node current = goal;
     while (current) {
         path->size++;
         current = current->parent;
@@ -240,28 +239,36 @@ Path RetracePath(Node *goal) {
     return path;
 }
 
+void AddNodeToVisitedList(Node node) {
+    node->isClosed = 1;
+    return;
+}
+
 Path FindPath(AStarSource *source, void *start, void *goal) {
-    PriorityQueue *open = CreatePriorityQueue();
-    HashTable *visited = CreateHashTable();
+    PriorityQueue open = CreatePriorityQueue();
+    HashTable visited = CreateHashTable();
     NeighborsList neighborsList = CreateNeighborsList();
     Path path = NULL;
 
-    Node *current = GetNode(visited, start);
+    Node current = GetNode(visited, start);
     current->gCost = 0;
     current->fCost = source->Heuristic(start, goal);
 
     AddNodeToOpenList(open, current);
 
     while(HasOpenNodes(open)) {
-        Node *current = GetFirstFromOpen(open);
+        current = GetFirstFromOpen(open);
         if (current->node == goal) {
-            AddNodeToVisitedList(visited, current);
+            AddNodeToVisitedList(current);
             break;
         }
-        AddNodeToVisitedList(visited, current);
+        
+        AddNodeToVisitedList(current);
+        
+        neighborsList->count = 0;
         source->GetNeighbors(neighborsList, current->node);
         for (size_t i = 0; i < neighborsList->count; i++) {
-            Node *neighbor = GetNode(visited, neighborsList->nodes[i]);
+            Node neighbor = GetNode(visited, neighborsList->nodes[i]);
             int newCost = current->gCost + neighborsList->costs[i];
             if (newCost < neighbor->gCost || !neighbor->isOpen) {
                 neighbor->gCost = newCost;

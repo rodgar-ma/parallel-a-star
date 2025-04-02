@@ -65,6 +65,11 @@ Map LoadMap(const char *filename) {
     return map;
 }
 
+Node GetNodeAtPos(Map map, int x, int y) {
+    if (map->grid[y][x] == NULL) return NULL;
+    else return map->grid[y][x];
+}
+
 void FreeMap(Map map) {
     for (int y = 0; y < map->height; y++) {
         for (int x = 0; x < map->width; x++) {
