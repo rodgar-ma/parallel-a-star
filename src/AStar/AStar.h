@@ -4,9 +4,15 @@
 typedef struct __NeighborsList *NeighborsList;
 
 typedef struct {
+<<<<<<< Updated upstream
     float (*Heuristic)(void *a, void *b);
     void (*GetNeighbors)(NeighborsList neighbors, void *node);
     int (*NodeComparator)(void *a, void *b);
+=======
+    int (*Heuristic)(void *fromNode, void *toNode);
+    void (*GetNeighbors)(NeighborsList *neighbors, void *node);
+    int (*CompareFunc)(void *node1, void *node2);
+>>>>>>> Stashed changes
 } AStarSource;
 
 void AddNeighbor(NeighborsList neighbors, void *node, float cost);
