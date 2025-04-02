@@ -52,6 +52,8 @@ Node CreateNode(void *n) {
     Node node = malloc(sizeof(struct __Node));
     node->node = n;
     node->parent = NULL;
+    node->gCost = 0;
+    node->fCost = 0;
     node->isOpen = 0;
     node->isClosed = 0;
     return node;
@@ -156,7 +158,7 @@ size_t HashFunction(void *node, size_t capacity) {
 
 void ResizeHashTable(HashTable visited) {
     size_t newCapacity = (visited->capacity == 0) ? 16 : visited->capacity * 2;
-    HashItem *newNodes = calloc(newCapacity, sizeof(struct __HashItem));
+    HashItem *newNodes = calloc(newCapacity, sizeof(HashItem));
 
     // Reinsertar nodos en la nueva tabla
     for (size_t i = 0; i < visited->capacity; i++) {
@@ -186,7 +188,6 @@ void FreeHashTable(HashTable visited) {
         HashItem current = visited->nodes[i];
         while (current) {
             HashItem next = current->next;
-            free(current->node);
             free(current);
             current = next;
         }
