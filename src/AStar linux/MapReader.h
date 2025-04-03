@@ -12,6 +12,7 @@ struct __Node {
 struct __Map {
     int width;
     int height;
+    int count;
     Node ** grid;
 };
 

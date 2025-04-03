@@ -7,16 +7,21 @@
 Map MAP;
 
 int ManhattanHeuristic(void *fromNode, void *toNode) {
-    return abs(((Node)fromNode)->x - ((Node)toNode)->x) + abs(((Node)fromNode)->y - ((Node)toNode)->y);
+    int distX = abs(((Node)toNode)->x - ((Node)fromNode)->x);
+    int distY = abs(((Node)toNode)->y - ((Node)fromNode)->y);
+    if (distX > distY) return distX;
+    else return distY;
 }
 
 void GetNeighbors(NeighborsList neighbors, void *node) {
     int x = ((Node)node)->x;
     int y = ((Node)node)->y;
-    if (MAP->grid[y-1][x]) AddNeighbor(neighbors, (void*)MAP->grid[y-1][x], 1);
-    if (MAP->grid[y+1][x]) AddNeighbor(neighbors, (void*)MAP->grid[y+1][x], 1);
-    if (MAP->grid[y][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y][x-1], 1);
-    if (MAP->grid[y][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y][x+1], 1);
+    for (int j = -1; j < 2; j++) {
+        for (int i = -1; i < 2; i++) {
+            if (i == 0 && j == 0) continue;
+            if (MAP->grid[y+j][x+i]) AddNeighbor(neighbors, (void*)MAP->grid[y+j][x+i], 1);
+        }
+    }
 }
 
 void PrintPath(Path path) {
@@ -47,13 +52,22 @@ int main(int argc, char const *argv[])
     int goal_y = atoi(argv[5]);
 
     AStarSource *source = malloc(sizeof(AStarSource));
+    source->map_size = MAP->count;
     source->Heuristic = &ManhattanHeuristic;
     source->GetNeighbors = &GetNeighbors;
 
     Node start = GetNodeAtPos(MAP, start_x, start_y);
     Node goal = GetNodeAtPos(MAP, goal_x, goal_y);
 
-    Path path = FindPath(source, start, goal);
+    if (!start) {
+        perror("No start node");
+        return 1;
+    } else if (!goal) {
+        perror("No goal node");
+        return 1;
+    }
+
+    Path path = FindPath(source, (void *)start, (void *)goal);
 
     PrintPath(path);
 

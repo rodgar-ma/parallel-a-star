@@ -11,6 +11,7 @@ struct __Path {
 };
 
 typedef struct {
+    int map_size;
     int (*Heuristic)(void *fromNode, void *toNode);
     void (*GetNeighbors)(NeighborsList neighbors, void *node);
 } AStarSource;

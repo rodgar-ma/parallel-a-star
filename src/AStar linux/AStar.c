@@ -1,7 +1,6 @@
 #include <stdlib.h>
+#include <limits.h>
 #include "AStar.h"
-
-#define MAP_SIZE 262144
 
 typedef struct __Node *Node;
 typedef struct __PriorityQueue *PriorityQueue;
@@ -32,6 +31,7 @@ struct __PriorityQueue {
 
 struct __HashTable {
     size_t count;
+    int size;
     Node *nodes;
 };
 
@@ -48,8 +48,8 @@ Node CreateNode(void *n) {
     Node node = malloc(sizeof(struct __Node));
     node->node = n;
     node->parent = NULL;
-    node->gCost = 0;
-    node->fCost = 0;
+    node->gCost = INT_MAX;
+    node->fCost = INT_MAX;
     node->isOpen = 0;
     node->isClosed = 0;
     return node;
@@ -80,16 +80,13 @@ PriorityQueue CreatePriorityQueue() {
     return pq;
 }
 
-void Swap(Node *a, Node *b) {
+static inline void Swap(Node *a, Node *b) {
     Node temp = *a;
     *a = *b;
     *b = temp;
 }
 
 void AddNodeToOpenList(PriorityQueue open, Node n) {
-    n->isClosed = 0;
-    if (n->isOpen) return;
-
     n->isOpen = 1;
 
     if (open->count == open->capacity) {
@@ -107,8 +104,6 @@ void AddNodeToOpenList(PriorityQueue open, Node n) {
 }
 
 Node GetFirstFromOpen(PriorityQueue open) {
-    if (open->count == 0) return NULL;
-
     Node minNode = open->nodes[0];
     open->nodes[0] = open->nodes[--open->count];
 
@@ -127,7 +122,7 @@ Node GetFirstFromOpen(PriorityQueue open) {
         Swap(&open->nodes[i], &open->nodes[smallest]);
         i = smallest;
     }
-
+    minNode->isOpen = 0;
     return minNode;
 }
 
@@ -140,15 +135,16 @@ void FreePriorityQueue(PriorityQueue pq) {
     free(pq);
 }
 
-HashTable CreateHashTable() {
+HashTable CreateHashTable(int size) {
     HashTable ht = malloc(sizeof(struct __HashTable));
     ht->count = 0;
-    ht->nodes = calloc(MAP_SIZE, sizeof(Node));
+    ht->size = size;
+    ht->nodes = calloc(size, sizeof(Node));
     return ht;
 }
 
-size_t HashFunction(void *node) {
-    return ((size_t)node) % MAP_SIZE;
+size_t HashFunction(HashTable table, void *node) {
+    return ((size_t)node) % table->size;
 }
 
 void FreeHashTable(HashTable visited) {
@@ -157,11 +153,12 @@ void FreeHashTable(HashTable visited) {
 }
 
 Node GetNode(HashTable visited, void *node) {
-    size_t index = HashFunction(node);
+    size_t index = HashFunction(visited, node);
     if (visited->nodes[index]) {
         return visited->nodes[index];
     }
     visited->nodes[index] = CreateNode(node);
+    visited->count++;
     return visited->nodes[index];
 }
 
@@ -184,14 +181,9 @@ Path RetracePath(Node goal) {
     return path;
 }
 
-void AddNodeToClosedList(Node node) {
-    node->isClosed = 1;
-    return;
-}
-
 Path FindPath(AStarSource *source, void *start, void *goal) {
     PriorityQueue open = CreatePriorityQueue();
-    HashTable hashTable = CreateHashTable();
+    HashTable hashTable = CreateHashTable(source->map_size);
     NeighborsList neighborsList = CreateNeighborsList();
     Path path = NULL;
 
@@ -203,25 +195,22 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
 
     while(HasOpenNodes(open)) {
         current = GetFirstFromOpen(open);
+        current->isClosed = 1;
         if (current->node == goal) {
-            AddNodeToClosedList(current);
             break;
         }
-        
-        AddNodeToClosedList(current);
         
         neighborsList->count = 0;
         source->GetNeighbors(neighborsList, current->node);
         for (size_t i = 0; i < neighborsList->count; i++) {
             Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
             int newCost = current->gCost + neighborsList->costs[i];
-            if (newCost < neighbor->gCost || !neighbor->isOpen) {
+            if (!neighbor->isClosed || (newCost < neighbor->gCost && neighbor->isClosed)) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source->Heuristic(neighbor->node, goal);
                 neighbor->parent = current;
-                if (!neighbor->isOpen) {
-                    AddNodeToOpenList(open, neighbor);
-                }
+                neighbor->isClosed = 0;
+                AddNodeToOpenList(open, neighbor);
             }
         }
     }

@@ -42,6 +42,7 @@ Map LoadMap(const char *filename) {
     map->width = width;
     map->height = height;
     map->grid = calloc(height, sizeof(Node **));
+    map->count = 0;
 
     // Leer el mapa
     for (int y = 0; y < height; y++) {
@@ -53,6 +54,7 @@ Map LoadMap(const char *filename) {
                 map->grid[y][x] = malloc(sizeof(struct __Node));
                 map->grid[y][x]->x = x;
                 map->grid[y][x]->y = y;
+                map->count++;
             } else {
                 map->grid[y][x] = NULL;
             }
