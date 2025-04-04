@@ -1,6 +1,8 @@
 #ifndef AStar_h
 #define AStar_h
 
+#include <stdlib.h>
+
 typedef struct __NeighborsList *NeighborsList;
 typedef struct __Path *Path;
 

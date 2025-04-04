@@ -3,11 +3,10 @@
 #include <string.h>
 #include "MapReader.h"
 
-Map LoadMap(const char *filename) {
-    FILE *file;
-    errno_t err;
+Map LoadMap(char *filename) {
+    FILE *file = fopen(filename, "r");
 
-    if ((err = fopen_s(&file, filename, "r")) != 0) {
+    if (!file) {
         perror("Error abriendo el archivo");
         return NULL;
     }
@@ -18,12 +17,12 @@ Map LoadMap(const char *filename) {
     // Leer dimensiones
     while (fgets(buffer, sizeof(buffer), file)) {
         if (strncmp(buffer, "width", 5) == 0) {
-            if ((err = sscanf_s(buffer, "width %d", &width)) != 1) {
+            if (sscanf(buffer, "width %d", &width) != 1) {
                 perror("Error abriendo el archivo");
                 return NULL;
             }
         } else if (strncmp(buffer, "height", 6) == 0) {
-            if ((err = sscanf_s(buffer, "height %d", &height)) != 1) {
+            if (sscanf(buffer, "height %d", &height) != 1) {
                 perror("Error abriendo el archivo");
                 return NULL;
             }
@@ -43,6 +42,7 @@ Map LoadMap(const char *filename) {
     map->width = width;
     map->height = height;
     map->grid = calloc(height, sizeof(Node **));
+    map->count = width*height;
 
     // Leer el mapa
     for (int y = 0; y < height; y++) {

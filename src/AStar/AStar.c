@@ -1,23 +1,25 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
+#include <float.h>
 #include "AStar.h"
 
 typedef struct __Node *Node;
 typedef struct __PriorityQueue *PriorityQueue;
-typedef struct __HashItem *HashItem;
 typedef struct __HashTable *HashTable;
 
 struct __NeighborsList {
     size_t capacity;
     size_t count;
-    int *costs;
+    double *costs;
     void **nodes;
 };
 
 struct __Node {
     void *node;
     Node parent;
-    int gCost;
-    int fCost;
+    double gCost;
+    double fCost;
     unsigned isOpen:1;
     unsigned isClosed:1;
 };
@@ -28,15 +30,11 @@ struct __PriorityQueue {
     Node *nodes;
 } ;
 
-struct __HashItem{
-    Node node;
-    HashItem next;
-};
-
 struct __HashTable {
-    size_t capacity;
+    AStarSource *source;
+    size_t size;
     size_t count;
-    HashItem *nodes;
+    Node *nodes;
 };
 
 NeighborsList CreateNeighborsList() {
@@ -52,17 +50,17 @@ Node CreateNode(void *n) {
     Node node = malloc(sizeof(struct __Node));
     node->node = n;
     node->parent = NULL;
-    node->gCost = 0;
-    node->fCost = 0;
+    node->gCost = DBL_MAX;
+    node->fCost = DBL_MAX;
     node->isOpen = 0;
     node->isClosed = 0;
     return node;
 }
 
-void AddNeighbor(NeighborsList list, void *node, int cost) {
+void AddNeighbor(NeighborsList list, void *node, double cost) {
     if (list->count == list->capacity) {
         list->capacity = 1 + (2 * list->capacity);
-        list->costs = realloc(list->costs, list->capacity * sizeof(int));
+        list->costs = realloc(list->costs, list->capacity * sizeof(double));
         list->nodes = realloc(list->nodes, list->capacity * sizeof(void *));
     }
     list->costs[list->count] = cost;
@@ -72,7 +70,6 @@ void AddNeighbor(NeighborsList list, void *node, int cost) {
 
  void FreeNeighborsList(NeighborsList neighbors) {
     free(neighbors->costs);
-    free(neighbors->nodes);
     free(neighbors);
  }
 
@@ -92,8 +89,6 @@ void Swap(Node *a, Node *b) {
 
 void AddNodeToOpenList(PriorityQueue open, Node n) {
     n->isClosed = 0;
-    if (n->isOpen) return;
-
     n->isOpen = 1;
 
     if (open->count == open->capacity) {
@@ -111,8 +106,6 @@ void AddNodeToOpenList(PriorityQueue open, Node n) {
 }
 
 Node GetFirstFromOpen(PriorityQueue open) {
-    if (open->count == 0) return NULL;
-
     Node minNode = open->nodes[0];
     open->nodes[0] = open->nodes[--open->count];
 
@@ -131,12 +124,8 @@ Node GetFirstFromOpen(PriorityQueue open) {
         Swap(&open->nodes[i], &open->nodes[smallest]);
         i = smallest;
     }
-
+    minNode->isOpen = 0;
     return minNode;
-}
-
-int HasOpenNodes(PriorityQueue pq) {
-    return pq->count > 0;
 }
 
 void FreePriorityQueue(PriorityQueue pq) {
@@ -144,81 +133,45 @@ void FreePriorityQueue(PriorityQueue pq) {
     free(pq);
 }
 
-HashTable CreateHashTable() {
+int HasOpenNodes(PriorityQueue pq) {
+    return pq->count > 0;
+}
+
+HashTable CreateHashTable(AStarSource *source) {
     HashTable ht = malloc(sizeof(struct __HashTable));
-    ht->capacity = 0;
+    ht->source = source;
     ht->count = 0;
-    ht->nodes = NULL;
+    ht->size = 2 * source->map_size;
+    ht->nodes = calloc(ht->size, sizeof(Node));
     return ht;
 }
 
 size_t HashFunction(void *node, size_t capacity) {
-    return ((size_t)node) % capacity;
+    return (uintptr_t)node % capacity;
 }
 
-void ResizeHashTable(HashTable visited) {
-    size_t newCapacity = (visited->capacity == 0) ? 16 : visited->capacity * 2;
-    HashItem *newNodes = calloc(newCapacity, sizeof(HashItem));
-
-    // Reinsertar nodos en la nueva tabla
-    for (size_t i = 0; i < visited->capacity; i++) {
-        HashItem current = visited->nodes[i];
-        while (current) {
-            HashItem next = current->next; // Guardamos el siguiente nodo en la lista de colisiones
-            size_t newIndex = HashFunction(current->node, newCapacity);
-            
-            // Insertar en la nueva tabla con manejo de colisiones
-            current->next = newNodes[newIndex];
-            newNodes[newIndex] = current;
-
-            current = next;
+void FreeHashTable(HashTable hashTable) {
+    for(int i = 0; i < hashTable->size; i++) {
+        if (hashTable->nodes[i]) {
+            free(hashTable->nodes[i]);
         }
     }
-
-    // Liberar la tabla anterior y actualizar la referencia
-    free(visited->nodes);
-    visited->nodes = newNodes;
-    visited->capacity = newCapacity;
+    free(hashTable->nodes);
+    free(hashTable);
 }
 
-void FreeHashTable(HashTable visited) {
-    if (!visited) return;
-
-    for (size_t i = 0; i < visited->capacity; i++) {
-        HashItem current = visited->nodes[i];
-        while (current) {
-            HashItem next = current->next;
-            free(current);
-            current = next;
-        }
-    }
-
-    free(visited->nodes);
-    free(visited);
-}
-
-Node GetNode(HashTable visited, void *node) {
-    if (visited->capacity == 0 || (visited->count + 1) > visited->capacity * 0.75) {
-        ResizeHashTable(visited);
-    }
-
-    size_t index = HashFunction(node, visited->capacity);
-    HashItem current = visited->nodes[index];
-
+Node GetNode(HashTable hashTable, void *node) {
+    size_t index = HashFunction(node, hashTable->size);
+    Node current = hashTable->nodes[index];
     while (current) {
-        if (current->node == node) {
-            return current->node;
+        if (hashTable->source->Equals(current->node, node)) {
+            return current;
         }
-        current = current->next;
+        current = hashTable->nodes[++index];
     }
-
-    HashItem hi = malloc(sizeof(struct __HashItem));
-    hi->node = CreateNode(node);
-    hi->next = visited->nodes[index];
-    visited->nodes[index] = hi;
-    visited->count++;
-
-    return hi->node;
+    hashTable->nodes[index] = CreateNode(node);
+    hashTable->count++;
+    return hashTable->nodes[index];
 }
 
 Path RetracePath(Node goal) {
@@ -234,24 +187,24 @@ Path RetracePath(Node goal) {
     current = goal;
     path->nodes = calloc(path->size, sizeof(void *));
     for (size_t i = 0; i < path->size; i++) {
-        path->nodes[i] = current->node;
+        path->nodes[path->size-i-1] = current->node;
         current = current->parent;
     }
     return path;
 }
 
-void AddNodeToVisitedList(Node node) {
-    node->isClosed = 1;
-    return;
+void FreePath(Path path) {
+    free(path->nodes);
+    free(path);
 }
 
 Path FindPath(AStarSource *source, void *start, void *goal) {
     PriorityQueue open = CreatePriorityQueue();
-    HashTable visited = CreateHashTable();
+    HashTable hashTable = CreateHashTable(source);
     NeighborsList neighborsList = CreateNeighborsList();
     Path path = NULL;
 
-    Node current = GetNode(visited, start);
+    Node current = GetNode(hashTable, start);
     current->gCost = 0;
     current->fCost = source->Heuristic(start, goal);
 
@@ -259,19 +212,17 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
 
     while(HasOpenNodes(open)) {
         current = GetFirstFromOpen(open);
+        current->isClosed = 1;
         if (current->node == goal) {
-            AddNodeToVisitedList(current);
             break;
         }
-        
-        AddNodeToVisitedList(current);
         
         neighborsList->count = 0;
         source->GetNeighbors(neighborsList, current->node);
         for (size_t i = 0; i < neighborsList->count; i++) {
-            Node neighbor = GetNode(visited, neighborsList->nodes[i]);
-            int newCost = current->gCost + neighborsList->costs[i];
-            if (newCost < neighbor->gCost || !neighbor->isOpen) {
+            Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
+            double newCost = current->gCost + neighborsList->costs[i];
+            if (newCost < neighbor->gCost && !neighbor->isClosed) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source->Heuristic(neighbor->node, goal);
                 neighbor->parent = current;
@@ -282,8 +233,8 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
         }
     }
     path = RetracePath(current);
+    FreeHashTable(hashTable);
     FreePriorityQueue(open);
-    FreeHashTable(visited);
     FreeNeighborsList(neighborsList);
     return path;
 }

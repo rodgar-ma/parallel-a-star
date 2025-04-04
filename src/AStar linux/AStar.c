@@ -4,7 +4,6 @@
 
 typedef struct __Node *Node;
 typedef struct __PriorityQueue *PriorityQueue;
-typedef struct __HashItem *HashItem;
 typedef struct __HashTable *HashTable;
 
 struct __NeighborsList {
