@@ -204,7 +204,7 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
         for (size_t i = 0; i < neighborsList->count; i++) {
             Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
             int newCost = current->gCost + neighborsList->costs[i];
-            if (!neighbor->isClosed || (newCost < neighbor->gCost && neighbor->isClosed)) {
+            if (!neighbor->isOpen || (newCost < neighbor->gCost && neighbor->isClosed)) { //REVISAR
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source->Heuristic(neighbor->node, goal);
                 neighbor->parent = current;
