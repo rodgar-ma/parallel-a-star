@@ -16,12 +16,17 @@ int ManhattanHeuristic(void *fromNode, void *toNode) {
 void GetNeighbors(NeighborsList neighbors, void *node) {
     int x = ((Node)node)->x;
     int y = ((Node)node)->y;
+    printf("Node [%d, %d]\n", x, y);
     for (int j = -1; j < 2; j++) {
         for (int i = -1; i < 2; i++) {
             if (i == 0 && j == 0) continue;
-            if (MAP->grid[y+j][x+i]) AddNeighbor(neighbors, (void*)MAP->grid[y+j][x+i], 1);
+            if (MAP->grid[y+j][x+i]) {
+                AddNeighbor(neighbors, (void*)MAP->grid[y+j][x+i], 1);
+                printf("\tNode[%d,%d]\n", MAP->grid[y+j][x+i]->x, MAP->grid[y+j][x+i]->y);
+            }
         }
     }
+    printf("\n");
 }
 
 void PrintPath(Path path) {
