@@ -31,7 +31,7 @@ struct __PriorityQueue {
 } ;
 
 struct __HashTable {
-    AStarSource *source;
+    AStarSource source;
     size_t size;
     size_t count;
     Node *nodes;
@@ -128,6 +128,17 @@ Node GetFirstFromOpen(PriorityQueue open) {
     return minNode;
 }
 
+void ReorderOpenList(PriorityQueue open, Node n) {
+    size_t j = 0;
+    while (j < open->count && open->nodes[j] != n) {
+        j++;
+    }
+    while (j > 0 && open->nodes[(j-1)/2]->fCost > open->nodes[j]->fCost) {
+        Swap(&open->nodes[j], &open->nodes[(j-1)/2]);
+        j = (j - 1) / 2;
+    }
+}
+
 void FreePriorityQueue(PriorityQueue pq) {
     free(pq->nodes);
     free(pq);
@@ -137,11 +148,11 @@ int HasOpenNodes(PriorityQueue pq) {
     return pq->count > 0;
 }
 
-HashTable CreateHashTable(AStarSource *source) {
+HashTable CreateHashTable(AStarSource source) {
     HashTable ht = malloc(sizeof(struct __HashTable));
     ht->source = source;
     ht->count = 0;
-    ht->size = 2 * source->map_size;
+    ht->size = 2 * source.map_size;
     ht->nodes = calloc(ht->size, sizeof(Node));
     return ht;
 }
@@ -164,7 +175,7 @@ Node GetNode(HashTable hashTable, void *node) {
     size_t index = HashFunction(node, hashTable->size);
     Node current = hashTable->nodes[index];
     while (current) {
-        if (hashTable->source->Equals(current->node, node)) {
+        if (hashTable->source.Equals(current->node, node)) {
             return current;
         }
         current = hashTable->nodes[++index];
@@ -198,7 +209,7 @@ void FreePath(Path path) {
     free(path);
 }
 
-Path FindPath(AStarSource *source, void *start, void *goal) {
+Path FindPath(AStarSource source, void *start, void *goal) {
     PriorityQueue open = CreatePriorityQueue();
     HashTable hashTable = CreateHashTable(source);
     NeighborsList neighborsList = CreateNeighborsList();
@@ -206,7 +217,7 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
 
     Node current = GetNode(hashTable, start);
     current->gCost = 0;
-    current->fCost = source->Heuristic(start, goal);
+    current->fCost = source.Heuristic(start, goal);
 
     AddNodeToOpenList(open, current);
 
@@ -218,16 +229,18 @@ Path FindPath(AStarSource *source, void *start, void *goal) {
         }
         
         neighborsList->count = 0;
-        source->GetNeighbors(neighborsList, current->node);
+        source.GetNeighbors(neighborsList, current->node);
         for (size_t i = 0; i < neighborsList->count; i++) {
             Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
             double newCost = current->gCost + neighborsList->costs[i];
             if (newCost < neighbor->gCost && !neighbor->isClosed) {
                 neighbor->gCost = newCost;
-                neighbor->fCost = newCost + source->Heuristic(neighbor->node, goal);
+                neighbor->fCost = newCost + source.Heuristic(neighbor->node, goal);
                 neighbor->parent = current;
                 if (!neighbor->isOpen) {
                     AddNodeToOpenList(open, neighbor);
+                } else {
+                    ReorderOpenList(open, neighbor);
                 }
             }
         }

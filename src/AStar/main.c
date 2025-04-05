@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 #include <math.h>
 #include "AStar.h"
 #include "MapReader.h"
@@ -21,7 +22,7 @@ double MahattanHeuristic(void *fromNode, void *toNode) {
 double DiagonalHeuristic(void *fromNode, void *toNode) {
     double dx = abs(((Node)toNode)->x - ((Node)fromNode)->x);
     double dy = abs(((Node)toNode)->y - ((Node)fromNode)->y);
-    return dx + dy - fmin(dx, dy) * 0.4142135623730951; 
+    return dx + dy - fmin(dx, dy) * (sqrt(2) - 1); 
 }
 
 void GetNeighbors8Tiles(NeighborsList neighbors, void *node) {
@@ -52,10 +53,10 @@ void GetNeighbors(NeighborsList neighbors, void *node) {
     if (x-1 > -1 && MAP->grid[y][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y][x-1], 1);
     if (x+1 < MAP->width && MAP->grid[y][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y][x+1], 1);
     
-    if (y-1 > -1 && x-1 > -1 && MAP->grid[y-1][x] && MAP->grid[y][x-1] && MAP->grid[y-1][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y-1][x-1], 1.4142135623730951);
-    if (y-1 > -1 && x+1 < MAP->width && MAP->grid[y-1][x] && MAP->grid[y][x+1] && MAP->grid[y-1][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y-1][x+1], 1.4142135623730951);
-    if (y+1 < MAP->height && x-1 > -1 && MAP->grid[y+1][x] && MAP->grid[y][x-1] && MAP->grid[y+1][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y+1][x-1], 1.4142135623730951);
-    if (y+1 < MAP->height && x+1 < MAP->width && MAP->grid[y+1][x] && MAP->grid[y][x+1] && MAP->grid[y+1][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y+1][x+1], 1.4142135623730951);
+    if (y-1 > -1 && x-1 > -1 && MAP->grid[y-1][x] && MAP->grid[y][x-1] && MAP->grid[y-1][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y-1][x-1], sqrt(2));
+    if (y-1 > -1 && x+1 < MAP->width && MAP->grid[y-1][x] && MAP->grid[y][x+1] && MAP->grid[y-1][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y-1][x+1], sqrt(2));
+    if (y+1 < MAP->height && x-1 > -1 && MAP->grid[y+1][x] && MAP->grid[y][x-1] && MAP->grid[y+1][x-1]) AddNeighbor(neighbors, (void*)MAP->grid[y+1][x-1], sqrt(2));
+    if (y+1 < MAP->height && x+1 < MAP->width && MAP->grid[y+1][x] && MAP->grid[y][x+1] && MAP->grid[y+1][x+1]) AddNeighbor(neighbors, (void*)MAP->grid[y+1][x+1], sqrt(2));
 }
 
 int Equals(void *a, void *b) {
@@ -93,6 +94,13 @@ void printMapScen(MapScen entry) {
         printf("Coste: %.8f\n", entry.cost);
 }
 
+static volatile int keepRunning = 1;
+
+void intHandler(int dummy) {
+    keepRunning = 0;
+}
+
+
 int main(int argc, char const *argv[])
 {
     if (argc != 2) {
@@ -102,22 +110,17 @@ int main(int argc, char const *argv[])
 
     FILE *file = fopen(argv[1], "r");
     if (!file) {
-        perror("No se pudo abrir el archivo");
+        perror("No se pudo abrir el fichero del escenario");
         return 1;
     }
 
-    AStarSource *source = malloc(sizeof(AStarSource));
-    source->Heuristic = &DiagonalHeuristic;
-    source->GetNeighbors = &GetNeighbors;
-    source->Equals = &Equals;
-
-    char map_file[256];
-    char line[256];
-    MapScen entry;
     int total_succeed = 0;
     int total_failed = 0;
-    fgets(line, 256, file);
-    while (fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
+    char map_file[256];
+    MapScen entry;
+    fscanf(file, "%*[^\n]\n");
+    signal(SIGINT, intHandler);
+    while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.goal_x, &entry.goal_y,
                   &entry.cost) == 9)
@@ -125,30 +128,30 @@ int main(int argc, char const *argv[])
         if (!map_file || strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
         }
-        char newPath[256] = "../maze-map/";
-        MAP = LoadMap(strcat(newPath, map_file));
+        
+        char map_dir[256] = "../maze-map/";
+        MAP = LoadMap(strcat(map_dir, map_file));
         if (!MAP) {
-            perror("Error al cargar el mapa");
+            perror("Error al cargar el fichero del mapa");
             return 1;
         }
 
-        source->map_size = MAP->count;
-
+        AStarSource source = {MAP->count, &DiagonalHeuristic, &GetNeighbors, &Equals};
         Node start = GetNodeAtPos(MAP, entry.start_x, entry.start_y);
         Node goal = GetNodeAtPos(MAP, entry.goal_x, entry.goal_y);
 
         if (!start) {
-            perror("No start node");
+            perror("El nodo de inicio no es válido");
             return 1;
         } else if (!goal) {
-            perror("No goal node");
+            perror("El nodo objetivo no es válido");
             return 1;
         }
 
         Path path = FindPath(source, (void *)start, (void *)goal);
 
         printf("%d-", total_succeed + total_failed + 1);
-        if (fabs(path->cost - entry.cost) < 0.0001) {
+        if (fabs(path->cost - entry.cost) < 1e-4) {
             printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_succeed++;
         }
@@ -159,8 +162,7 @@ int main(int argc, char const *argv[])
         FreePath(path);
         FreeMap(MAP);
     }
-    
-    free(source);
+
     printf("\nResultados:\n");
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);

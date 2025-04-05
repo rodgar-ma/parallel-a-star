@@ -20,7 +20,7 @@ typedef struct {
 } AStarSource;
 
 void AddNeighbor(NeighborsList neighbors, void *node, double cost);
-Path FindPath(AStarSource *source, void *start, void *goal);
+Path FindPath(AStarSource source, void *start, void *goal);
 void FreePath(Path path);
 
 #endif
