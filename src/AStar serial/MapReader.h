@@ -10,13 +10,13 @@ struct __Node {
 };
 
 struct __Map {
+    int count;
     int width;
     int height;
-    int count;
     Node ** grid;
 };
 
-Map LoadMap(const char *filename);
+Map LoadMap(char *filename);
 Node GetNodeAtPos(Map map, int x, int y);
 void FreeMap(Map map);
 

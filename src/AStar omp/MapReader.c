@@ -3,7 +3,7 @@
 #include <string.h>
 #include "MapReader.h"
 
-Map LoadMap(const char *filename) {
+Map LoadMap(char *filename) {
     FILE *file = fopen(filename, "r");
 
     if (!file) {

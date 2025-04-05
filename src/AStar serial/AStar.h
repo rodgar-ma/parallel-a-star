@@ -7,19 +7,20 @@ typedef struct __NeighborsList *NeighborsList;
 typedef struct __Path *Path;
 
 struct __Path {
-    int cost;
+    double cost;
     size_t size;
     void **nodes;
 };
 
 typedef struct {
-    int map_size;
-    int (*Heuristic)(void *fromNode, void *toNode);
+    size_t map_size;
+    double (*Heuristic)(void *fromNode, void *toNode);
     void (*GetNeighbors)(NeighborsList neighbors, void *node);
+    int (*Equals)(void *a, void *b);
 } AStarSource;
 
-void AddNeighbor(NeighborsList neighbors, void *node, int cost);
-
-Path FindPath(AStarSource *source, void *start, void *goal);
+void AddNeighbor(NeighborsList neighbors, void *node, double cost);
+Path FindPath(AStarSource source, void *start, void *goal);
+void FreePath(Path path);
 
 #endif
