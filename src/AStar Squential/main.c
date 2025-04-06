@@ -3,6 +3,7 @@
 #include <string.h>
 #include <signal.h>
 #include <math.h>
+#include <time.h>
 #include "AStar.h"
 #include "MapReader.h"
 
@@ -114,6 +115,10 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+
     int total_succeed = 0;
     int total_failed = 0;
     char map_file[256];
@@ -165,7 +170,12 @@ int main(int argc, char const *argv[])
 
     if (MAP) FreeMap(MAP);
 
+    end = clock();
+
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    
     printf("\nResultados:\n");
+    printf("Tiempo total: %.2f segundos\n", cpu_time_used);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
+#include <omp.h>
 #include "AStar.h"
 
 typedef struct __Node *Node;
@@ -221,6 +222,7 @@ Path FindPath(AStarSource source, void *start, void *goal) {
 
     AddNodeToOpenList(open, current);
 
+    
     while(HasOpenNodes(open)) {
         current = GetFirstFromOpen(open);
         current->isClosed = 1;
@@ -230,17 +232,25 @@ Path FindPath(AStarSource source, void *start, void *goal) {
         
         neighborsList->count = 0;
         source.GetNeighbors(neighborsList, current->node);
+        #pragma omp parallel for
         for (size_t i = 0; i < neighborsList->count; i++) {
-            Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
+            Node neighbor;
             double newCost = current->gCost + neighborsList->costs[i];
-            if (newCost < neighbor->gCost && !neighbor->isClosed) {
+            #pragma omp critical
+            {
+                neighbor = GetNode(hashTable, neighborsList->nodes[i]);
+            }
+            if (newCost < neighbor->gCost) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source.Heuristic(neighbor->node, goal);
                 neighbor->parent = current;
-                if (!neighbor->isOpen) {
-                    AddNodeToOpenList(open, neighbor);
-                } else {
-                    ReorderOpenList(open, neighbor);
+                #pragma omp critical
+                {
+                    if (!neighbor->isOpen) {
+                        AddNodeToOpenList(open, neighbor);
+                    } else {
+                        ReorderOpenList(open, neighbor);
+                    }
                 }
             }
         }

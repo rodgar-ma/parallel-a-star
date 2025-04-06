@@ -233,7 +233,7 @@ Path FindPath(AStarSource source, void *start, void *goal) {
         for (size_t i = 0; i < neighborsList->count; i++) {
             Node neighbor = GetNode(hashTable, neighborsList->nodes[i]);
             double newCost = current->gCost + neighborsList->costs[i];
-            if (newCost < neighbor->gCost && !neighbor->isClosed) {
+            if (newCost < neighbor->gCost) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source.Heuristic(neighbor->node, goal);
                 neighbor->parent = current;

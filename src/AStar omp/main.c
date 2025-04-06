@@ -3,6 +3,7 @@
 #include <string.h>
 #include <signal.h>
 #include <math.h>
+#include <time.h>
 #include "AStar.h"
 #include "MapReader.h"
 
@@ -114,6 +115,10 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
+
     int total_succeed = 0;
     int total_failed = 0;
     char map_file[256];
@@ -127,13 +132,13 @@ int main(int argc, char const *argv[])
     {
         if (!map_file || strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
-        }
-        
-        char map_dir[256] = "../maze-map/";
-        MAP = LoadMap(strcat(map_dir, map_file));
-        if (!MAP) {
-            perror("Error al cargar el fichero del mapa");
-            return 1;
+            char map_dir[256] = "../maze-map/";
+            if (MAP) FreeMap(MAP);
+            MAP = LoadMap(strcat(map_dir, map_file));
+            if (!MAP) {
+                perror("Error al cargar el fichero del mapa");
+                return 1;
+            }
         }
 
         AStarSource source = {MAP->count, &DiagonalHeuristic, &GetNeighbors, &Equals};
@@ -150,7 +155,7 @@ int main(int argc, char const *argv[])
 
         Path path = FindPath(source, (void *)start, (void *)goal);
 
-        printf("%d-", total_succeed + total_failed + 1);
+        printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1e-4) {
             printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_succeed++;
@@ -159,11 +164,18 @@ int main(int argc, char const *argv[])
             printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_failed++;
         }
+
         FreePath(path);
-        FreeMap(MAP);
     }
 
+    if (MAP) FreeMap(MAP);
+
+    end = clock();
+
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
     printf("\nResultados:\n");
+    printf("Tiempo total: %.2f segundos\n", cpu_time_used);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);
