@@ -121,7 +121,7 @@ int main(int argc, char const *argv[])
 
     int total_succeed = 0;
     int total_failed = 0;
-    char map_file[256];
+    char map_file[256] = "";
     MapScen entry;
     fscanf(file, "%*[^\n]\n");
     signal(SIGINT, intHandler);
@@ -130,7 +130,7 @@ int main(int argc, char const *argv[])
                   &entry.start_x, &entry.start_y, &entry.goal_x, &entry.goal_y,
                   &entry.cost) == 9)
     {
-        if (!map_file || strcmp(map_file, entry.filename) != 0) {
+        if (strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
             char map_dir[256] = "../maze-map/";
             if (MAP) FreeMap(MAP);
