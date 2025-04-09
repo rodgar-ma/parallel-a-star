@@ -3,6 +3,8 @@
 #include "astar.h"
 #include "priority_queue.h"
 
+#define DEFAULT_QUEUE_SIZE 16
+
 priority_queue **priority_queues_create(int k) {
     priority_queue **pqs = calloc(k, sizeof(priority_queue*));
     for (int i = 0; i < k; i++) {
@@ -13,9 +15,9 @@ priority_queue **priority_queues_create(int k) {
 
 priority_queue *priority_queue_create() {
     priority_queue *pq = malloc(sizeof(priority_queue));
-    pq->capacity = 0;
+    pq->capacity = DEFAULT_QUEUE_SIZE;
     pq->count = 0;
-    pq->nodes = NULL;
+    pq->nodes = calloc(DEFAULT_QUEUE_SIZE, sizeof(node*));
     return pq;
 }
 
@@ -39,13 +41,14 @@ void priority_queue_insert(priority_queue *pq, node *n) {
     size_t i = pq->count++;
     pq->nodes[i] = n;
 
-    while (i > 1 && pq->nodes[(i-1)/2]->fCost > pq->nodes[i]->fCost) {
+    while (i > 0 && pq->nodes[(i-1)/2]->fCost > pq->nodes[i]->fCost) {
         swap(&pq->nodes[i], &pq->nodes[(i-1)/2]);
         i = (i - 1) / 2;
     }
 }
 
 node *priority_queue_extract(priority_queue *pq) {
+    if (pq->count == 0) return NULL;
     node *minNode = pq->nodes[0];
     pq->nodes[0] = pq->nodes[--pq->count];
 
@@ -71,24 +74,24 @@ int priority_queue_is_empty(priority_queue *pq) {
     return pq->count == 0;
 }
 
-int priority_queues_are_empty(priority_queue **pqs) {
-    size_t index = 0;
-    while (pqs[index]) {
-        if (pqs[index]->count > 0) return 1;
-        index++;
+int priority_queues_are_empty(priority_queue **pqs, int k) {
+    for (int i = 0; i < k; i++) {
+        if (!priority_queue_is_empty(pqs[i])) return 0;
     }
-    return 0;
+    return 1;
 }
 
 double priority_queue_get_min(priority_queue *pq) {
+    if (priority_queue_is_empty(pq)) return DBL_MAX;
     return pq->nodes[0]->fCost;
 }
 
 double priority_queues_get_min(priority_queue **pq, int k) {
     double min_f = DBL_MAX;
     for (int i = 0; i < k; i++) {
-        node *current_best = pq[i]->nodes[0];
-        if (current_best != NULL && current_best->fCost < min_f) min_f = current_best->fCost;
+        if (priority_queue_is_empty(pq[i])) continue;
+        double new_f = priority_queue_get_min(pq[i]);
+        if (new_f < min_f) min_f = new_f;
     }
     return min_f;
 }

@@ -35,7 +35,7 @@ void add_neighbor(neighbors_list *neighbors, void *n, double cost) {
     neighbors->count++;
 }
 
-unsigned int jenkins_hash(int j, const char *str) {
+unsigned int jenkins_hash(int j, char *str) {
 	unsigned long hash = (j * 10000007);
     char c = *str++;
 	while (c) {
@@ -77,7 +77,7 @@ path *find_path(AStarSource source, void *start, void *target, int k) {
 
     node *m = NULL;
     int steps = 0;
-    while (priority_queues_are_empty(Q))
+    while (!priority_queues_are_empty(Q, k))
     {
         list_clear(S);
         neighbors_list *neighbors = neighbors_list_create();
