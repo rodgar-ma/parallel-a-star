@@ -24,8 +24,8 @@ void priority_queue_destroy(priority_queue *pq) {
     free(pq);
 }
 
-static void swap(node *a, node *b) {
-    node temp = *a;
+static void swap(node **a, node **b) {
+    node *temp = *a;
     *a = *b;
     *b = temp;
 }
@@ -39,18 +39,16 @@ void priority_queue_insert(priority_queue *pq, node *n) {
     size_t i = pq->count++;
     pq->nodes[i] = n;
 
-    while (i > 0 && pq->nodes[(i-1)/2]->fCost > pq->nodes[i]->fCost) {
+    while (i > 1 && pq->nodes[(i-1)/2]->fCost > pq->nodes[i]->fCost) {
         swap(&pq->nodes[i], &pq->nodes[(i-1)/2]);
         i = (i - 1) / 2;
     }
 }
 
 node *priority_queue_extract(priority_queue *pq) {
-    node *res = pq->nodes[0];
-    pq->nodes[0] = pq->nodes[pq->count];
-    pq->nodes[pq->count] = NULL;
-    pq->count--;
-    
+    node *minNode = pq->nodes[0];
+    pq->nodes[0] = pq->nodes[--pq->count];
+
     size_t i = 0;
     while (2 * i + 1 < pq->count) {
         size_t left = 2 * i + 1;
@@ -66,7 +64,7 @@ node *priority_queue_extract(priority_queue *pq) {
         swap(&pq->nodes[i], &pq->nodes[smallest]);
         i = smallest;
     }
-    return res;
+    return minNode;
 }
 
 int priority_queue_is_empty(priority_queue *pq) {

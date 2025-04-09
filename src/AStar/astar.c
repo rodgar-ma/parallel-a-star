@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include "omp.h"
 #include "astar.h"
 #include "list.h"
 #include "priority_queue.h"
@@ -13,6 +12,7 @@ node *node_create(void *n, double gCost, double fCost, node *parent) {
     new->gCost = gCost;
     new->fCost = fCost;
     new->parent = parent;
+    return new;
 }
 
 neighbors_list *neighbors_list_create() {
@@ -36,12 +36,13 @@ void add_neighbor(neighbors_list *neighbors, void *n, double cost) {
 }
 
 unsigned int jenkins_hash(int j, const char *str) {
-	char c;
 	unsigned long hash = (j * 10000007);
-	while (c = *str++) {
+    char c = *str++;
+	while (c) {
 		hash += c;
 		hash += hash << 10;
 		hash ^= hash >> 6;
+        c = *str++;
 	}
 	hash += hash << 3;
 	hash ^= hash >> 11;
@@ -49,8 +50,27 @@ unsigned int jenkins_hash(int j, const char *str) {
 	return hash;
 }
 
+path *retrace_path(node *goal) {
+    path *path = malloc(sizeof(path));
+    path->cost = goal->gCost;
+    path->count = 0;
+    node *current = goal;
+    while (current) {
+        path->count++;
+        current = current->parent;
+    }
+
+    path->nodes = calloc(path->count, sizeof(void*));
+    current = goal;
+    for (int i = 0; i < path->count; i++) {
+        path->nodes[path->count - (i+1)] = current;
+        current = current->parent;
+    }
+    return path;
+}
+
 path *find_path(AStarSource source, void *start, void *target, int k) {
-    node **H = calloc(k, sizeof(node*));
+    node **H = calloc(HASH_SIZE, sizeof(node*));
     priority_queue **Q = priority_queues_create(k);
     list *S = list_create();
     priority_queue_insert(Q[0], node_create(start, 0, source.heuristic(start, target), NULL));
@@ -60,8 +80,7 @@ path *find_path(AStarSource source, void *start, void *target, int k) {
     while (priority_queues_are_empty(Q))
     {
         list_clear(S);
-        neighbors_list *neighbors;
-        #pragma omp parallel for shared(k, Q, target, m) private(q, neighbors)
+        neighbors_list *neighbors = neighbors_list_create();
         for(int i = 0; i < k; i++) {
             if (priority_queue_is_empty(Q[i])) continue;
             node *q = priority_queue_extract(Q[i]);
@@ -115,5 +134,10 @@ path *find_path(AStarSource source, void *start, void *target, int k) {
         }
         steps++;
     }
-    
+    return retrace_path(m);
+}
+
+void path_destroy(path *path) {
+    free(path->nodes);
+    free(path);
 }

@@ -26,7 +26,7 @@ double DiagonalHeuristic(void *fromNode, void *toNode) {
     return dx + dy - fmin(dx, dy) * (sqrt(2) - 1); 
 }
 
-void GetNeighbors8Tiles(neighbors_list neighbors, void *node) {
+void GetNeighbors8Tiles(void *node, neighbors_list *neighbors) {
     int x = ((Node)node)->x;
     int y = ((Node)node)->y;
     for (int j = -1; j < 2; j++) {
@@ -37,7 +37,7 @@ void GetNeighbors8Tiles(neighbors_list neighbors, void *node) {
     }
 }
 
-void GetNeighbors4Tiles(neighbors_list neighbors, void *node) {
+void GetNeighbors4Tiles(void *node, neighbors_list *neighbors) {
     int x = ((Node)node)->x;
     int y = ((Node)node)->y;
     if (y-1 > -1 && MAP->grid[y-1][x]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x], 1);
@@ -46,7 +46,7 @@ void GetNeighbors4Tiles(neighbors_list neighbors, void *node) {
     if (x+1 < MAP->width && MAP->grid[y][x+1]) add_neighbor(neighbors, (void*)MAP->grid[y][x+1], 1);
 }
 
-void GetNeighbors(neighbors_list neighbors, void *node) {
+void GetNeighbors(void *node, neighbors_list *neighbors) {
     int x = ((Node)node)->x;
     int y = ((Node)node)->y;
     if (y-1 > -1 && MAP->grid[y-1][x]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x], 1);
@@ -68,10 +68,10 @@ int Equals(void *a, void *b) {
 
 void PrintPath(path *path) {
     printf("Path found!\n");
-    printf("Number of nodes = %zu\n", path_get_size(path));
-    printf("Total cost = %f\n", path_get_cost(path));
-    for (int i = 0; i < path_get_size(path); i++) {
-        printf("[%d,%d]\n", ((Node)path_get_node_at_index(path, i))->x, ((Node)path_get_node_at_index(path, i))->y);
+    printf("Number of nodes = %zu\n", path->count);
+    printf("Total cost = %f\n", path->cost);
+    for (int i = 0; i < path->count; i++) {
+        printf("[%d,%d]\n", ((Node)path->nodes[i])->x, ((Node)path->nodes[i])->y);
     }
     printf("\n");
 }
@@ -141,7 +141,7 @@ int main(int argc, char const *argv[])
             }
         }
 
-        AStarSource source = {MAP->count, &DiagonalHeuristic, &GetNeighbors, &Equals};
+        AStarSource source = {&GetNeighbors, &DiagonalHeuristic};
         Node start = GetNodeAtPos(MAP, entry.start_x, entry.start_y);
         Node goal = GetNodeAtPos(MAP, entry.goal_x, entry.goal_y);
 
@@ -153,19 +153,19 @@ int main(int argc, char const *argv[])
             return 1;
         }
 
-        path *path = FindPath(source, (void *)start, (void *)goal);
+        path *path = find_path(source, (void *)start, (void *)goal, 2);
 
         printf("%d-", entry.id);
-        if (fabs(path_get_cost(path) - entry.cost) < 1e-4) {
-            printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path_get_cost(path));
+        if (fabs(path->cost - entry.cost) < 1e-4) {
+            printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_succeed++;
         }
         else {
-            printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path_get_cost(path));
+            printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_failed++;
         }
 
-        FreePath(path);
+        path_destroy(path);
     }
 
     if (MAP) FreeMap(MAP);

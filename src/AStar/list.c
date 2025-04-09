@@ -33,4 +33,5 @@ void list_remove(list *list, size_t index) {
 
 node *list_get(list *list, size_t index) {
     if (index < list->capacity) return list->nodes[index];
+    return NULL;
 }

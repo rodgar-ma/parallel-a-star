@@ -4,13 +4,11 @@
 #include <stdlib.h>
 #include "astar.h"
 
-typedef struct __priority_queue priority_queue;
-
-struct __priority_queue {
+typedef struct __priority_queue {
     size_t capacity;
     size_t count;
     node **nodes;
-};
+} priority_queue;
 
 priority_queue **priority_queues_create(int k);
 priority_queue *priority_queue_create();
