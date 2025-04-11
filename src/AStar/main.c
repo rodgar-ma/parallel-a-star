@@ -160,7 +160,7 @@ int main(int argc, char const *argv[])
         id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         id_t target = GetIdAtPos(MAP, entry.target_x, entry.target_y);
 
-        path *path = find_path_omp(&source, start, target, 4);
+        path *path = find_path_sequential(&source, start, target);
 
         printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1e-4) {
