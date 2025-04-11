@@ -16,7 +16,7 @@ void priority_queue_destroy(priority_queue *pq);
 void priority_queue_insert(priority_queue *pq, node *node);
 node *priority_queue_extract(priority_queue *pq);
 int priority_queue_is_empty(priority_queue *pq);
-int priority_queues_are_empty(priority_queue **pq);
+int priority_queues_are_empty(priority_queue **pq, int k);
 double priority_queue_get_min(priority_queue *pq);
 double priority_queues_get_min(priority_queue **pq, int k);
 
