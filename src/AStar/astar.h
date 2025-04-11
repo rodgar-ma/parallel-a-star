@@ -7,8 +7,8 @@
 
 typedef unsigned long id_t;
 typedef struct __node node;
-typedef struct __path path;
 typedef struct __neighbors_list neighbors_list;
+typedef struct __path path;
 
 struct __node {
     id_t id;

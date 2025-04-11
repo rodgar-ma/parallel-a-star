@@ -1,5 +1,5 @@
-#ifndef MapReader_h
-#define MapReader_h
+#ifndef MAP_READER_H
+#define MAP_READER_H
 
 #include "astar.h"
 
