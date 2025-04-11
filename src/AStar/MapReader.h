@@ -1,10 +1,13 @@
 #ifndef MapReader_h
 #define MapReader_h
 
+#include "astar.h"
+
 typedef struct __Node *Node;
 typedef struct __Map *Map;
 
 struct __Node {
+    id_t id;
     int x;
     int y;
 };
@@ -17,8 +20,13 @@ struct __Map {
 };
 
 Map LoadMap(char *filename);
-Node GetNodeAtPos(Map map, int x, int y);
-void FreeMap(Map map);
 
+Node GetNodeById(Map map, id_t id);
+
+int ExistsNodeAtPos(Map map, int x, int y);
+
+id_t GetIdAtPos(Map map, int x, int y);
+
+void FreeMap(Map map);
 
 #endif

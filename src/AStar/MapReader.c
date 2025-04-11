@@ -54,9 +54,10 @@ Map LoadMap(char *filename) {
                 map->grid[y][x] = malloc(sizeof(struct __Node));
                 map->grid[y][x]->x = x;
                 map->grid[y][x]->y = y;
-                map->count++;
+                map->grid[y][x]->id = map->count++;
             } else {
                 map->grid[y][x] = NULL;
+                map->count++;
             }
         }
     }
@@ -66,9 +67,20 @@ Map LoadMap(char *filename) {
     return map;
 }
 
-Node GetNodeAtPos(Map map, int x, int y) {
+Node GetNodeById(Map map, id_t id) {
+    int y = id / map->width;
+    int x = id - (y * map->width);
     if (map->grid[y][x] == NULL) return NULL;
     else return map->grid[y][x];
+}
+
+int ExistsNodeAtPos(Map map, int x, int y) {
+    if (x < 0 || x >= map->width || y < 0 || y >= map->height) return 0;
+    return map->grid[y][x] != NULL;
+}
+
+id_t GetIdAtPos(Map map, int x, int y) {
+    return map->grid[y][x]->id;
 }
 
 void FreeMap(Map map) {

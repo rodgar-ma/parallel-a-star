@@ -9,61 +9,68 @@
 
 Map MAP;
 
-double ChevyshevHeuristic(void *fromNode, void *toNode) {
-    double distX = abs(((Node)toNode)->x - ((Node)fromNode)->x);
-    double distY = abs(((Node)toNode)->y - ((Node)fromNode)->y);
+double ChevyshevHeuristic(id_t n1_id, id_t n2_id) {
+    Node n1 = GetNodeById(MAP, n1_id);
+    Node n2 = GetNodeById(MAP, n2_id);
+    double distX = abs(n2->x - n1->x);
+    double distY = abs(n2->y - n1->y);
     if (distX > distY) return distX;
     else return distY;
 }
 
-double MahattanHeuristic(void *fromNode, void *toNode) {
-    return abs(((Node)toNode)->x - ((Node)fromNode)->x) + abs(((Node)toNode)->y - ((Node)fromNode)->y);
+double MahattanHeuristic(id_t n1_id, id_t n2_id) {
+    Node n1 = GetNodeById(MAP, n1_id);
+    Node n2 = GetNodeById(MAP, n2_id);
+    return abs(n2->x - n1->x) + abs(n2->y - n1->y);
 }
 
-double DiagonalHeuristic(void *fromNode, void *toNode) {
-    double dx = abs(((Node)toNode)->x - ((Node)fromNode)->x);
-    double dy = abs(((Node)toNode)->y - ((Node)fromNode)->y);
+double DiagonalHeuristic(id_t n1_id, id_t n2_id) {
+    Node n1 = GetNodeById(MAP, n1_id);
+    Node n2 = GetNodeById(MAP, n2_id);
+    double dx = abs(n2->x - n1->x);
+    double dy = abs(n2->y - n1->y);
     return dx + dy - fmin(dx, dy) * (sqrt(2) - 1); 
 }
 
-void GetNeighbors8Tiles(void *node, neighbors_list *neighbors) {
-    int x = ((Node)node)->x;
-    int y = ((Node)node)->y;
+void GetNeighbors8Tiles(neighbors_list *neighbors, id_t n_id) {
+    Node node = GetNodeById(MAP, n_id);
     for (int j = -1; j < 2; j++) {
         for (int i = -1; i < 2; i++) {
             if (i == 0 && j == 0) continue;
-            if (y+j > -1 && y+j < MAP->height && x+i > -1 && x+i < MAP->width && MAP->grid[y+j][x+i]) add_neighbor(neighbors, (void*)MAP->grid[y+j][x+i], 1);
+            if (ExistsNodeAtPos(MAP, node->x+i, node->y+j)) {
+                add_neighbor(neighbors, GetIdAtPos(MAP, node->x+i, node->y+j), 1);
+            }
         }
     }
 }
 
-void GetNeighbors4Tiles(void *node, neighbors_list *neighbors) {
-    int x = ((Node)node)->x;
-    int y = ((Node)node)->y;
-    if (y-1 > -1 && MAP->grid[y-1][x]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x], 1);
-    if (y+1 < MAP->height && MAP->grid[y+1][x]) add_neighbor(neighbors, (void*)MAP->grid[y+1][x], 1);
-    if (x-1 > -1 && MAP->grid[y][x-1]) add_neighbor(neighbors, (void*)MAP->grid[y][x-1], 1);
-    if (x+1 < MAP->width && MAP->grid[y][x+1]) add_neighbor(neighbors, (void*)MAP->grid[y][x+1], 1);
+void GetNeighbors4Tiles(neighbors_list *neighbors, id_t n_id) {
+    Node node = GetNodeById(MAP, n_id);
+    if (ExistsNodeAtPos(MAP, node->x-1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y), 1);
+    if (ExistsNodeAtPos(MAP, node->x+1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y), 1);
+    if (ExistsNodeAtPos(MAP, node->x, node->y-1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y-1), 1);
+    if (ExistsNodeAtPos(MAP, node->x, node->y+1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y+1), 1);
 }
 
-void GetNeighbors(void *node, neighbors_list *neighbors) {
-    int x = ((Node)node)->x;
-    int y = ((Node)node)->y;
-    if (y-1 > -1 && MAP->grid[y-1][x]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x], 1);
-    if (y+1 < MAP->height && MAP->grid[y+1][x]) add_neighbor(neighbors, (void*)MAP->grid[y+1][x], 1);
-    if (x-1 > -1 && MAP->grid[y][x-1]) add_neighbor(neighbors, (void*)MAP->grid[y][x-1], 1);
-    if (x+1 < MAP->width && MAP->grid[y][x+1]) add_neighbor(neighbors, (void*)MAP->grid[y][x+1], 1);
+void GetNeighbors(neighbors_list *neighbors, id_t n_id) {
+    Node node = GetNodeById(MAP, n_id);
+    if (ExistsNodeAtPos(MAP, node->x-1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y), 1);
+    if (ExistsNodeAtPos(MAP, node->x+1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y), 1);
+    if (ExistsNodeAtPos(MAP, node->x, node->y-1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y-1), 1);
+    if (ExistsNodeAtPos(MAP, node->x, node->y+1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y+1), 1);
     
-    if (y-1 > -1 && x-1 > -1 && MAP->grid[y-1][x] && MAP->grid[y][x-1] && MAP->grid[y-1][x-1]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x-1], sqrt(2));
-    if (y-1 > -1 && x+1 < MAP->width && MAP->grid[y-1][x] && MAP->grid[y][x+1] && MAP->grid[y-1][x+1]) add_neighbor(neighbors, (void*)MAP->grid[y-1][x+1], sqrt(2));
-    if (y+1 < MAP->height && x-1 > -1 && MAP->grid[y+1][x] && MAP->grid[y][x-1] && MAP->grid[y+1][x-1]) add_neighbor(neighbors, (void*)MAP->grid[y+1][x-1], sqrt(2));
-    if (y+1 < MAP->height && x+1 < MAP->width && MAP->grid[y+1][x] && MAP->grid[y][x+1] && MAP->grid[y+1][x+1]) add_neighbor(neighbors, (void*)MAP->grid[y+1][x+1], sqrt(2));
-}
-
-int Equals(void *a, void *b) {
-    Node na = (Node)a;
-    Node nb = (Node)b;
-    return na->x == nb->x && na->y == nb->y;
+    if (ExistsNodeAtPos(MAP, node->x-1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y-1) && ExistsNodeAtPos(MAP, node->x-1, node->y-1)) {
+        add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y-1), sqrt(2));
+    }
+    if (ExistsNodeAtPos(MAP, node->x-1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y+1) && ExistsNodeAtPos(MAP, node->x-1, node->y+1)) {
+        add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y+1), sqrt(2));
+    }
+    if (ExistsNodeAtPos(MAP, node->x+1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y-1) && ExistsNodeAtPos(MAP, node->x+1, node->y-1)) {
+        add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y-1), sqrt(2));
+    }
+    if (ExistsNodeAtPos(MAP, node->x+1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y+1) && ExistsNodeAtPos(MAP, node->x+1, node->y+1)) {
+        add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y+1), sqrt(2));
+    }
 }
 
 void PrintPath(path *path) {
@@ -71,7 +78,7 @@ void PrintPath(path *path) {
     printf("Number of nodes = %zu\n", path->count);
     printf("Total cost = %f\n", path->cost);
     for (int i = 0; i < path->count; i++) {
-        printf("[%d,%d]\n", ((Node)path->nodes[i])->x, ((Node)path->nodes[i])->y);
+        printf("[%d,%d]\n", GetNodeById(MAP, path->nodeIds[i])->x, GetNodeById(MAP, path->nodeIds[i])->y);
     }
     printf("\n");
 }
@@ -81,7 +88,7 @@ typedef struct {
     char filename[256];
     int width, height;
     int start_x, start_y;
-    int goal_x, goal_y;
+    int target_x, target_y;
     double cost;
 } MapScen;
 
@@ -91,7 +98,7 @@ void printMapScen(MapScen entry) {
         printf("Archivo: %s\n", entry.filename);
         printf("Dimensiones: %dx%d\n", entry.width, entry.height);
         printf("Inicio: (%d, %d)\n", entry.start_x, entry.start_y);
-        printf("Meta: (%d, %d)\n", entry.goal_x, entry.goal_y);
+        printf("Meta: (%d, %d)\n", entry.target_x, entry.target_y);
         printf("Coste: %.8f\n", entry.cost);
 }
 
@@ -127,7 +134,7 @@ int main(int argc, char const *argv[])
     signal(SIGINT, intHandler);
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
-                  &entry.start_x, &entry.start_y, &entry.goal_x, &entry.goal_y,
+                  &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
                   &entry.cost) == 9)
     {
         if (strcmp(map_file, entry.filename) != 0) {
@@ -141,19 +148,19 @@ int main(int argc, char const *argv[])
             }
         }
 
-        AStarSource source = {&GetNeighbors, &DiagonalHeuristic};
-        Node start = GetNodeAtPos(MAP, entry.start_x, entry.start_y);
-        Node goal = GetNodeAtPos(MAP, entry.goal_x, entry.goal_y);
-
-        if (!start) {
+        if (!ExistsNodeAtPos(MAP, entry.start_x, entry.start_y)) {
             perror("El nodo de inicio no es válido");
             return 1;
-        } else if (!goal) {
+        } else if (!ExistsNodeAtPos(MAP, entry.target_x, entry.target_y)) {
             perror("El nodo objetivo no es válido");
             return 1;
         }
 
-        path *path = find_path(source, (void *)start, (void *)goal, 2);
+        AStarSource source = {MAP->count, &GetNeighbors, &DiagonalHeuristic};
+        id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
+        id_t target = GetIdAtPos(MAP, entry.target_x, entry.target_y);
+
+        path *path = find_path_omp(&source, start, target, 4);
 
         printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1e-4) {

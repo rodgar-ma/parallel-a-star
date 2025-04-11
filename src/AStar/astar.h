@@ -3,12 +3,15 @@
 
 #include <stdlib.h>
 
+#define DEFAULT_NIEGHBORS_LIST_CAPACITY 8;
+
+typedef unsigned long id_t;
 typedef struct __node node;
 typedef struct __path path;
 typedef struct __neighbors_list neighbors_list;
 
 struct __node {
-    void *node;
+    id_t id;
     node *parent;
     double gCost;
     double fCost;
@@ -16,24 +19,29 @@ struct __node {
 
 struct __path {
     size_t count;
+    id_t *nodeIds;
     double cost;
-    void **nodes;
 };
 
 struct __neighbors_list {
     size_t capacity;
     size_t count;
+    id_t *nodeIds;
     double *costs;
-    void **elements;
 };
 
 typedef struct {
-    void (*get_neighbors)(void *node, neighbors_list *neighbors);
-    double (*heuristic)(void *node1, void *node2);
+    size_t max_size;
+    void (*get_neighbors)(neighbors_list *neighbors, id_t n_id);
+    double (*heuristic)(id_t n1_id, id_t n2_id);
 } AStarSource;
 
-path *find_path(AStarSource source, void *start, void *target, int k);
-void add_neighbor(neighbors_list *neighbors, void *node, double cost);
+path *find_path_omp(AStarSource *source, id_t s_id, id_t t_id, int k);
+
+path *find_path_sequential(AStarSource *source, id_t s_id, id_t t_id);
+
+void add_neighbor(neighbors_list *neighbors, id_t n_id, double cost);
+
 void path_destroy(path *path);
 
 
