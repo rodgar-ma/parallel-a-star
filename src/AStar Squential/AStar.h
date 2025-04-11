@@ -1,12 +1,12 @@
-#ifndef AStar_h
-#define AStar_h
+#ifndef ASTAR_H
+#define ASTAR_H
 
 #include <stdlib.h>
 
-typedef struct __NeighborsList *NeighborsList;
-typedef struct __Path *Path;
+typedef struct __neighbors_list *nieghbors_list;
+typedef struct __path *path;
 
-struct __Path {
+struct __path {
     double cost;
     size_t size;
     void **nodes;

@@ -4,36 +4,38 @@
 #include <stdlib.h>
 
 typedef struct __node node;
-typedef struct __path path;
 typedef struct __neighbors_list neighbors_list;
+typedef struct __path path;
 
 struct __node {
-    void *node;
+    unsigned long id;
     node *parent;
     double gCost;
     double fCost;
-};
-
-struct __path {
-    size_t count;
-    double cost;
-    void **nodes;
 };
 
 struct __neighbors_list {
     size_t capacity;
     size_t count;
     double *costs;
-    void **elements;
+    unsigned long **nodes;
+};
+
+struct __path {
+    size_t count;
+    double cost;
+    unsigned long **nodes;
 };
 
 typedef struct {
-    void (*get_neighbors)(void *node, neighbors_list *neighbors);
-    double (*heuristic)(void *node1, void *node2);
+    size_t max_size;
+    void (*get_neighbors)(unsigned long node, neighbors_list *neighbors);
+    double (*heuristic)(unsigned long node1, unsigned long node2);
 } AStarSource;
 
-path *find_path(AStarSource source, void *start, void *target, int k);
-void add_neighbor(neighbors_list *neighbors, void *node, double cost);
+path *find_path_sequential(AStarSource *source, unsigned long *start, unsigned long *goal);
+path *find_path_openmp(AStarSource *source, unsigned long *start, unsigned long *goal);
+void add_neighbor(neighbors_list *neighbors, unsigned long *node, double cost);
 void path_destroy(path *path);
 
 
