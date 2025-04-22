@@ -3,6 +3,8 @@
 #include <string.h>
 #include "MapReader.h"
 
+Map MAP;
+
 Map LoadMap(char *filename) {
     FILE *file = fopen(filename, "r");
 
@@ -64,6 +66,7 @@ Map LoadMap(char *filename) {
 
     fclose(file);
 
+    MAP = map;
     return map;
 }
 

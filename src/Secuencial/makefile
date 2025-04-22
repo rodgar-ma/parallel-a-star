@@ -1,0 +1,2 @@
+main_seq: main_seq.c astar.h astar_seq.c MapReader.h MapReader.c closed_list.h closed_list.c open_list.h open_list.c utils.h utils.c
+	clang main_seq.c astar_seq.c MapReader.c utils.c closed_list.c open_list.c -o main_seq

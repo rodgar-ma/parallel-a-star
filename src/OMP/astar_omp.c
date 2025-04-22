@@ -10,7 +10,7 @@
 #define HASH_SIZE 1024 * 1024
 #define HASH_FUNS 2
 
-node *node_create(id_t id, double gCost, double fCost, node *parent) {
+node *node_create(astar_id_t id, double gCost, double fCost, node *parent) {
     node *n = malloc(sizeof(node));
     n->id = id;
     n->parent = parent;
@@ -24,7 +24,7 @@ neighbors_list *neighbors_list_create() {
     list->capacity = DEFAULT_NIEGHBORS_LIST_CAPACITY;
     list->count = 0;
     list->costs = calloc(list->capacity, sizeof(double));
-    list->nodeIds = calloc(list->capacity, sizeof(id_t));
+    list->nodeIds = calloc(list->capacity, sizeof(astar_id_t));
     return list;
 }
 
@@ -42,10 +42,10 @@ void neighbors_list_destroy(neighbors_list *list) {
     free(list);
 }
 
-void add_neighbor(neighbors_list *neighbors, id_t n_id, double cost) {
+void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost) {
     if (neighbors->count == neighbors->capacity) {
         neighbors->capacity *= 2;
-        neighbors->nodeIds = realloc(neighbors->nodeIds, neighbors->capacity * sizeof(id_t));
+        neighbors->nodeIds = realloc(neighbors->nodeIds, neighbors->capacity * sizeof(astar_id_t));
         neighbors->costs = realloc(neighbors->costs, neighbors->capacity * sizeof(double));
     }
     neighbors->nodeIds[neighbors->count] = n_id;
@@ -64,7 +64,7 @@ path *reatrace_path(node *target) {
         current = current->parent;
     }
 
-    p->nodeIds = calloc(p->count, sizeof(id_t));
+    p->nodeIds = calloc(p->count, sizeof(astar_id_t));
     current = target;
     for (int i = 0; i < p->count; i++) {
         p->nodeIds[p->count-i-1] = target->id;
@@ -78,7 +78,7 @@ void path_destroy(path *p) {
     free(p);
 }
 
-path *find_path_omp(AStarSource *source, id_t s_id, id_t t_id, int k) {
+path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k) {
     open_list **Q = open_lists_create(k);
     closed_list *H = closed_list_create(source->max_size);
     list *S = list_create();
