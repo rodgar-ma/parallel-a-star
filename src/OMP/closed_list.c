@@ -5,6 +5,11 @@ closed_list *closed_list_create(size_t capacity) {
     closed_list *list = malloc(sizeof(closed_list));
     list->capacity = capacity;
     list->nodes = calloc(capacity, sizeof(node*));
+    list->locks = calloc(capacity, sizeof(omp_lock_t*));
+    for (int i = 0; i < capacity; i++) {
+        list->locks[i] = malloc(sizeof(omp_lock_t));
+        omp_init_lock(list->locks[i]);
+    }
     return list;
 }
 

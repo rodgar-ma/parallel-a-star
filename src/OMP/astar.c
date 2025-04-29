@@ -3,9 +3,8 @@
 #include <omp.h>
 #include "astar.h"
 #include "list.h"
-#include "open_list.h"
+#include "priority_list.h"
 #include "closed_list.h"
-#include "list.h"
 
 #define HASH_SIZE 1024 * 1024
 #define HASH_FUNS 2
@@ -40,6 +39,13 @@ void neighbors_list_destroy(neighbors_list *list) {
     free(list->nodeIds);
     free(list->costs);
     free(list);
+}
+
+void neighbors_lists_destroy(neighbors_list** lists, int k) {
+    for (int i = 0; i < k; i++) {
+        neighbors_list_destroy(lists[i]);
+    }
+    free(lists);
 }
 
 void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost) {
@@ -79,23 +85,24 @@ void path_destroy(path *p) {
 }
 
 path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k) {
-    open_list **Q = open_lists_create(k);
+    omp_set_num_threads(k);
+
+    priority_list **Q = priority_lists_create(k);
     closed_list *H = closed_list_create(source->max_size);
     list *S = list_create();
     neighbors_list **neighbors = neighbors_lists_create(k);
-    open_list_insert_or_update(Q[0], node_create(s_id, 0, source->heuristic(s_id, t_id), NULL));
 
-    omp_set_num_threads(k);
+    priority_list_insert_or_update(Q[0], node_create(s_id, 0, source->heuristic(s_id, t_id), NULL));
 
     node *m = NULL;
     int steps = 0;
-    while (!open_lists_are_empty(Q, k))
+    while (!priority_lists_are_empty(Q, k))
     {
         list_clear(S);
-        # pragma omp parallel for shared(k, Q, S, t_id, neighbors, source, m)
+        # pragma omp parallel for
         for(int i = 0; i < k; i++) {
-            if (open_list_is_empty(Q[i])) continue;
-            node *q = open_list_extract(Q[i]);
+            if (priority_list_is_empty(Q[i])) continue;
+            node *q = priority_list_extract(Q[i]);
             if (q->id == t_id) {
                 if (m == NULL || q->gCost + source->heuristic(q->id, t_id) < m->gCost + source->heuristic(m->id, t_id)) {
                     m = q;
@@ -111,29 +118,35 @@ path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k
                 }
             }
         }
-        if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < open_lists_get_min(Q, k)) {
+        if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < priority_lists_get_min(Q, k)) {
             break;
         }
+        
         # pragma omp parallel for
         for (size_t i = 0; i < S->count; i++) {
             node *s = list_get(S, i);
+            omp_set_lock(H->locks[s->id]);
             if (closed_list_contains(H, s) && closed_list_is_better(H, s)) {
                 list_remove(S, i);
             }
+            omp_unset_lock(H->locks[s->id]);
         }
         # pragma omp parallel for
-        for (int i = 0; i < S->capacity; i++) {
+        for (int i = 0; i < S->count; i++) {
             node *t1 = list_get(S, i);
             if (t1 != NULL) {
                 t1->fCost = t1->gCost + source->heuristic(t1->id, t_id);
-                open_list_insert_or_update(Q[(i + steps) % k], t1);
+                #pragma omp critical
+                {
+                    priority_list_insert_or_update(Q[(i + steps) % k], t1);
+                }
                 closed_list_insert(H, t1);
             }
         }
         steps++;
     }
     path *path = reatrace_path(m);
-    open_lists_destroy(Q, k);
+    priority_lists_destroy(Q, k);
     closed_list_destroy(H);
     list_destroy(S);
     return path;

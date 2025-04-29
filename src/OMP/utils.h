@@ -6,6 +6,12 @@
 
 extern Map MAP;
 
+Node GetNodeById(Map map, unsigned long id);
+
+int ExistsNodeAtPos(Map map, int x, int y);
+
+unsigned long GetIdAtPos(Map map, int x, int y);
+
 double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id);
 
 double MahattanHeuristic(astar_id_t n1_id, astar_id_t n2_id);

@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <signal.h>
 #include <math.h>
+#include <signal.h>
 #include <time.h>
-#include "../utils/MapReader.h"
-#include "../utils/utils.h"
+#include "MapReader.h"
+#include "utils.h"
 #include "astar.h"
 
 typedef struct {
@@ -23,11 +23,10 @@ void intHandler(int dummy) {
     keepRunning = 0;
 }
 
-
 int main(int argc, char const *argv[])
 {
     if (argc != 2) {
-        perror("Uso: <exe> map.scen");
+        perror("Uso: ./main_seq map.scen");
         return 1;
     }
 

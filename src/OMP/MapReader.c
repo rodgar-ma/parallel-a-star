@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "MapReader.h"
+#include "astar.h"
 
 Map MAP;
 
@@ -50,7 +51,6 @@ Map LoadMap(char *filename) {
     for (int y = 0; y < height; y++) {
         fgets(buffer, sizeof(buffer), file);
         map->grid[y] = calloc(width, sizeof(Node *));
-
         for (int x = 0; x < width; x++) {
             if (buffer[x] == '.') {
                 map->grid[y][x] = malloc(sizeof(struct __Node));
@@ -64,13 +64,13 @@ Map LoadMap(char *filename) {
         }
     }
 
+    // Cierra el fichero
     fclose(file);
 
-    MAP = map;
     return map;
 }
 
-Node GetNodeById(Map map, id_t id) {
+Node GetNodeById(Map map, astar_id_t id) {
     int y = id / map->width;
     int x = id - (y * map->width);
     if (map->grid[y][x] == NULL) return NULL;

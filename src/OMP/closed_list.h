@@ -2,13 +2,15 @@
 #define CLOSED_LIST_H
 
 #include <stdlib.h>
+#include <omp.h>
 #include "astar.h"
 
 typedef struct __closed_list closed_list;
 
 struct __closed_list {
     size_t capacity;
-    node **nodes;
+    node** nodes;
+    omp_lock_t** locks;
 };
 
 closed_list *closed_list_create(size_t capacity);

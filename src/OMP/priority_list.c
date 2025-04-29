@@ -1,35 +1,36 @@
 #include <stdlib.h>
 #include <float.h>
 #include "astar.h"
-#include "open_list.h"
+#include "priority_list.h"
 
 /* Crea un conjunto de listas de prioridad */
-open_list **open_lists_create(int k) {
-    open_list **lists = calloc(k, sizeof(open_list*));
-    for (int i = 0; i < k; i++) {
-        lists[i] = open_list_create();
+priority_list **priority_lists_create(int k) {
+    priority_list **lists = calloc(k, sizeof(priority_list*));
+    for(int i = 0; i < k; i++) {
+        lists[i] = priority_list_create();
     }
     return lists;
 }
 
 /* Crea una lista de prioridad */
-open_list *open_list_create() {
-    open_list *list = malloc(sizeof(open_list));
+priority_list *priority_list_create() {
+    priority_list *list = malloc(sizeof(priority_list));
     list->capacity = DEFAULT_QUEUE_SIZE;
     list->count = 0;
     list->nodes = calloc(DEFAULT_QUEUE_SIZE, sizeof(node*));
     return list;
 }
 
-void open_lists_destroy(open_list **lists, int k) {
+/* Libera la memoria de un conjunto de listas de prioridad */
+void priority_lists_destroy(priority_list **lists, int k) {
     for (int i = 0; i < k; i++) {
-        open_list_destroy(lists[i]);
+        priority_list_destroy(lists[i]);
     }
     free(lists);
 }
 
 /* Libera la memoria de la lista de prioridad */
-void open_list_destroy(open_list *list) {
+void priority_list_destroy(priority_list *list) {
     free(list->nodes);
     free(list);
 }
@@ -42,7 +43,7 @@ static void swap(node **a, node **b) {
 }
 
 /* Inserta un nodo en la lista de prioridad o actualiza su valor si ya existe. Si la lista está llena, se duplica su tamaño */
-void open_list_insert_or_update(open_list *list, node *n) {
+void priority_list_insert_or_update(priority_list *list, node *n) {
     for (size_t i = 0; i < list->count; i++) {
         if (list->nodes[i]->id == n->id) {
             if (n->fCost < list->nodes[i]->fCost) {
@@ -71,7 +72,7 @@ void open_list_insert_or_update(open_list *list, node *n) {
 }
 
 /* Extrae el nodo con menor fCost de la lista y lo devuelve. Si la lista está vacía, devuelve NULL */
-node *open_list_extract(open_list *list) {
+node *priority_list_extract(priority_list *list) {
     if (list->count == 0) return NULL;
     node *minNode = list->nodes[0];
     list->nodes[0] = list->nodes[--list->count];
@@ -94,32 +95,31 @@ node *open_list_extract(open_list *list) {
     return minNode;
 }
 
-/* Devuelve 1 si la lista está vacía, 0 en caso contrario */
-int open_list_is_empty(open_list *list) {
-    return list->count == 0;
-}
-
 /* Devuelve 1 si todas las listas están vacías, 0 en caso contrario */
-int open_lists_are_empty(open_list **lists, int k) {
+int priority_lists_are_empty(priority_list **lists, int k) {
     for (int i = 0; i < k; i++) {
-        if (!open_list_is_empty(lists[i])) return 0;
+        if (!priority_list_is_empty(lists[i])) return 0;
     }
     return 1;
 }
 
-/* Devuelve el mínimo fCost de una lista */
-double open_list_get_min(open_list *list) {
-    if (open_list_is_empty(list)) return DBL_MAX;
-    return list->nodes[0]->fCost;
+/* Devuelve 1 si la lista está vacía, 0 en caso contrario */
+int priority_list_is_empty(priority_list *list) {
+    return list->count == 0;
 }
 
-/* Devuelve el mínimo fCost de un conjunto de listas */
-double open_lists_get_min(open_list **list, int k) {
-    double min_f = DBL_MAX;
+/* Devuelve el mínimo fCost de una conjunto de listas */
+double priority_lists_get_min(priority_list **lists, int k) {
+    double min = DBL_MAX;
     for (int i = 0; i < k; i++) {
-        if (open_list_is_empty(list[i])) continue;
-        double new_f = open_list_get_min(list[i]);
-        if (new_f < min_f) min_f = new_f;
+        double tmp = priority_list_get_min(lists[i]);
+        if (tmp < min) min = tmp;
     }
-    return min_f;
+    return min;
+}
+
+/* Devuelve el mínimo fCost de una lista */
+double priority_list_get_min(priority_list *list) {
+    if (priority_list_is_empty(list)) return DBL_MAX;
+    return list->nodes[0]->fCost;
 }

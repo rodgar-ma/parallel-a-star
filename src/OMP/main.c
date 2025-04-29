@@ -25,27 +25,29 @@ void intHandler(int dummy) {
 
 int main(int argc, char const *argv[])
 {
-    if (argc != 2) {
-        perror("Uso: <exe> map.scen");
+    if (argc != 3) {
+        perror("Uso: <exe> num_threads map.scen");
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
+    int num_threads = atoi(argv[1]);
+    FILE *file = fopen(argv[2], "r");
     if (!file) {
         perror("No se pudo abrir el fichero del escenario");
         return 1;
     }
 
-    clock_t start, end;
-    double cpu_time_used;
-    start = clock();
-
-    int total_succeed = 0;
-    int total_failed = 0;
+    signal(SIGINT, intHandler);
+    
     char map_file[256] = "";
     MapScen entry;
     fscanf(file, "%*[^\n]\n");
-    signal(SIGINT, intHandler);
+
+    int total_succeed = 0;
+    int total_failed = 0;
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
@@ -74,7 +76,7 @@ int main(int argc, char const *argv[])
         astar_id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         astar_id_t target = GetIdAtPos(MAP, entry.target_x, entry.target_y);
 
-        path *path = find_path_omp(&source, start, target, 8);
+        path *path = find_path_omp(&source, start, target, num_threads);
 
         printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1e-4) {

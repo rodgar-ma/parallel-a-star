@@ -2,11 +2,10 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
-#include "astar_seq.h"
-#include "../utils/priority_list.h"
-#include "../utils/closed_list.h"
+#include "astar.h"
+#include "priority_list.h"
 
-// Nodo en el grafo. Representa un estado.
+// Crea un nodo. Representa un estado.
 node *node_create(astar_id_t id, double gCost, double fCost, node *parent) {
     node *n = malloc(sizeof(node));
     n->id = id;
@@ -79,7 +78,7 @@ void path_destroy(path *p) {
 
 path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id) {
     priority_list *open = priority_list_create();
-    closed_list *closed = closed_list_create(source->max_size);
+    node** closed = calloc(source->max_size, sizeof(node*));
     neighbors_list *neighbors = neighbors_list_create();
 
     node *current = node_create(s_id, 0, source->heuristic(s_id, t_id), NULL);
@@ -87,7 +86,6 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
 
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
-        closed_list_insert(closed, current);
         
         if (current->id == t_id) {
             break;
@@ -97,16 +95,18 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
         source->get_neighbors(neighbors, current->id);
         for (size_t i = 0; i < neighbors->count; i++) {
             double newCost = current->gCost + neighbors->costs[i];
+            if(closed[neighbors->nodeIds[i]] && closed[neighbors->nodeIds[i]]->gCost <= newCost) continue;
             node *neighbor = node_create(neighbors->nodeIds[i], newCost, newCost + source->heuristic(neighbors->nodeIds[i], t_id), current);
-            if (!closed_list_contains(closed, neighbor) || !closed_list_is_better(closed, neighbor)) {
-                closed_list_remove(closed, neighbor);
-                priority_list_insert_or_update(open, neighbor);
-            }
+            priority_list_insert_or_update(open, neighbor);
         }
+        closed[current->id] = current;
     }
     path *path = reatrace_path(current);
     priority_list_destroy(open);
-    closed_list_destroy(closed);
     neighbors_list_destroy(neighbors);
+    for(int i = 0; i < source->max_size; i++) {
+        free(closed[i]);
+    }
+    free(closed);
     return path;
 }

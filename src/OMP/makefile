@@ -1,2 +1,2 @@
-main_omp: main_omp.c astar.h astar_omp.c MapReader.h MapReader.c closed_list.h closed_list.c open_list.h open_list.c utils.h utils.c list.h list.c
-	clang -fopenmp main_omp.c astar_omp.c MapReader.c utils.c closed_list.c open_list.c list.c -o main_omp
+main: main.c astar.h astar.c MapReader.h MapReader.c closed_list.h closed_list.c priority_list.h priority_list.c utils.h utils.c list.h list.c
+	clang -fopenmp -g main.c astar.c MapReader.c utils.c closed_list.c priority_list.c list.c -o main

@@ -1,10 +1,12 @@
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include "utils.h"
 #include "MapReader.h"
 #include "astar.h"
+
+
+// Heuristics
 
 double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
@@ -29,6 +31,10 @@ double DiagonalHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     return dx + dy - fmin(dx, dy) * (sqrt(2) - 1); 
 }
 
+
+
+// Get Neighbors
+
 void GetNeighbors8Tiles(neighbors_list *neighbors, astar_id_t n_id) {
     Node node = GetNodeById(MAP, n_id);
     for (int j = -1; j < 2; j++) {
@@ -51,24 +57,37 @@ void GetNeighbors4Tiles(neighbors_list *neighbors, astar_id_t n_id) {
 
 void GetNeighbors(neighbors_list *neighbors, astar_id_t n_id) {
     Node node = GetNodeById(MAP, n_id);
+
+    // Nodo izquierda
     if (ExistsNodeAtPos(MAP, node->x-1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y), 1);
+    // Nodo derecha
     if (ExistsNodeAtPos(MAP, node->x+1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y), 1);
+    // Nodo arriba
     if (ExistsNodeAtPos(MAP, node->x, node->y-1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y-1), 1);
+    // Nodo abajo
     if (ExistsNodeAtPos(MAP, node->x, node->y+1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y+1), 1);
     
+    // Nodo arriba izquierda
     if (ExistsNodeAtPos(MAP, node->x-1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y-1) && ExistsNodeAtPos(MAP, node->x-1, node->y-1)) {
         add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y-1), sqrt(2));
     }
+    // Nodo abajo izqueirda
     if (ExistsNodeAtPos(MAP, node->x-1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y+1) && ExistsNodeAtPos(MAP, node->x-1, node->y+1)) {
         add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y+1), sqrt(2));
     }
+    // Nodo arriba derecha
     if (ExistsNodeAtPos(MAP, node->x+1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y-1) && ExistsNodeAtPos(MAP, node->x+1, node->y-1)) {
         add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y-1), sqrt(2));
     }
+    // Nodo abajo derecha
     if (ExistsNodeAtPos(MAP, node->x+1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y+1) && ExistsNodeAtPos(MAP, node->x+1, node->y+1)) {
         add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y+1), sqrt(2));
     }
 }
+
+
+
+// Print path
 
 void PrintPath(path *path) {
     printf("Path found!\n");
