@@ -4,7 +4,7 @@
 #include "MapReader.h"
 #include "astar.h"
 
-Map MAP;
+extern Map MAP;
 
 Node GetNodeById(Map map, unsigned long id);
 

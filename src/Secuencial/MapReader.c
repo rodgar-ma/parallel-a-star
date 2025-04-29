@@ -4,8 +4,6 @@
 #include "MapReader.h"
 #include "astar.h"
 
-Map MAP;
-
 Map LoadMap(char *filename) {
     FILE *file = fopen(filename, "r");
 
@@ -82,7 +80,7 @@ int ExistsNodeAtPos(Map map, int x, int y) {
     return map->grid[y][x] != NULL;
 }
 
-id_t GetIdAtPos(Map map, int x, int y) {
+astar_id_t GetIdAtPos(Map map, int x, int y) {
     return map->grid[y][x]->id;
 }
 

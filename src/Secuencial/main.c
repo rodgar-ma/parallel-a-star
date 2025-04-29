@@ -36,16 +36,18 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    clock_t start, end;
-    double cpu_time_used;
-    start = clock();
+    signal(SIGINT, intHandler);
+    
+    char map_file[256] = "";
+    Map MAP;
+    MapScen entry;
+    fscanf(file, "%*[^\n]\n");
 
     int total_succeed = 0;
     int total_failed = 0;
-    char map_file[256] = "";
-    MapScen entry;
-    fscanf(file, "%*[^\n]\n");
-    signal(SIGINT, intHandler);
+    clock_t start, end;
+    double cpu_time_used;
+    start = clock();
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
