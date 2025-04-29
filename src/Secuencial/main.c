@@ -23,6 +23,8 @@ void intHandler(int dummy) {
     keepRunning = 0;
 }
 
+Map MAP;
+
 int main(int argc, char const *argv[])
 {
     if (argc != 2) {
@@ -39,7 +41,6 @@ int main(int argc, char const *argv[])
     signal(SIGINT, intHandler);
     
     char map_file[256] = "";
-    Map MAP;
     MapScen entry;
     fscanf(file, "%*[^\n]\n");
 

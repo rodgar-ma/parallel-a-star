@@ -40,7 +40,6 @@ int main(int argc, char const *argv[])
     signal(SIGINT, intHandler);
     
     char map_file[256] = "";
-    Map MAP;
     MapScen entry;
     fscanf(file, "%*[^\n]\n");
 
