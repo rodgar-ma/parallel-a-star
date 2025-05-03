@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
-            char map_dir[256] = "../maze-map/";
+            char map_dir[256] = "../maps/";
             if (MAP) FreeMap(MAP);
             MAP = LoadMap(strcat(map_dir, map_file));
             if (!MAP) {
