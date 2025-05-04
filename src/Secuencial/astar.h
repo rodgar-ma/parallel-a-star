@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define DEFAULT_NIEGHBORS_LIST_CAPACITY 8;
+#define DEFAULT_NIEGHBORS_LIST_CAPACITY 8
 
 typedef unsigned long astar_id_t;
 typedef struct __node node;
@@ -15,6 +15,9 @@ struct __node {
     node *parent;
     double gCost;
     double fCost;
+    unsigned int isOpen:1;
+    unsigned int isClosed:1;
+    size_t open_index;
 };
 
 struct __path {
@@ -42,5 +45,6 @@ void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost);
 
 void path_destroy(path *path);
 
+node *node_create(astar_id_t id, double gCost, double fCost, node *parent);
 
 #endif

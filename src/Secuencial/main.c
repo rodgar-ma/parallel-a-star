@@ -4,8 +4,7 @@
 #include <math.h>
 #include <signal.h>
 #include <time.h>
-#include "MapReader.h"
-#include "utils.h"
+#include "MapUtils.h"
 #include "astar.h"
 
 typedef struct {
@@ -56,9 +55,9 @@ int main(int argc, char const *argv[])
     {
         if (strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
-            char map_dir[256] = "../maps/";
+            char maps_dir[256] = "../maps/";
             if (MAP) FreeMap(MAP);
-            MAP = LoadMap(strcat(map_dir, map_file));
+            MAP = LoadMap(strcat(maps_dir, map_file));
             if (!MAP) {
                 perror("Error al cargar el fichero del mapa");
                 return 1;
@@ -73,7 +72,7 @@ int main(int argc, char const *argv[])
             return 1;
         }
         
-        AStarSource source = {MAP->count, &GetNeighbors, &DiagonalHeuristic};
+        AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &DiagonalHeuristic};
         astar_id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         astar_id_t target = GetIdAtPos(MAP, entry.target_x, entry.target_y);
 

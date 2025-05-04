@@ -12,6 +12,8 @@ node *node_create(astar_id_t id, double gCost, double fCost, node *parent) {
     n->parent = parent;
     n->gCost = gCost;
     n->fCost = fCost;
+    n->isOpen = 0;
+    n->isClosed = 0;
     return n;
 }
 
@@ -59,7 +61,7 @@ path *reatrace_path(node *target) {
     p->nodeIds = calloc(p->count, sizeof(astar_id_t));
     current = target;
     for (int i = 0; i < p->count; i++) {
-        p->nodeIds[p->count-i-1] = target->id;
+        p->nodeIds[p->count - i - 1] = current->id;
         current = current->parent;
     }
     return p;
@@ -78,35 +80,44 @@ void path_destroy(path *p) {
 
 path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id) {
     priority_list *open = priority_list_create();
-    node** closed = calloc(source->max_size, sizeof(node*));
+    node** visited = calloc(source->max_size, sizeof(node*));
     neighbors_list *neighbors = neighbors_list_create();
 
     node *current = node_create(s_id, 0, source->heuristic(s_id, t_id), NULL);
+    visited[s_id] = current;
     priority_list_insert_or_update(open, current);
 
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
-        
+        current->isClosed = 1;
+
         if (current->id == t_id) {
             break;
         }
 
         neighbors->count = 0;
         source->get_neighbors(neighbors, current->id);
+
         for (size_t i = 0; i < neighbors->count; i++) {
             double newCost = current->gCost + neighbors->costs[i];
-            if(closed[neighbors->nodeIds[i]] && closed[neighbors->nodeIds[i]]->gCost <= newCost) continue;
-            node *neighbor = node_create(neighbors->nodeIds[i], newCost, newCost + source->heuristic(neighbors->nodeIds[i], t_id), current);
-            priority_list_insert_or_update(open, neighbor);
+            node *neighbor = visited[neighbors->nodeIds[i]];
+            if (!neighbor) {
+                neighbor = node_create(neighbors->nodeIds[i], newCost, newCost + source->heuristic(neighbors->nodeIds[i], t_id), current);
+                visited[neighbor->id] = neighbor;
+                priority_list_insert_or_update(open, neighbor);
+            } else if (newCost < neighbor->gCost) {
+                    neighbor->gCost = newCost;
+                    neighbor->fCost = newCost + source->heuristic(neighbor->id, t_id);
+                    neighbor->parent = current;
+                    neighbor->isClosed = 0;
+                    priority_list_insert_or_update(open, neighbor);
+            }
         }
-        closed[current->id] = current;
     }
+    
     path *path = reatrace_path(current);
     priority_list_destroy(open);
     neighbors_list_destroy(neighbors);
-    for(int i = 0; i < source->max_size; i++) {
-        free(closed[i]);
-    }
-    free(closed);
+    free(visited);
     return path;
 }
