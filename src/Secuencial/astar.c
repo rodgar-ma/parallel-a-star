@@ -3,7 +3,6 @@
 #include <limits.h>
 #include <float.h>
 #include "astar.h"
-#include "MapUtils.h"
 #include "priority_list.h"
 
 // Crea un nodo. Representa un estado.

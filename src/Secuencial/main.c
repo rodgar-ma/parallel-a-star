@@ -27,7 +27,7 @@ Map MAP;
 int main(int argc, char const *argv[])
 {
     if (argc != 2) {
-        perror("Uso: ./main_seq map.scen");
+        perror("Uso: <exe> map.scen");
         return 1;
     }
 
