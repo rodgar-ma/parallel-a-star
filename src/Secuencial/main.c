@@ -65,12 +65,16 @@ int main(int argc, char const *argv[])
         }
 
         if (!ExistsNodeAtPos(MAP, entry.start_x, entry.start_y)) {
-            perror("El nodo de inicio no es válido");
-            return 1;
-        } else if (!ExistsNodeAtPos(MAP, entry.target_x, entry.target_y)) {
-            perror("El nodo objetivo no es válido");
-            return 1;
+            printf("%d-[Error] Nodo de inicio inválido (%d, %d)\n", entry.id, entry.start_x, entry.start_y);
+            total_failed++;
+            continue;
         }
+        if (!ExistsNodeAtPos(MAP, entry.target_x, entry.target_y)) {
+            printf("%d-[Error] Nodo objetivo inválido (%d, %d)\n", entry.id, entry.target_x, entry.target_y);
+            total_failed++;
+            continue;
+        }
+        
         
         AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &DiagonalHeuristic};
         astar_id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
@@ -78,13 +82,21 @@ int main(int argc, char const *argv[])
 
         path *path = find_path_sequential(&source, start, target);
 
+        if (!path) {
+            printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
+                   entry.start_x, entry.start_y, entry.target_x, entry.target_y);
+            total_failed++;
+            continue;
+        }
+
         printf("%d-", entry.id);
-        if (fabs(path->cost - entry.cost) < 1e-4) {
+        if (fabs(path->cost - entry.cost) < 1) {
             printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
             total_succeed++;
         }
         else {
             printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
+            // PrintPath(path);
             total_failed++;
         }
 

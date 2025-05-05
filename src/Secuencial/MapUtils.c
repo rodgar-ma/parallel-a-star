@@ -5,6 +5,7 @@
 #include "MapUtils.h"
 #include "astar.h"
 
+// Carga el mapa del fichero `filename`.
 Map LoadMap(char *filename) {
     FILE *file = fopen(filename, "r");
 
@@ -48,6 +49,7 @@ Map LoadMap(char *filename) {
     // Leer el mapa
     for (int y = 0; y < height; y++) {
         fgets(buffer, sizeof(buffer), file);
+        buffer[strcspn(buffer, "\r\n")] = 0;
         map->grid[y] = calloc(width, sizeof(Node *));
         for (int x = 0; x < width; x++) {
             if (buffer[x] == '.') {
@@ -67,22 +69,27 @@ Map LoadMap(char *filename) {
     return map;
 }
 
+// Devuelve el `Node` en `map` correspondiente al `id`.
 Node GetNodeById(Map map, astar_id_t id) {
     int y = id / map->width;
-    int x = id - (y * map->width);
+    int x = id % map->width;
     if (map->grid[y][x] == NULL) return NULL;
     else return map->grid[y][x];
 }
 
+// Devuelve `true` si hay un nodo en `map` con coordenadas `x` e `y`.
+// Devuelve `false` en caso contrario.
 int ExistsNodeAtPos(Map map, int x, int y) {
     if (x < 0 || x >= map->width || y < 0 || y >= map->height) return 0;
     return map->grid[y][x] != NULL;
 }
 
+// Devuelve el `astar_id_t` del nodo en `map` con coordenadas `x` e `y`.
 astar_id_t GetIdAtPos(Map map, int x, int y) {
     return map->grid[y][x]->id;
 }
 
+// Libera `map`.
 void FreeMap(Map map) {
     for (int y = 0; y < map->height; y++) {
         for (int x = 0; x < map->width; x++) {
@@ -94,8 +101,7 @@ void FreeMap(Map map) {
     free(map);
 }
 
-// Heuristics
-
+// Chevyshev Heuristic.
 double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
@@ -105,49 +111,38 @@ double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     else return distY;
 }
 
+// Manhattan Heuristic.
 double MahattanHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
 }
 
+// Diagonal Heuristic
 double DiagonalHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     double dx = abs(n2->x - n1->x);
     double dy = abs(n2->y - n1->y);
-    return dx + dy - fmin(dx, dy) * (sqrt(2) - 1); 
+    return dx + dy + (sqrt(2) - 2.0) * fmin(dx, dy); 
+}
+
+// Euclidean Heuristic
+double EuclideanHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
+    Node n1 = GetNodeById(MAP, n1_id);
+    Node n2 = GetNodeById(MAP, n2_id);
+    double dx = abs(n2->x - n1->x);
+    double dy = abs(n2->y - n1->y);
+    return sqrt(dx * dx + dy * dy); 
 }
 
 
 
 // Get Neighbors
-
-void GetNeighbors8Tiles(neighbors_list *neighbors, astar_id_t n_id) {
-    Node node = GetNodeById(MAP, n_id);
-    for (int j = -1; j < 2; j++) {
-        for (int i = -1; i < 2; i++) {
-            if (i == 0 && j == 0) continue;
-            if (ExistsNodeAtPos(MAP, node->x+i, node->y+j)) {
-                add_neighbor(neighbors, GetIdAtPos(MAP, node->x+i, node->y+j), 1);
-            }
-        }
-    }
-}
-
-void GetNeighbors4Tiles(neighbors_list *neighbors, astar_id_t n_id) {
-    Node node = GetNodeById(MAP, n_id);
-    if (ExistsNodeAtPos(MAP, node->x-1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x-1, node->y), 1);
-    if (ExistsNodeAtPos(MAP, node->x+1, node->y)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x+1, node->y), 1);
-    if (ExistsNodeAtPos(MAP, node->x, node->y-1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y-1), 1);
-    if (ExistsNodeAtPos(MAP, node->x, node->y+1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x, node->y+1), 1);
-}
-
 void GetNeighbors(neighbors_list *neighbors, astar_id_t n_id) {
     Node node = GetNodeById(MAP, n_id);
-    if (!node) return;
 
-    // Movimientos ortogonales (costo 1)
+    // Movimientos ortogonales (coste 1)
     int dx[] = {-1, 1, 0, 0};
     int dy[] = {0, 0, -1, 1};
     for (int i = 0; i < 4; i++) {
@@ -156,20 +151,23 @@ void GetNeighbors(neighbors_list *neighbors, astar_id_t n_id) {
         }
     }
 
-    // Movimientos diagonales (costo sqrt(2))
-    int ddx[] = {-1, -1, 1, 1};
-    int ddy[] = {-1, 1, -1, 1};
-    for (int i = 0; i < 4; i++) {
-        if (ExistsNodeAtPos(MAP, node->x + ddx[i], node->y + ddy[i])) {
-            add_neighbor(neighbors, GetIdAtPos(MAP, node->x + ddx[i], node->y + ddy[i]), sqrt(2));
-        }
-    }
+    // Movimientos diagonales (coste sqrt(2))
+    if (ExistsNodeAtPos(MAP, node->x - 1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y - 1)
+    && ExistsNodeAtPos(MAP, node->x - 1, node->y - 1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x - 1, node->y - 1), sqrt(2));
+    
+    if (ExistsNodeAtPos(MAP, node->x - 1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y + 1)
+    && ExistsNodeAtPos(MAP, node->x - 1, node->y + 1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x - 1, node->y + 1), sqrt(2));
+    
+    if (ExistsNodeAtPos(MAP, node->x + 1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y - 1)
+    && ExistsNodeAtPos(MAP, node->x + 1, node->y - 1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x + 1, node->y - 1), sqrt(2));
+    
+    if (ExistsNodeAtPos(MAP, node->x + 1, node->y) && ExistsNodeAtPos(MAP, node->x, node->y + 1)
+    && ExistsNodeAtPos(MAP, node->x + 1, node->y + 1)) add_neighbor(neighbors, GetIdAtPos(MAP, node->x + 1, node->y + 1), sqrt(2));
 }
 
 
 
 // Print path
-
 void PrintPath(path *path) {
     printf("Path found!\n");
     printf("Number of nodes = %zu\n", path->count);

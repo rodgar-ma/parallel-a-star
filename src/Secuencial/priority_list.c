@@ -69,12 +69,8 @@ void priority_list_insert_or_update(priority_list *list, node *n) {
     } else {
         // ACTUALIZAR NODO EXISTENTE
         size_t i = n->open_index;
-        assert(i < list->count && list->nodes[i] == n);
 
-        // Solo actualizar si mejora el fCost
-        if (n->fCost >= list->nodes[i]->fCost) return;
-
-        // Heapify-up
+        // Heapify-up (reposiciona el nodo si su fCost ha mejorado)
         while (i > 0) {
             size_t parent = (i - 1) / 2;
             if (list->nodes[parent]->fCost <= n->fCost) break;
@@ -91,6 +87,7 @@ node *priority_list_extract(priority_list *list) {
     // Extraer el mínimo (siempre en la raíz)
     node *minNode = list->nodes[0];
     minNode->isOpen = 0;
+    minNode->open_index = -1;
     
     // Reemplazar raíz con último elemento
     list->nodes[0] = list->nodes[--list->count];

@@ -16,7 +16,6 @@ struct __node {
     double gCost;
     double fCost;
     unsigned int isOpen:1;
-    unsigned int isClosed:1;
     size_t open_index;
 };
 
