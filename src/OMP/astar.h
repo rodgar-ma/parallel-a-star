@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #define DEFAULT_NIEGHBORS_LIST_CAPACITY 8
-#define MAX_S_SIZE 1000000
+#define MAX_S_SIZE 10000
 
 typedef unsigned long astar_id_t;
 typedef struct __node node;
