@@ -86,6 +86,8 @@ void path_destroy(path *p) {
 path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k) {
     omp_set_num_threads(k);
 
+    int num_expansiones = 0;
+
     priority_list **Q = priority_lists_create(k);
     closed_list *H = closed_list_create(source->max_size);
     node **S = calloc(MAX_S_SIZE, sizeof(node*));
@@ -120,11 +122,15 @@ path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k
                 idx = S_count++;
                 if (idx < MAX_S_SIZE) {
                     S[idx] = node_create(neighbors[i]->nodeIds[j], q->gCost + neighbors[i]->costs[j], DBL_MAX, q);
+                    #pragma omp atomic
+                    num_expansiones++;
                 } else {
                     printf("Nodo fuera de rango en la lista S");
                 }
             }
         }
+        printf("Iteración: %d", steps);
+        printf("Número de nodos visitados: %d\n", num_expansiones);
         if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < priority_lists_get_min(Q, k)) {
             break;
         }
@@ -132,11 +138,11 @@ path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k
         #pragma omp parallel for num_threads(k) schedule(static,1)
         for (size_t i = 0; i < S_count; i++) {
             node *s = S[i];
-            omp_set_lock(&H->locks[s->id]);
+            // omp_set_lock(&H->locks[s->id]);
             if (closed_list_contains(H, s) && closed_list_is_better(H, s)) {
                 S[i] = NULL;
             }
-            omp_unset_lock(&H->locks[s->id]);
+            // omp_unset_lock(&H->locks[s->id]);
         }
         #pragma omp parallel for num_threads(k) schedule(static,1)
         for (int i = 0; i < S_count; i++) {

@@ -47,9 +47,10 @@ int main(int argc, char const *argv[])
 
     int total_succeed = 0;
     int total_failed = 0;
-    clock_t start, end;
+    clock_t start = 0;
+    clock_t end = 0;
     double cpu_time_used;
-    start = clock();
+    
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
@@ -78,10 +79,15 @@ int main(int argc, char const *argv[])
         }
         
         AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &EuclideanHeuristic};
-        astar_id_t start = GetIdAtPos(MAP, entry.start_x, entry.start_y);
-        astar_id_t target = GetIdAtPos(MAP, entry.target_x, entry.target_y);
+        astar_id_t s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
+        astar_id_t t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
+        
+        start = clock();
+        path *path = find_path_omp(&source, s_id, t_id, num_threads);
+        end = clock();
+        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+        printf("Tiempo total: %.4f segundos\n", cpu_time_used);
 
-        path *path = find_path_omp(&source, start, target, num_threads);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
@@ -106,12 +112,7 @@ int main(int argc, char const *argv[])
 
     if (MAP) FreeMap(MAP);
 
-    end = clock();
-
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-
     printf("\nResultados:\n");
-    printf("Tiempo total: %.2f segundos\n", cpu_time_used);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);
