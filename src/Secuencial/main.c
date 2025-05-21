@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <signal.h>
+#include <time.h>
 #include "MapUtils.h"
 #include "astar.h"
 
@@ -45,6 +46,8 @@ int main(int argc, char const *argv[])
     int total_succeed = 0;
     int total_failed = 0;
 
+    clock_t start = clock();
+
     double cpu_time_used;
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
@@ -80,7 +83,7 @@ int main(int argc, char const *argv[])
         
         path *path = find_path_sequential(&source, s_id, t_id, &cpu_time_used);
         
-        printf("Tiempo total: %.0f ns\n", 10e6 * cpu_time_used);
+        printf("Tiempo total: %lf ns\n", cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
@@ -103,9 +106,12 @@ int main(int argc, char const *argv[])
         path_destroy(path);
     }
 
+    clock_t end = clock();
+
     if (MAP) FreeMap(MAP);
 
     printf("\nResultados:\n");
+    printf("Tiempo total: %f\n", (double) (end - start) / CLOCKS_PER_SEC);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);

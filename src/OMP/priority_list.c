@@ -7,6 +7,7 @@ static void swap(node **n1, node **n2);
 /* Crea un conjunto de listas de prioridad */
 priority_list **priority_lists_create(int k) {
     priority_list **lists = calloc(k, sizeof(priority_list*));
+    #pragma omp paralle for num_threads(k)
     for(int i = 0; i < k; i++) {
         lists[i] = priority_list_create(MAX_QUEUE_SIZE);
     }
@@ -23,6 +24,7 @@ priority_list *priority_list_create(int capacity) {
 
 /* Libera la memoria de un conjunto de listas de prioridad */
 void priority_lists_destroy(priority_list **lists, int k) {
+    #pragma omp paralle for num_threads(k)
     for (int i = 0; i < k; i++) {
         priority_list_destroy(lists[i]);
     }

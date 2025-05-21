@@ -6,6 +6,7 @@ visited_list *visited_list_create(int capacity) {
     H->capacity = capacity;
     H->nodes = calloc(capacity, sizeof(node*));
     H->locks = malloc(capacity * sizeof(omp_lock_t));
+    #pragma omp parallel for
     for (int i = 0; i < capacity; i++) {
         omp_init_lock(&H->locks[i]);
     }
@@ -13,6 +14,7 @@ visited_list *visited_list_create(int capacity) {
 }
 
 void visited_list_destroy(visited_list *H) {
+    #pragma omp parallel for
     for (int i = 0; i < H->capacity; i++) {
         omp_destroy_lock(&H->locks[i]);
     }
@@ -30,7 +32,7 @@ void visited_list_insert(visited_list *H, list *S, int index, double hCost) {
     omp_set_lock(&H->locks[id]);
     if (H->nodes[id] == NULL) {
         H->nodes[id] = node_create(id, S->gCosts[index], S->gCosts[index] + hCost, S->parents[index]);
-    } else if (H->nodes[id]->gCost <= S->gCosts[index]) {
+    } else if (S->gCosts[index] < H->nodes[id]->gCost) {
         H->nodes[id]->gCost = S->gCosts[index];
         H->nodes[id]->fCost = S->gCosts[index] + hCost;
         H->nodes[id]->parent = S->parents[index];

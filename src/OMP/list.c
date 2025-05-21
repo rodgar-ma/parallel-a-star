@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <omp.h>
 #include <assert.h>
 #include "list.h"

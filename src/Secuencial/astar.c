@@ -96,6 +96,7 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
     priority_list_insert_or_update(open, current);
 
     clock_t start = clock();
+    int n_iters = 0;
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
 
@@ -105,7 +106,6 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
 
         neighbors->count = 0;
         source->get_neighbors(neighbors, current->id);
-
         for (size_t i = 0; i < neighbors->count; i++) {
             astar_id_t neighbor_id = neighbors->nodeIds[i];
             double newCost = current->gCost + neighbors->costs[i];
@@ -123,8 +123,10 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
                 priority_list_insert_or_update(open, neighbor);
             }
         }
+        n_iters++;
     }
     clock_t end = clock();
+    printf("%d iteraciones.\n", n_iters);
     *cpu_time_used = (double)(end - start) / CLOCKS_PER_SEC;
     path *path = reatrace_path(current);
     priority_list_destroy(open);

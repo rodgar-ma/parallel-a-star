@@ -1,7 +1,7 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <float.h>
 #include <omp.h>
-#include <stdio.h>
 #include <time.h>
 #include "astar.h"
 #include "priority_list.h"
@@ -88,7 +88,6 @@ void path_destroy(path *p) {
 /**********************************************************************************************************/
 
 path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used) {
-    omp_set_num_threads(k);
 
     priority_list **Q = priority_lists_create(k);
     visited_list *H = visited_list_create(source->max_size);
@@ -100,11 +99,13 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
 
     node *m = NULL;
     int steps = 0;
-    clock_t start_time = clock();
+
+    clock_t start_time, end_time;
+    start_time = clock();
     while (!priority_lists_empty(Q, k))
     {
         list_clear(S);
-        #pragma omp parallel for num_threads(k) schedule(static,1)
+        #pragma omp parallel for shared(Q, S, neighbors, H, t_id, k, m, source) schedule(static, 1)
         for(int i = 0; i < k; i++) {
             if (Q[i]->size == 0) continue;
             node *q = priority_list_extract(Q[i]);
@@ -125,8 +126,7 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
         if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < priority_lists_min(Q, k)) {
             break;
         }
-        
-        #pragma omp parallel for num_threads(k) schedule(static,1)
+        #pragma omp parallel for shared(Q, S, neighbors, H, t_id, k, steps, m, source)
         for (int i = 0; i < S->length; i++) {
             if (visited_list_contains(H, S->ids[i]) && visited_list_is_better(H, S, i)) {
                 continue;
@@ -137,8 +137,8 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
         }
         steps++;
     }
-    clock_t end_time = clock();
-    *cpu_time_used = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    end_time = clock();
+    *cpu_time_used = (double) (end_time - start_time) / CLOCKS_PER_SEC;
     path *path = retrace_path(m);
     priority_lists_destroy(Q, k);
     visited_list_destroy(H);
