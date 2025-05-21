@@ -1,49 +1,47 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#include <stdlib.h>
+#define MAX_NODE_EXPAND 8
+#define MAX_QUEUE_SIZE 1000000
 
-#define DEFAULT_NIEGHBORS_LIST_CAPACITY 8
-#define MAX_S_SIZE 10000
-
-typedef unsigned long astar_id_t;
 typedef struct __node node;
 typedef struct __neighbors_list neighbors_list;
 typedef struct __path path;
+typedef struct __list list;
 
 struct __node {
-    astar_id_t id;
-    node *parent;
+    int id;
     double gCost;
     double fCost;
-    unsigned int isOpen:1;
-    size_t open_index;
+    node *parent;
 };
 
 struct __path {
-    size_t count;
-    astar_id_t *nodeIds;
+    int count;
+    int *nodeIds;
     double cost;
 };
 
 struct __neighbors_list {
-    size_t capacity;
-    size_t count;
-    astar_id_t *nodeIds;
+    int capacity;
+    int count;
+    int *nodeIds;
     double *costs;
 };
 
 typedef struct {
-    size_t max_size;
-    void (*get_neighbors)(neighbors_list *neighbors, astar_id_t n_id);
-    double (*heuristic)(astar_id_t n1_id, astar_id_t n2_id);
+    int max_size;
+    void (*get_neighbors)(neighbors_list *neighbors, int n_id);
+    double (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
 
-path *find_path_omp(AStarSource *source, astar_id_t s_id, astar_id_t t_id, int k);
+path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used);
 
-void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost);
+void add_neighbor(neighbors_list *neighbors, int n_id, double cost);
 
 void path_destroy(path *path);
+
+node *node_create(int id, double gCost, double fCost, node *parent);
 
 
 #endif

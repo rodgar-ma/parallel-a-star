@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
+#include <time.h>
 #include "astar.h"
 #include "priority_list.h"
 
@@ -82,10 +83,10 @@ void free_visited(node **visited, size_t size) {
 }
 
 /**********************************************************************************************************/
-/*                                              A* Algorithm                                              */    
+/*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id) {
+path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id, double *cpu_time_used) {
     priority_list *open = priority_list_create();
     node** visited = calloc(source->max_size, sizeof(node*));
     neighbors_list *neighbors = neighbors_list_create();
@@ -94,8 +95,7 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
     visited[s_id] = current;
     priority_list_insert_or_update(open, current);
 
-    int num_expansiones = 0;
-
+    clock_t start = clock();
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
 
@@ -111,30 +111,22 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
             double newCost = current->gCost + neighbors->costs[i];
 
             node *neighbor = visited[neighbor_id];
-            num_expansiones++;
 
             if (!neighbor) {
                 neighbor = node_create(neighbor_id, newCost, newCost + source->heuristic(neighbor_id, t_id), current);
                 visited[neighbor_id] = neighbor;
-            } else if (neighbor->isOpen && newCost < neighbor->gCost) {
+                priority_list_insert_or_update(open, neighbor);
+            } else if ((neighbor->isOpen && newCost < neighbor->gCost) || newCost + source->heuristic(neighbor_id, t_id) < neighbor->fCost) {
                 neighbor->gCost = newCost;
                 neighbor->fCost = newCost + source->heuristic(neighbor_id, t_id);
                 neighbor->parent = current;
-            } else if (newCost + source->heuristic(neighbor_id, t_id) < neighbor->fCost) {
-                neighbor->gCost = newCost;
-                neighbor->fCost = newCost + source->heuristic(neighbor_id, t_id);
-                neighbor->parent = current;
-            } else {
-                continue;
+                priority_list_insert_or_update(open, neighbor);
             }
-            printf("Iteración: %d", steps);
-            printf("Número de nodos visitados: %d\n", num_expansiones);
-            priority_list_insert_or_update(open, neighbor);
         }
     }
-    
+    clock_t end = clock();
+    *cpu_time_used = (double)(end - start) / CLOCKS_PER_SEC;
     path *path = reatrace_path(current);
-    printf("Número de expansiones: %d\n", num_expansiones);
     priority_list_destroy(open);
     neighbors_list_destroy(neighbors);
     free_visited(visited, source->max_size);

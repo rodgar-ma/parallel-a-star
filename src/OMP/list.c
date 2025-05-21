@@ -1,37 +1,54 @@
-#include <stdlib.h>
+#include <omp.h>
+#include <assert.h>
 #include "list.h"
-#include "astar.h"
 
-list *list_create() {
-    list *list = malloc(sizeof(struct __list));
-    list->capacity = 0;
-    list->count = 0;
-    list->nodes = NULL;
-    return list;
+list **lists_create(int k, int capacity) {
+	list **lists = calloc(k, sizeof(list*));
+	for (int i = 0; i < k; i++) {
+		lists[i] = list_create(capacity);
+	}
+	return lists;
+}
+
+list *list_create(int capacity) {
+	list *l = malloc(sizeof(list));
+    l->length = 0;
+    l->capacity = capacity;
+    l->ids = calloc(capacity, sizeof(int));
+	l->gCosts = calloc(capacity, sizeof(double));
+	l->parents = calloc(capacity, sizeof(node*));
+    return l;
+}
+
+void lists_destroy(list **lists, int k) {
+	for (int i = 0; i < k; i++) {
+		list_destroy(lists[i]);
+	}
+	free(lists);
 }
 
 void list_destroy(list *list) {
-    free(list->nodes);
+	free(list->ids);
+	free(list->gCosts);
+	free(list->parents);
     free(list);
 }
 
 void list_clear(list *list) {
-    list->count = 0;
+	list->length = 0;
 }
 
-void list_insert(list *list, node *n) {
-    if (list->count == list->capacity) {
-        list->capacity = 1 + (2 * list->capacity);
-        list->nodes = realloc(list->nodes, list->capacity * sizeof(node));
-    }
-    list->nodes[list->count++] = n;
+void list_insert(list *list, int id, double gCost, node *parent) {
+	int index;
+    #pragma omp atomic capture
+	index = list->length++;
+    assert(index < list->capacity);
+	list->ids[index] = id;
+	list->gCosts[index] = gCost;
+	list->parents[index] = parent;
 }
 
-void list_remove(list *list, size_t index) {
-    if (index < list->capacity) list->nodes[index] = NULL;
-}
-
-node *list_get(list *list, size_t index) {
-    if (index < list->capacity) return list->nodes[index];
-    return NULL;
+void list_remove(list *list, int index) {
+	assert(list->length < list->capacity);
+	list->ids[index] = -1;
 }

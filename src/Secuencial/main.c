@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 #include <signal.h>
-#include <time.h>
 #include "MapUtils.h"
 #include "astar.h"
 
@@ -45,8 +44,7 @@ int main(int argc, char const *argv[])
 
     int total_succeed = 0;
     int total_failed = 0;
-    clock_t start = 0;
-    clock_t end = 0;
+
     double cpu_time_used;
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
@@ -80,11 +78,9 @@ int main(int argc, char const *argv[])
         astar_id_t s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         astar_id_t t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        start = clock();
-        path *path = find_path_sequential(&source, s_id, t_id);
-        end = clock();
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        printf("Tiempo total: %.4f segundos\n", cpu_time_used);
+        path *path = find_path_sequential(&source, s_id, t_id, &cpu_time_used);
+        
+        printf("Tiempo total: %.0f ns\n", 10e6 * cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",

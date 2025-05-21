@@ -3,7 +3,6 @@
 #include <string.h>
 #include <signal.h>
 #include <math.h>
-#include <time.h>
 #include "astar.h"
 #include "MapUtils.h"
 
@@ -47,8 +46,6 @@ int main(int argc, char const *argv[])
 
     int total_succeed = 0;
     int total_failed = 0;
-    clock_t start = 0;
-    clock_t end = 0;
     double cpu_time_used;
     
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
@@ -79,15 +76,12 @@ int main(int argc, char const *argv[])
         }
         
         AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &EuclideanHeuristic};
-        astar_id_t s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
-        astar_id_t t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
+        int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
+        int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        start = clock();
-        path *path = find_path_omp(&source, s_id, t_id, num_threads);
-        end = clock();
-        cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
-        printf("Tiempo total: %.4f segundos\n", cpu_time_used);
+        path *path = find_path_omp(&source, s_id, t_id, num_threads, &cpu_time_used);
 
+        printf("Tiempo total: %.0f ns\n", 10e6 * cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",

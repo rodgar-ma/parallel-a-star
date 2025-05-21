@@ -38,7 +38,7 @@ typedef struct {
     double (*heuristic)(astar_id_t n1_id, astar_id_t n2_id);
 } AStarSource;
 
-path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id);
+path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id, double *cpu_time_used);
 
 void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost);
 
