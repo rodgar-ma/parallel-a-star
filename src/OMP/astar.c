@@ -117,17 +117,15 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
             }
             neighbors[i]->count = 0;
             source->get_neighbors(neighbors[i], q->id);
-            for (int j = 0; j < neighbors[i]->count; j++) {
-                double newCost = q->gCost + neighbors[i]->costs[j];
-                list_insert(S, neighbors[i]->nodeIds[j], newCost, q);
-            }
+            list_insert(S, i, neighbors[i], q);
         }
 
         if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < priority_lists_min(Q, k)) {
             break;
         }
         #pragma omp parallel for shared(Q, S, neighbors, H, t_id, k, steps, m, source)
-        for (int i = 0; i < S->length; i++) {
+        for (int i = 0; i < S->capacity; i++) {
+            if (S->ids[i] == -1) continue;
             if (visited_list_contains(H, S->ids[i]) && visited_list_is_better(H, S, i)) {
                 continue;
             } else {
@@ -143,6 +141,6 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
     priority_lists_destroy(Q, k);
     visited_list_destroy(H);
     neighbors_lists_destroy(neighbors, k);
-    free(S);
+    list_destroy(S);
     return path;
 }

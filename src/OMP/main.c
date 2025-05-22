@@ -86,7 +86,7 @@ int main(int argc, char const *argv[])
         
         path *path = find_path_omp(&source, s_id, t_id, num_threads, &cpu_path_time);
 
-        printf("Tiempo total: %.2lf ms\n", 10e3 * cpu_path_time);
+        printf("Tiempo total: %.4lf ms\n", 10e6 * cpu_path_time);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
