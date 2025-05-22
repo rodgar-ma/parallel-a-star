@@ -28,6 +28,7 @@ neighbors_list *neighbors_list_create() {
 
 neighbors_list **neighbors_lists_create(int k) {
     neighbors_list **lists = calloc(k, sizeof(neighbors_list *));
+    #pragma omp parallel for
     for (int i = 0; i < k; i++) {
         lists[i] = neighbors_list_create();
     }
@@ -41,6 +42,7 @@ void neighbors_list_destroy(neighbors_list *list) {
 }
 
 void neighbors_lists_destroy(neighbors_list** lists, int k) {
+    #pragma omp parallel for
     for (int i = 0; i < k; i++) {
         neighbors_list_destroy(lists[i]);
     }
@@ -69,6 +71,7 @@ path *retrace_path(node *target) {
 
     p->nodeIds = calloc(p->count, sizeof(int));
     current = target;
+    #pragma omp parallel for
     for (int i = 0; i < p->count; i++) {
         p->nodeIds[p->count-i-1] = target->id;
         current = current->parent;
@@ -87,11 +90,11 @@ void path_destroy(path *p) {
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used) {
-
+path *find_path_omp(AStarSource *source, int s_id, int t_id, int k) {
+    omp_set_num_threads(k);
     priority_list **Q = priority_lists_create(k);
     visited_list *H = visited_list_create(source->max_size);
-    list *S = list_create(k * MAX_NODE_EXPAND);
+    // list *S = list_create(k * MAX_NODE_EXPAND);
     neighbors_list **neighbors = neighbors_lists_create(k);
 
     H->nodes[s_id] = node_create(s_id, 0, source->heuristic(s_id, t_id), NULL);
@@ -99,48 +102,70 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
 
     node *m = NULL;
     int steps = 0;
+    int found = 0;
 
-    clock_t start_time, end_time;
-    start_time = clock();
-    while (!priority_lists_empty(Q, k))
+    while (!found &&!priority_lists_empty(Q, k))
     {
-        list_clear(S);
-        #pragma omp parallel for shared(Q, S, neighbors, H, t_id, k, m, source) schedule(static, 1)
+        // #pragma omp single
+        // {
+        //     list_clear(S);
+        // }
+
+        #pragma omp parallel for
         for(int i = 0; i < k; i++) {
             if (Q[i]->size == 0) continue;
             node *q = priority_list_extract(Q[i]);
             if (q->id == t_id) {
-                if (m == NULL || q->gCost + source->heuristic(q->id, t_id) < m->gCost + source->heuristic(m->id, t_id)) {
+                if (m == NULL || q->fCost < m->fCost) {
                     m = q;
                 }
                 continue;
             }
             neighbors[i]->count = 0;
             source->get_neighbors(neighbors[i], q->id);
-            list_insert(S, i, neighbors[i], q);
+
+            for(int j = 0; j < neighbors[i]->count; j++) {
+                int id = neighbors[i]->nodeIds[j];
+                double newgCost = q->gCost + neighbors[i]->costs[j];
+                double newfCost = newgCost + source->heuristic(id, t_id);
+
+                if (!visited_list_contains(H, id)) {
+                    visited_list_insert(H, id, newgCost, newfCost, q);
+                    priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
+                } else if (!visited_list_is_better(H, id, newfCost)) {
+                    visited_list_insert(H, id, newgCost, newfCost, q);
+                    priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
+                }
+            }
+            // list_insert(S, i, neighbors[i], q);
         }
 
-        if (m != NULL && m->gCost + source->heuristic(m->id, t_id) < priority_lists_min(Q, k)) {
-            break;
+        // #pragma omp barrier
+
+        // #pragma omp single
+        // {
+        if (m != NULL && m->fCost < priority_lists_min(Q, k)) {
+            found = 1;
         }
-        #pragma omp parallel for shared(Q, S, neighbors, H, t_id, k, steps, m, source)
-        for (int i = 0; i < S->capacity; i++) {
-            if (S->ids[i] == -1) continue;
-            if (visited_list_contains(H, S->ids[i]) && visited_list_is_better(H, S, i)) {
-                continue;
-            } else {
-                visited_list_insert(H, S, i, source->heuristic(S->ids[i], t_id));
-                priority_list_insert(Q[(steps+i)%k], H->nodes[S->ids[i]]);
-            }
-        }
+        // }
+
+        // #pragma omp for
+        // for (int i = 0; i < S->capacity; i++) {
+        //     if (S->ids[i] == -1) continue;
+        //     if (visited_list_contains(H, S->ids[i]) && visited_list_is_better(H, S, i)) {
+        //         continue;
+        //     } else {
+        //         visited_list_insert(H, S, i, source->heuristic(S->ids[i], t_id));
+        //         priority_list_insert(Q[(steps+i)%k], H->nodes[S->ids[i]]);
+        //     }
+        // }
         steps++;
     }
-    end_time = clock();
-    *cpu_time_used = (double) (end_time - start_time) / CLOCKS_PER_SEC;
+    printf("%d iteraciones.\n", steps);
     path *path = retrace_path(m);
     priority_lists_destroy(Q, k);
     visited_list_destroy(H);
     neighbors_lists_destroy(neighbors, k);
-    list_destroy(S);
+    // list_destroy(S);
     return path;
 }

@@ -108,19 +108,16 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
         source->get_neighbors(neighbors, current->id);
         for (size_t i = 0; i < neighbors->count; i++) {
             astar_id_t neighbor_id = neighbors->nodeIds[i];
-            double newCost = current->gCost + neighbors->costs[i];
+            double newfCost = current->gCost + neighbors->costs[i] + source->heuristic(neighbor_id, t_id);
 
-            node *neighbor = visited[neighbor_id];
-
-            if (!neighbor) {
-                neighbor = node_create(neighbor_id, newCost, newCost + source->heuristic(neighbor_id, t_id), current);
-                visited[neighbor_id] = neighbor;
-                priority_list_insert_or_update(open, neighbor);
-            } else if ((neighbor->isOpen && newCost < neighbor->gCost) || newCost + source->heuristic(neighbor_id, t_id) < neighbor->fCost) {
-                neighbor->gCost = newCost;
-                neighbor->fCost = newCost + source->heuristic(neighbor_id, t_id);
-                neighbor->parent = current;
-                priority_list_insert_or_update(open, neighbor);
+            if (!visited[neighbor_id]) {
+                visited[neighbor_id] = node_create(neighbor_id, current->gCost + neighbors->costs[i], newfCost, current);;
+                priority_list_insert_or_update(open, visited[neighbor_id]);
+            } else if (newfCost < visited[neighbor_id]->fCost) {
+                visited[neighbor_id]->gCost = current->gCost + neighbors->costs[i];
+                visited[neighbor_id]->fCost = newfCost;
+                visited[neighbor_id]->parent = current;
+                priority_list_insert_or_update(open, visited[neighbor_id]);
             }
         }
         n_iters++;

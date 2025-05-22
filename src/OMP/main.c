@@ -84,9 +84,7 @@ int main(int argc, char const *argv[])
         int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        path *path = find_path_omp(&source, s_id, t_id, num_threads, &cpu_path_time);
-
-        printf("Tiempo total: %.4lf ms\n", 10e6 * cpu_path_time);
+        path *path = find_path_omp(&source, s_id, t_id, num_threads);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",

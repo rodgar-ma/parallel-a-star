@@ -21,6 +21,7 @@ void list_destroy(list *list) {
 }
 
 void list_clear(list *list) {
+	#pragma omp parallel for
 	for(int i = 0; i < list->capacity; i++) {
 		list->ids[i] = -1;
 	}
