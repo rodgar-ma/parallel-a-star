@@ -104,7 +104,7 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k) {
     int steps = 0;
     int found = 0;
 
-    while (!found &&!priority_lists_empty(Q, k))
+    while (!found && !priority_lists_empty(Q, k))
     {
         // #pragma omp single
         // {
@@ -128,11 +128,10 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k) {
                 int id = neighbors[i]->nodeIds[j];
                 double newgCost = q->gCost + neighbors[i]->costs[j];
                 double newfCost = newgCost + source->heuristic(id, t_id);
-
-                if (!visited_list_contains(H, id)) {
-                    visited_list_insert(H, id, newgCost, newfCost, q);
-                    priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
-                } else if (!visited_list_is_better(H, id, newfCost)) {
+                
+                if (visited_list_contains(H, id) && visited_list_is_better(H, id, newfCost)) {
+                    continue;
+                } else {
                     visited_list_insert(H, id, newgCost, newfCost, q);
                     priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
                 }

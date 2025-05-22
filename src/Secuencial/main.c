@@ -83,7 +83,7 @@ int main(int argc, char const *argv[])
         
         path *path = find_path_sequential(&source, s_id, t_id, &cpu_time_used);
         
-        printf("Tiempo total: %lf ns\n", cpu_time_used);
+        printf("Tiempo total: %lf ms\n", 10e3 * cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
