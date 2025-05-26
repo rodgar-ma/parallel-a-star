@@ -1,13 +1,12 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#define MAX_NODE_EXPAND 8
-#define MAX_QUEUE_SIZE 1000000
-
 typedef struct __node node;
 typedef struct __neighbors_list neighbors_list;
 typedef struct __path path;
 typedef struct __list list;
+
+#define MAX_NODE_EXPAND 8
 
 struct __node {
     int id;
@@ -35,7 +34,7 @@ typedef struct {
     double (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
 
-path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time);
+path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_used_time);
 
 void add_neighbor(neighbors_list *neighbors, int n_id, double cost);
 

@@ -31,18 +31,19 @@ int visited_list_contains(visited_list *H, int node_id) {
     return H->nodes[node_id] != NULL;
 }
 
-void visited_list_insert(visited_list *H, int id, double gCost, double fCost, node *parent) {
+int visited_list_insert(visited_list *H, int id, double gCost, double fCost, node *parent) {
     if (H->use_locks) omp_set_lock(&H->locks[id]);
     if (H->nodes[id] == NULL) {
         H->nodes[id] = node_create(id, gCost, fCost, parent);
-    } else if (!visited_list_is_better(H, id, fCost)) {
+        if (H->use_locks) omp_unset_lock(&H->locks[id]);
+        return 1;
+    } else if (fCost < H->nodes[id]->fCost) {
         H->nodes[id]->gCost = gCost;
         H->nodes[id]->fCost = fCost;
         H->nodes[id]->parent = parent;
+        if (H->use_locks) omp_unset_lock(&H->locks[id]);
+        return 1;
     }
     if (H->use_locks) omp_unset_lock(&H->locks[id]);
-}
-
-int visited_list_is_better(visited_list *H, int id, double fCost) {
-    return H->nodes[id]->fCost <= fCost;
+    return 0;
 }

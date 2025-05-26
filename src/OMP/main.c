@@ -50,9 +50,9 @@ int main(int argc, char const *argv[])
 
     int total_succeed = 0;
     int total_failed = 0;
-    clock_t start = clock();
-    double time;
     
+    double cpu_time_used;
+    double start = omp_get_wtime();
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
@@ -80,11 +80,11 @@ int main(int argc, char const *argv[])
             continue;
         }
         
-        AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &EuclideanHeuristic};
+        AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &DiagonalHeuristic};
         int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        path *path = find_path_omp(&source, s_id, t_id, num_threads, &time);
+        path *path = find_path_omp(&source, s_id, t_id, num_threads, &cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
@@ -95,24 +95,24 @@ int main(int argc, char const *argv[])
 
         printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1) {
-            printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.2f ms\n", entry.cost, path->cost, 10e3 * time);
+            printf("[OK] ");
             total_succeed++;
         }
         else {
-            printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.2f ms\n", entry.cost, path->cost, 10e3 * time);
-            // PrintPath(path);
+            printf("[Error] ");
             total_failed++;
         }
+        printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.6f milisegundos\n", entry.cost, path->cost,  cpu_time_used);
 
         path_destroy(path);
     }
 
-    clock_t end = clock();
+    double end = omp_get_wtime();
 
     if (MAP) FreeMap(MAP);
 
     printf("\nResultados:\n");
-    printf("Tiempo total: %.2f\n", 10e3 * (double) (end - start) / CLOCKS_PER_SEC);
+    printf("Tiempo total: %.6f segundos\n", (end - start));
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);

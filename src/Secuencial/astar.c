@@ -1,10 +1,11 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
 #include <time.h>
+#include <omp.h>
 #include "astar.h"
 #include "priority_list.h"
+#include "MapUtils.h"
 
 // Crea un nodo. Representa un estado.
 node *node_create(int id, double gCost, double fCost, node *parent) {
@@ -97,9 +98,18 @@ path *find_path_sequential(AStarSource *source, int s_id, int t_id, double *cpu_
 
     int n_iters = 0;
 
-    clock_t start = clock();
+    double start = omp_get_wtime();
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
+        printf("STEP %d\n", n_iters);
+        Node n = GetNodeById(MAP, current->id);
+        Node p;
+        if (current->parent != NULL){
+            p = GetNodeById(MAP, current->parent->id);
+            printf("(%d, %d)->(%d, %d)\n", p->x, p->y, n->x, n->y);
+        } else {
+            printf("(%d, %d)\n", n->x, n->y);
+        }
 
         if (current->id == t_id) {
             break;
@@ -109,23 +119,28 @@ path *find_path_sequential(AStarSource *source, int s_id, int t_id, double *cpu_
         source->get_neighbors(neighbors, current->id);
         for (size_t i = 0; i < neighbors->count; i++) {
             int neighbor_id = neighbors->nodeIds[i];
-            double newfCost = current->gCost + neighbors->costs[i] + source->heuristic(neighbor_id, t_id);
-
+            double newCost = current->gCost + neighbors->costs[i]; //  + source->heuristic(neighbor_id, t_id);
+            Node neighbor = GetNodeById(MAP, neighbor_id);
             if (!visited[neighbor_id]) {
-                visited[neighbor_id] = node_create(neighbor_id, current->gCost + neighbors->costs[i], newfCost, current);;
+                visited[neighbor_id] = node_create(neighbor_id, newCost, newCost + source->heuristic(neighbor_id, t_id), current);
                 priority_list_insert_or_update(open, visited[neighbor_id]);
-            } else if (newfCost < visited[neighbor_id]->fCost) {
-                visited[neighbor_id]->gCost = current->gCost + neighbors->costs[i];
-                visited[neighbor_id]->fCost = newfCost;
+                printf("Nuevo nodo: (%d, %d), gCost = %f, fCost = %f\n", neighbor->x, neighbor->y, visited[neighbor_id]->gCost, visited[neighbor_id]->fCost);
+            } else if (newCost < visited[neighbor_id]->gCost) {
+                printf("Nuevo actualizado: (%d, %d), old_gCost = %f, new_gCost = %f\n", neighbor->x, neighbor->y, visited[neighbor_id]->gCost, newCost);
+                visited[neighbor_id]->gCost = newCost;
+                visited[neighbor_id]->fCost = newCost + source->heuristic(neighbor_id, t_id);
                 visited[neighbor_id]->parent = current;
                 priority_list_insert_or_update(open, visited[neighbor_id]);
+            } else {
+                printf("Nodo (%d, %d) no se actualiza\n", neighbor->x, neighbor->y);
             }
         }
+        printf("\n\n");
         n_iters++;
     }
-    clock_t end = clock();
+    double end = omp_get_wtime();
+    *cpu_time_used = (end - start) * 1000.0;
     printf("%d iteraciones.\n", n_iters);
-    *cpu_time_used = (double)(end - start) / CLOCKS_PER_SEC;
     path *path = reatrace_path(current);
     priority_list_destroy(open);
     neighbors_list_destroy(neighbors);

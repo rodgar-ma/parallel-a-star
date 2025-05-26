@@ -20,9 +20,7 @@ void visited_list_destroy(visited_list *H);
 
 int visited_list_contains(visited_list *H, int node_id);
 
-void visited_list_insert(visited_list *H, int id, double gCost, double fCost, node *parent);
-
-int visited_list_is_better(visited_list *H, int id, double fCost);
+int visited_list_insert(visited_list *H, int id, double gCost, double fCost, node *parent);
 
 
 #endif

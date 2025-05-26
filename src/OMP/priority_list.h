@@ -3,11 +3,10 @@
 
 #include "astar.h"
 
-#define DEFAULT_QUEUE_SIZE 16
-
 typedef struct __priority_list {
     int size;
     node **nodes;
+    float *priorities;
 } priority_list;
 
 priority_list **priority_lists_create(int k);

@@ -5,6 +5,7 @@
 #include <time.h>
 #include "astar.h"
 #include "priority_list.h"
+#include "MapUtils.h"
 #include "visited_list.h"
 #include "list.h"
 
@@ -71,7 +72,6 @@ path *retrace_path(node *target) {
 
     p->nodeIds = calloc(p->count, sizeof(int));
     current = target;
-    #pragma omp parallel for
     for (int i = 0; i < p->count; i++) {
         p->nodeIds[p->count-i-1] = target->id;
         current = current->parent;
@@ -90,7 +90,7 @@ void path_destroy(path *p) {
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time) {
+path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used) {
     omp_set_num_threads(k);
     priority_list **Q = priority_lists_create(k);
     int locks = 1;
@@ -106,18 +106,31 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
     int steps = 0;
     int found = 0;
 
-    clock_t start = clock();
+    double start = omp_get_wtime();
     while (!found && !priority_lists_empty(Q, k))
     {
         list_clear(S);
+        printf("STEP %d\n", steps);
 
-        #pragma omp parallel for schedule(static, 1)
+        #pragma omp parallel for
         for(int i = 0; i < k; i++) {
             if (Q[i]->size == 0) continue;
             node *q = priority_list_extract(Q[i]);
+            Node n = GetNodeById(MAP, q->id);
+            Node p;
+            if (q->parent != NULL){
+                p = GetNodeById(MAP, q->parent->id);
+                printf("Thread: %d, (%d, %d)->(%d, %d), fCost = %f\n", omp_get_thread_num(), p->x, p->y, n->x, n->y, q->fCost);
+            } else {
+                printf("Thread: %d, (%d, %d), fCost = %f\n", omp_get_thread_num(), n->x, n->y, q->fCost);
+            }
+            
             if (q->id == t_id) {
-                if (m == NULL || q->fCost < m->fCost) {
-                    m = q;
+                # pragma omp critical
+                {
+                    if (m == NULL || q->fCost < m->fCost) {
+                        m = q;
+                    }
                 }
                 continue;
             }
@@ -125,6 +138,14 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
             source->get_neighbors(neighbors[i], q->id);
             list_insert(S, i, neighbors[i], q);
         }
+        
+        printf("Lista S:\n");
+        for(int j = 0; j < S->capacity; j++) {
+            if (S->ids[j] == -1) continue;
+            Node neighbor = GetNodeById(MAP, S->ids[j]);
+            printf("Nodo (%d, %d), gCost = %f.\n", neighbor->x, neighbor->y, S->gCosts[j]);
+        }
+        printf("\n");
 
         if (m != NULL && m->fCost < priority_lists_min(Q, k)) {
             found = 1;
@@ -134,16 +155,24 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
         #pragma omp parallel for
         for (int i = 0; i < S->capacity; i++) {
             if (S->ids[i] == -1) continue;
+            Node n = GetNodeById(MAP, S->ids[i]);
             if (!visited_list_contains(H, S->ids[i]) || S->gCosts[i] < H->nodes[S->ids[i]]->gCost) {
-                visited_list_insert(H, S->ids[i], S->gCosts[i], S->gCosts[i] + source->heuristic(S->ids[i], t_id), S->parents[i]);
-                priority_list_insert(Q[(steps+i)%k], H->nodes[S->ids[i]]);
+                if (visited_list_insert(H, S->ids[i], S->gCosts[i], S->gCosts[i] + source->heuristic(S->ids[i], t_id), S->parents[i])) {
+                    priority_list_insert(Q[(steps+i)%k], H->nodes[S->ids[i]]);
+                    printf("Nodo (%d, %d), gCost = %f, fCost = %f, en lista de prioridad %d.\n", n->x, n->y, H->nodes[S->ids[i]]->gCost, H->nodes[S->ids[i]]->fCost, (steps+i)%k);
+                } else {
+                    printf("Nodo (%d, %d) llega tarde. old_fCost = %f, new_fCost = %f.\n", n->x, n->y, H->nodes[S->ids[i]]->gCost, S->gCosts[i]);
+                }
+            } else {
+                printf("Nodo (%d, %d) no se actualiza. old_gCost = %f, new_gCost = %f.\n", n->x, n->y, H->nodes[S->ids[i]]->gCost, S->gCosts[i]);
             }
         }
 
+        printf("\n\n");
         steps++;
     }
-    clock_t end = clock();
-    *time = (double) (end - start) / CLOCKS_PER_SEC;
+    double end = omp_get_wtime();
+    *cpu_time_used = (end - start) * 1000.0;
     printf("%d iteraciones.\n", steps);
     path *path = retrace_path(m);
     priority_lists_destroy(Q, k);

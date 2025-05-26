@@ -84,7 +84,7 @@ int ExistsNodeAtPos(Map map, int x, int y) {
     return map->grid[y][x] != NULL;
 }
 
-// Devuelve el `int` del nodo en `map` con coordenadas `x` e `y`.
+// Devuelve el id del nodo en `map` con coordenadas `x` e `y`.
 int GetIdAtPos(Map map, int x, int y) {
     return map->grid[y][x]->id;
 }

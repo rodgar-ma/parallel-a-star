@@ -2,18 +2,28 @@
 #include <float.h>
 #include "priority_list.h"
 
+#define MAX_QUEUE_SIZE 1000000
+
 // static void swap(node **n1, node **n2);
 
-static void swap(priority_list *list, int i, int j) {
-    node *temp = list->nodes[i];
-    list->nodes[i] = list->nodes[j];
-    list->nodes[j] = temp;
+// static void swap(priority_list *list, int i, int j) {
+//     node *tmp_node = list->nodes[i];
+//     float tmp_prio = list->priorities[i];
+//     list->nodes[i] = list->nodes[j];
+//     list->priorities[i] = list->priorities[j];
+//     list->nodes[j] = tmp_node;
+//     list->priorities[j] = tmp_prio;
+// }
+
+static void swap(node **n1, node **n2) {
+    node *tmp = *n1;
+    *n1 = *n2;
+    *n2 = tmp;
 }
 
 /* Crea un conjunto de listas de prioridad */
 priority_list **priority_lists_create(int k) {
     priority_list **lists = calloc(k, sizeof(priority_list*));
-    #pragma omp parallel for num_threads(k)
     for(int i = 0; i < k; i++) {
         lists[i] = priority_list_create(MAX_QUEUE_SIZE);
     }
@@ -24,13 +34,12 @@ priority_list **priority_lists_create(int k) {
 priority_list *priority_list_create(int capacity) {
     priority_list *list = malloc(sizeof(priority_list));
     list->size = 0;
-    list->nodes = calloc(capacity, sizeof(node*));
+    list->nodes = calloc(capacity + 1, sizeof(node*));
     return list;
 }
 
 /* Libera la memoria de un conjunto de listas de prioridad */
 void priority_lists_destroy(priority_list **lists, int k) {
-    #pragma omp parallel for num_threads(k)
     for (int i = 0; i < k; i++) {
         priority_list_destroy(lists[i]);
     }
@@ -44,41 +53,35 @@ void priority_list_destroy(priority_list *list) {
 }
 
 void priority_list_insert(priority_list *list, node *n) {
-        int i = list->size++;
-        list->nodes[i] = n;
-
-        // Heapify-up
-        while (i > 0) {
-            int parent = (i - 1) / 2;
-            if (list->nodes[parent]->fCost <= list->nodes[i]->fCost) break;
-
-            swap(list, i, parent);
-            i = parent;
-        }
+    list->size++;
+    list->nodes[list->size] = n;
+    int current = list->size;
+    while (current > 1 && list->nodes[current]->fCost < list->nodes[current / 2]->fCost) {
+        swap(&(list->nodes[current]), &(list->nodes[current / 2]));
+        current /= 2;
+    }
 }
 
 node *priority_list_extract(priority_list *list) {
-    node *res = list->nodes[0];
-    list->nodes[0] = list->nodes[--list->size];
-
-    int i = 0;
-    while (1) {
-        int left = 2 * i + 1;
-        int right = 2 * i + 2;
-        int smallest = i;
-
-        if (left < list->size && list->nodes[left]->fCost < list->nodes[smallest]->fCost) {
-            smallest = left;
+    node *res = list->nodes[1];
+    list->nodes[1] = list->nodes[list->size];
+    list->nodes[list->size] = NULL;
+    list->size--;
+    int current = 1;
+    while(current < list->size) {
+        int smallest = current;
+        int child = 2 * current;
+        if (child <= list->size && list->nodes[child]->fCost <= list->nodes[smallest]->fCost) {
+            smallest = child;
         }
-        if (right < list->size && list->nodes[right]->fCost < list->nodes[smallest]->fCost) {
-            smallest = right;
+        child = 2 * current + 1;
+        if (child <= list->size && list->nodes[child]->fCost <= list->nodes[smallest]->fCost) {
+            smallest = child;
         }
-        if (smallest == i) break;
-
-        swap(list, i, smallest);
-        i = smallest;
+        if (smallest == current) break;
+        swap(&(list->nodes[current]), &(list->nodes[smallest]));
+        current = smallest;
     }
-
     return res;
 }
 
@@ -92,7 +95,7 @@ int priority_lists_empty(priority_list **lists, int k) {
 double priority_lists_min(priority_list **lists, int k) {
 	double best_f = DBL_MAX;
 	for (int i = 0; i < k; i++) {
-		node *current_best = lists[i]->nodes[0];
+		node *current_best = lists[i]->nodes[1];
 		if (current_best != NULL && current_best->fCost < best_f) {
 			best_f = current_best->fCost;
 		}
