@@ -78,12 +78,10 @@ int main(int argc, char const *argv[])
         
         
         AStarSource source = {MAP->width*MAP->height, &GetNeighbors, &DiagonalHeuristic};
-        astar_id_t s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
-        astar_id_t t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
+        int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
+        int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
         path *path = find_path_sequential(&source, s_id, t_id, &cpu_time_used);
-        
-        printf("Tiempo total: %lf ms\n", 10e3 * cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
@@ -94,11 +92,11 @@ int main(int argc, char const *argv[])
 
         printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1) {
-            printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
+            printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.2f ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
             total_succeed++;
         }
         else {
-            printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
+            printf("[Error] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.2f ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
             // PrintPath(path);
             total_failed++;
         }
@@ -111,7 +109,7 @@ int main(int argc, char const *argv[])
     if (MAP) FreeMap(MAP);
 
     printf("\nResultados:\n");
-    printf("Tiempo total: %f\n", (double) (end - start) / CLOCKS_PER_SEC);
+    printf("Tiempo total: %.2f ms\n", 10e3 * (double) (end - start) / CLOCKS_PER_SEC);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);

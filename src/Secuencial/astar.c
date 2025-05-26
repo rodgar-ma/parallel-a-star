@@ -7,7 +7,7 @@
 #include "priority_list.h"
 
 // Crea un nodo. Representa un estado.
-node *node_create(astar_id_t id, double gCost, double fCost, node *parent) {
+node *node_create(int id, double gCost, double fCost, node *parent) {
     node *n = malloc(sizeof(node));
     n->id = id;
     n->parent = parent;
@@ -24,7 +24,7 @@ neighbors_list *neighbors_list_create() {
     list->capacity = DEFAULT_NIEGHBORS_LIST_CAPACITY;
     list->count = 0;
     list->costs = calloc(list->capacity, sizeof(double));
-    list->nodeIds = calloc(list->capacity, sizeof(astar_id_t));
+    list->nodeIds = calloc(list->capacity, sizeof(int));
     return list;
 }
 
@@ -36,10 +36,10 @@ void neighbors_list_destroy(neighbors_list *list) {
 }
 
 // Función para el ususario. Añade un vecino a un nodo y su coste. Debe llamarse desde `get_neighbors`.
-void add_neighbor(neighbors_list *neighbors, astar_id_t n_id, double cost) {
+void add_neighbor(neighbors_list *neighbors, int n_id, double cost) {
     if (neighbors->count == neighbors->capacity) {
         neighbors->capacity *= 2;
-        neighbors->nodeIds = realloc(neighbors->nodeIds, neighbors->capacity * sizeof(astar_id_t));
+        neighbors->nodeIds = realloc(neighbors->nodeIds, neighbors->capacity * sizeof(int));
         neighbors->costs = realloc(neighbors->costs, neighbors->capacity * sizeof(double));
     }
     neighbors->nodeIds[neighbors->count] = n_id;
@@ -59,7 +59,7 @@ path *reatrace_path(node *target) {
         current = current->parent;
     }
 
-    p->nodeIds = calloc(p->count, sizeof(astar_id_t));
+    p->nodeIds = calloc(p->count, sizeof(int));
     current = target;
     for (int i = 0; i < p->count; i++) {
         p->nodeIds[p->count - i - 1] = current->id;
@@ -86,7 +86,7 @@ void free_visited(node **visited, size_t size) {
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id, double *cpu_time_used) {
+path *find_path_sequential(AStarSource *source, int s_id, int t_id, double *cpu_time_used) {
     priority_list *open = priority_list_create();
     node** visited = calloc(source->max_size, sizeof(node*));
     neighbors_list *neighbors = neighbors_list_create();
@@ -95,8 +95,9 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
     visited[s_id] = current;
     priority_list_insert_or_update(open, current);
 
-    clock_t start = clock();
     int n_iters = 0;
+
+    clock_t start = clock();
     while(!priority_list_is_empty(open)) {
         current = priority_list_extract(open);
 
@@ -107,7 +108,7 @@ path *find_path_sequential(AStarSource *source, astar_id_t s_id, astar_id_t t_id
         neighbors->count = 0;
         source->get_neighbors(neighbors, current->id);
         for (size_t i = 0; i < neighbors->count; i++) {
-            astar_id_t neighbor_id = neighbors->nodeIds[i];
+            int neighbor_id = neighbors->nodeIds[i];
             double newfCost = current->gCost + neighbors->costs[i] + source->heuristic(neighbor_id, t_id);
 
             if (!visited[neighbor_id]) {

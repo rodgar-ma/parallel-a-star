@@ -70,7 +70,7 @@ Map LoadMap(char *filename) {
 }
 
 // Devuelve el `Node` en `map` correspondiente al `id`.
-Node GetNodeById(Map map, astar_id_t id) {
+Node GetNodeById(Map map, int id) {
     int y = id / map->width;
     int x = id % map->width;
     if (map->grid[y][x] == NULL) return NULL;
@@ -84,8 +84,8 @@ int ExistsNodeAtPos(Map map, int x, int y) {
     return map->grid[y][x] != NULL;
 }
 
-// Devuelve el `astar_id_t` del nodo en `map` con coordenadas `x` e `y`.
-astar_id_t GetIdAtPos(Map map, int x, int y) {
+// Devuelve el id del nodo en `map` con coordenadas `x` e `y`.
+int GetIdAtPos(Map map, int x, int y) {
     return map->grid[y][x]->id;
 }
 
@@ -102,7 +102,7 @@ void FreeMap(Map map) {
 }
 
 // Chevyshev Heuristic.
-double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
+double ChevyshevHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     double distX = abs(n2->x - n1->x);
@@ -112,14 +112,14 @@ double ChevyshevHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
 }
 
 // Manhattan Heuristic.
-double MahattanHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
+double MahattanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
 }
 
 // Diagonal Heuristic
-double DiagonalHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
+double DiagonalHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     double dx = abs(n2->x - n1->x);
@@ -128,7 +128,7 @@ double DiagonalHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
 }
 
 // Euclidean Heuristic
-double EuclideanHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
+double EuclideanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     double dx = abs(n2->x - n1->x);
@@ -139,7 +139,7 @@ double EuclideanHeuristic(astar_id_t n1_id, astar_id_t n2_id) {
 
 
 // Get Neighbors
-void GetNeighbors(neighbors_list *neighbors, astar_id_t n_id) {
+void GetNeighbors(neighbors_list *neighbors, int n_id) {
     Node node = GetNodeById(MAP, n_id);
 
     // Movimientos ortogonales (coste 1)

@@ -2,7 +2,13 @@
 #include <float.h>
 #include "priority_list.h"
 
-static void swap(node **n1, node **n2);
+// static void swap(node **n1, node **n2);
+
+static void swap(priority_list *list, int i, int j) {
+    node *temp = list->nodes[i];
+    list->nodes[i] = list->nodes[j];
+    list->nodes[j] = temp;
+}
 
 /* Crea un conjunto de listas de prioridad */
 priority_list **priority_lists_create(int k) {
@@ -46,7 +52,7 @@ void priority_list_insert(priority_list *list, node *n) {
             int parent = (i - 1) / 2;
             if (list->nodes[parent]->fCost <= list->nodes[i]->fCost) break;
 
-            swap(&(list->nodes[i]), &(list->nodes[parent]));
+            swap(list, i, parent);
             i = parent;
         }
 }
@@ -69,7 +75,7 @@ node *priority_list_extract(priority_list *list) {
         }
         if (smallest == i) break;
 
-        swap(&(list->nodes[i]), &(list->nodes[smallest]));
+        swap(list, i, smallest);
         i = smallest;
     }
 
@@ -92,10 +98,4 @@ double priority_lists_min(priority_list **lists, int k) {
 		}
 	}
 	return best_f;
-}
-
-static void swap(node **n1,  node **n2) {
-	node *tmp = *n1;
-	*n1 = *n2;
-	*n2 = tmp;
 }

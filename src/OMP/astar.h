@@ -35,7 +35,7 @@ typedef struct {
     double (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
 
-path *find_path_omp(AStarSource *source, int s_id, int t_id, int k);
+path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time);
 
 void add_neighbor(neighbors_list *neighbors, int n_id, double cost);
 

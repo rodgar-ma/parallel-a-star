@@ -7,8 +7,8 @@
 #define DEFAULT_QUEUE_SIZE 16
 
 typedef struct __priority_list {
-    size_t capacity;
-    size_t count;
+    int capacity;
+    int count;
     node **nodes;
 } priority_list;
 
