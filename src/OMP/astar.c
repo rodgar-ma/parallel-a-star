@@ -111,7 +111,7 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
     {
         list_clear(S);
 
-        #pragma omp parallel for
+        #pragma omp parallel for schedule(static, 1)
         for(int i = 0; i < k; i++) {
             if (Q[i]->size == 0) continue;
             node *q = priority_list_extract(Q[i]);
@@ -124,30 +124,12 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
             neighbors[i]->count = 0;
             source->get_neighbors(neighbors[i], q->id);
             list_insert(S, i, neighbors[i], q);
-
-            // for(int j = 0; j < neighbors[i]->count; j++) {
-            //     int id = neighbors[i]->nodeIds[j];
-            //     double newCost = q->gCost + neighbors[i]->costs[j];
-                
-            //     if (!visited_list_contains(H, id) || newCost < H->nodes[id]->gCost) {
-            //         visited_list_insert(H, id, newCost, newCost + source->heuristic(id, t_id), q);
-            //         priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
-            //     } else if (!visited_list_is_better(H, id, newfCost)) {
-            //         visited_list_insert(H, id, newgCost, newfCost, q);
-            //         priority_list_insert(Q[(steps+i)%k], H->nodes[id]);
-            //     }
-            // }
         }
 
-        // #pragma omp barrier
-
-        // #pragma omp single
-        // {
         if (m != NULL && m->fCost < priority_lists_min(Q, k)) {
             found = 1;
             continue;
         }
-        // }
 
         #pragma omp parallel for
         for (int i = 0; i < S->capacity; i++) {
@@ -157,6 +139,7 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
                 priority_list_insert(Q[(steps+i)%k], H->nodes[S->ids[i]]);
             }
         }
+
         steps++;
     }
     clock_t end = clock();
@@ -166,6 +149,6 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *time
     priority_lists_destroy(Q, k);
     visited_list_destroy(H);
     neighbors_lists_destroy(neighbors, k);
-    // list_destroy(S);
+    list_destroy(S);
     return path;
 }
