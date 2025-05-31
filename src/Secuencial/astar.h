@@ -4,35 +4,36 @@
 #include <stdlib.h>
 
 #define DEFAULT_NIEGHBORS_LIST_CAPACITY 8
+#define DEFAULT_PRIORITY_LIST_CAPACITY 8
 
 typedef struct __node node;
 typedef struct __neighbors_list neighbors_list;
 typedef struct __path path;
 
-struct __node {
-    int id;
-    node *parent;
-    double gCost;
-    double fCost;
-    unsigned int isOpen:1;
-    size_t open_index;
-};
+// struct __node {
+//     int id;
+//     node *parent;
+//     double gCost;
+//     double fCost;
+//     unsigned int isOpen:1;
+//     int open_index;
+// };
 
 struct __path {
-    size_t count;
+    int count;
     int *nodeIds;
     double cost;
 };
 
 struct __neighbors_list {
-    size_t capacity;
-    size_t count;
+    int capacity;
+    int count;
     int *nodeIds;
     double *costs;
 };
 
 typedef struct {
-    size_t max_size;
+    int max_size;
     void (*get_neighbors)(neighbors_list *neighbors, int n_id);
     double (*heuristic)(int n1_id, int n2_id);
 } AStarSource;

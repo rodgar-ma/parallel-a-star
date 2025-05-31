@@ -1,0 +1,17 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "tarea-main",
+      "appliesTo": [
+        "src/OMP/main.c",
+        "src/OMP/astar.c",
+        "src/OMP/visited_list.c",
+        "src/OMP/priority_list.c",
+        "src/OMP/list.c",
+        "src/OMP/MapUtils.c"
+      ],
+      "type": "launch"
+    }
+  ]
+}

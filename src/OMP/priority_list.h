@@ -3,10 +3,14 @@
 
 #include "astar.h"
 
+typedef struct __priority_item {
+    node *node;
+    double priority;
+} priority_item;
+
 typedef struct __priority_list {
     int size;
-    node **nodes;
-    float *priorities;
+    priority_item *items;
 } priority_list;
 
 priority_list **priority_lists_create(int k);

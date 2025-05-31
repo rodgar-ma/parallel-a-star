@@ -97,12 +97,11 @@ int main(int argc, char const *argv[])
         if (fabs(path->cost - entry.cost) < 1) {
             printf("[OK] ");
             total_succeed++;
-        }
-        else {
+        } else {
             printf("[Error] ");
             total_failed++;
         }
-        printf("[OK] Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.6f milisegundos\n", entry.cost, path->cost,  cpu_time_used);
+        printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %.6f milisegundos\n", entry.cost, path->cost,  cpu_time_used);
 
         path_destroy(path);
     }

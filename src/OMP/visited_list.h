@@ -10,11 +10,10 @@ typedef struct __visited_list visited_list;
 struct __visited_list {
     int capacity;
     node** nodes;
-    int use_locks;
     omp_lock_t* locks;
 };
 
-visited_list *visited_list_create(int capacity, int locks);
+visited_list *visited_list_create(int capacity);
 
 void visited_list_destroy(visited_list *H);
 
