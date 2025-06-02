@@ -2,16 +2,16 @@
 #define ASTAR_H
 
 #include <stdlib.h>
+#include <omp.h>
 
 #define INIT_NEIGHBORS_LIST_CAPACITY 10
+#define INIT_QUEUE_CAPACITY 10
 
 typedef struct node_t {
     int id;
     float gCost;
     float fCost;
     int parent;
-    unsigned int is_open:1;
-    int open_index;
 } node_t;
 
 typedef struct neighbors_list {
@@ -27,6 +27,13 @@ typedef struct path {
     float cost;
 } path;
 
+typedef struct queue {
+    int size;
+    int capacity;
+    heap_item_t **nodes;
+    omp_lock_t lock;
+} queue;
+
 typedef struct {
     int max_size;
     void (*get_neighbors)(neighbors_list *neighbors, int n_id);
@@ -35,7 +42,7 @@ typedef struct {
 
 void add_neighbor(neighbors_list *neighbors, int n_id, float cost);
 
-path *astar_search(AStarSource *source, int s_id, int t_id);
+path *astar_search(AStarSource *source, int s_id, int t_id, int k);
 
 void path_destroy(path *path);
 

@@ -27,9 +27,9 @@ Node GetNodeById(Map map, int id);
 int ExistsNodeAtPos(Map map, int x, int y);
 int GetIdAtPos(Map map, int x, int y);
 
-float ChevyshevHeuristic(int n1_id, int n2_id);
-float MahattanHeuristic(int n1_id, int n2_id);
-float DiagonalHeuristic(int n1_id, int n2_id);
+double ChevyshevHeuristic(int n1_id, int n2_id);
+double MahattanHeuristic(int n1_id, int n2_id);
+double DiagonalHeuristic(int n1_id, int n2_id);
 
 void GetNeighbors8Tiles(neighbors_list *neighbors, int n_id);
 void GetNeighbors4Tiles(neighbors_list *neighbors, int n_id);

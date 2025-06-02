@@ -7,8 +7,6 @@ node_t *node_create(int id, float gCost, float fCost, int parent) {
     n->parent = parent;
     n->gCost = gCost;
     n->fCost = fCost;
-    n->is_open = 0;
-    n->open_index = -1;
     return n;
 }
 
@@ -69,40 +67,94 @@ void closed_list_destroy(node_t **closed, int size) {
     }
 }
 
+int hash(int node, int k) {
+    return node % k;
+}
+
+queue *queue_init() {
+    queue *q = malloc(sizeof(queue));
+    q->size = 0;
+    q->capacity = INIT_QUEUE_CAPACITY;
+    q->nodes = malloc(q->capacity * sizeof(heap_item_t*));
+    omp_init_lock(&q->lock);
+    return q;
+}
+
+void queue_destroy(queue *q) {
+    free(q->nodes);
+    omp_destroy_lock(&q->lock);
+    free(q);
+}
+
+void enqueue(queue *q, heap_item_t *n) {
+    omp_set_lock(&q->lock);
+    if (q->size == q->capacity) {
+        q->capacity *= 2;
+        q->nodes = realloc(q->nodes, q->capacity * sizeof(node_t*));
+    }
+    q->nodes[q->size++] = n;
+    omp_unset_lock(&q->lock);
+}
+
+heap_item_t *dequeue(queue *q) {
+    heap_item_t *res = NULL;
+    omp_set_lock(&q->lock);
+    if (q->size > 0) {
+        res = q->nodes[--q->size];
+    }
+    omp_unset_lock(&q->lock);
+    return res;
+}
+
 /**********************************************************************************************************/
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *astar_search(AStarSource *source, int start_id, int goal_id) {
-    heap_t *open = heap_init();
+path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
     node_t **closed = malloc(source->max_size * sizeof(node_t*));
-    neighbors_list *neighbors = neighbors_list_create(INIT_NEIGHBORS_LIST_CAPACITY);
+
+    heap_t *open[k];
+    queue *q[k];
+    neighbors_list *neighbors[k];
+    for (int i = 0; i < k; i++) {
+        open[i] = heap_init();
+        q[i] = queue_init();
+        neighbors[i] = neighbors_list_create(INIT_NEIGHBORS_LIST_CAPACITY);
+    }
     
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
-    heap_insert(open, closed[start_id]);
+    enqueue(q[hash(start_id, k)], closed[start_id]);
 
-    while(!heap_is_empty(open)) {
-        node_t *current = heap_extract(open);
+    #pragma omp parallel num_threads(k)
+    {
+        int tid = omp_get_thread_num();
+        int found = 0;
 
-        if (current->id == goal_id) break;
-
-        neighbors->count = 0;
-        source->get_neighbors(neighbors, current->id);
-        for(int i = 0; i < neighbors->count; i++) {
-            int n_id = neighbors->nodeIds[i];
-            float new_cost = closed[current->id]->gCost + neighbors->costs[i];
-            if (closed[n_id]) {
-                if (new_cost < closed[n_id]->gCost) {
-                    closed[n_id]->gCost = new_cost;
-                    closed[n_id]->fCost = new_cost + source->heuristic(n_id, goal_id);
-                    closed[n_id]->parent = current->id;
-                    if (closed[n_id]->is_open) heap_update(open, closed[n_id]);
-                    else heap_insert(open, closed[n_id]);
-                }
-            } else {
-                closed[n_id] = node_create(n_id,new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
-                heap_insert(open, closed[n_id]);
+        while(!found) {
+            heap_item_t * msg;
+            while((msg = dequeue(q[tid])) != NULL) {
+                if (!closed[msg->node] || closed[msg->node]->fCost < msg->fCost)
+                heap_insert(open[tid], msg);
             }
+
+            node_t *current = heap_extract(open[tid]);
+            if (!current) continue;
+
+            if (current->id = goal_id) {
+                #pragma omp critical
+                {
+                    found = 1;
+                }
+                continue;
+            }
+
+            neighbors[tid]->count = 0;
+            source->get_neighbors(neighbors[tid], current->id);
+
+            for(int i = 0; i < neighbors[tid]->count; i++) {
+                int id = neighbors[tid]->nodeIds[i];
+                float cost = neighbors[tid]->costs[i];
+                enqueue(q[hash(id, k)], );
         }
     }
 

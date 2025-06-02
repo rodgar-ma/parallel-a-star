@@ -102,37 +102,37 @@ void FreeMap(Map map) {
 }
 
 // Chevyshev Heuristic.
-float ChevyshevHeuristic(int n1_id, int n2_id) {
+double ChevyshevHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
-    float distX = abs(n2->x - n1->x);
-    float distY = abs(n2->y - n1->y);
+    double distX = abs(n2->x - n1->x);
+    double distY = abs(n2->y - n1->y);
     if (distX > distY) return distX;
     else return distY;
 }
 
 // Manhattan Heuristic.
-float MahattanHeuristic(int n1_id, int n2_id) {
+double MahattanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
 }
 
 // Diagonal Heuristic
-float DiagonalHeuristic(int n1_id, int n2_id) {
+double DiagonalHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
-    float dx = abs(n2->x - n1->x);
-    float dy = abs(n2->y - n1->y);
+    double dx = abs(n2->x - n1->x);
+    double dy = abs(n2->y - n1->y);
     return dx + dy + (sqrt(2) - 2.0) * fmin(dx, dy); 
 }
 
 // Euclidean Heuristic
-float EuclideanHeuristic(int n1_id, int n2_id) {
+double EuclideanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
-    float dx = abs(n2->x - n1->x);
-    float dy = abs(n2->y - n1->y);
+    double dx = abs(n2->x - n1->x);
+    double dy = abs(n2->y - n1->y);
     return sqrt(dx * dx + dy * dy); 
 }
 
@@ -170,7 +170,7 @@ void GetNeighbors(neighbors_list *neighbors, int n_id) {
 // Print path
 void PrintPath(path *path) {
     printf("Path found!\n");
-    printf("Number of nodes = %u\n", path->count);
+    printf("Number of nodes = %zu\n", path->count);
     printf("Total cost = %f\n", path->cost);
     for (int i = 0; i < path->count; i++) {
         printf("[%d,%d]\n", GetNodeById(MAP, path->nodeIds[i])->x, GetNodeById(MAP, path->nodeIds[i])->y);

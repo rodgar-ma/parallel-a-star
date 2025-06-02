@@ -94,7 +94,7 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
     
     priority_list **Q = priority_lists_create(k);
     visited_list *H = visited_list_create(source->max_size);
-    // list *S = list_create(k * MAX_NODE_EXPAND);
+    list *S = list_create(k * MAX_NODE_EXPAND);
     neighbors_list **neighbors = neighbors_lists_create(k);
 
     H->nodes[s_id] = node_create(s_id, 0, source->heuristic(s_id, t_id), NULL);
