@@ -76,7 +76,7 @@ void closed_list_destroy(node_t **closed, int size) {
 path *astar_search(AStarSource *source, int start_id, int goal_id) {
     heap_t *open = heap_init();
     node_t **closed = malloc(source->max_size * sizeof(node_t*));
-    neighbors_list *neighbors = neighbors_list_create(INIT_NEIGHBORS_LIST_CAPACITY);
+    neighbors_list *neighbors = neighbors_list_create();
     
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
     heap_insert(open, closed[start_id]);

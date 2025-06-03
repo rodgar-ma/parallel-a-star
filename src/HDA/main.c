@@ -13,7 +13,7 @@ typedef struct {
     int width, height;
     int start_x, start_y;
     int target_x, target_y;
-    double cost;
+    float cost;
 } MapScen;
 
 static volatile int keepRunning = 1;
@@ -24,14 +24,18 @@ void intHandler(int dummy) {
 
 Map MAP;
 
+char MAP_SCEN_FILENAME[256];
+
 int main(int argc, char const *argv[])
 {
-    if (argc != 2) {
-        perror("Uso: <exe> map.scen");
+    if (argc != 3) {
+        perror("Uso: <exe> num_threads map.scen");
         return 1;
     }
 
-    FILE *file = fopen(argv[1], "r");
+    int num_threads = atoi(argv[1]);
+
+    FILE *file = fopen(argv[2], "r");
     if (!file) {
         perror("No se pudo abrir el fichero del escenario");
         return 1;
@@ -47,13 +51,14 @@ int main(int argc, char const *argv[])
     int total_failed = 0;
 
     clock_t start = clock();
-    while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%lf\n",
+    while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%f\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
                   &entry.start_x, &entry.start_y, &entry.target_x, &entry.target_y,
                   &entry.cost) == 9)
     {
         if (strcmp(map_file, entry.filename) != 0) {
             strcpy(map_file, entry.filename);
+            strcat(MAP_SCEN_FILENAME, entry.filename);
             char maps_dir[256] = "../maps/";
             if (MAP) FreeMap(MAP);
             MAP = LoadMap(strcat(maps_dir, map_file));
@@ -79,7 +84,7 @@ int main(int argc, char const *argv[])
         int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        path *path = astar_search(&source, s_id, t_id);
+        path *path = astar_search(&source, s_id, t_id, num_threads);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",

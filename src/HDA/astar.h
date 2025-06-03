@@ -27,12 +27,12 @@ typedef struct path {
     float cost;
 } path;
 
-typedef struct queue {
+typedef struct queue_t {
     int size;
     int capacity;
-    heap_item_t **nodes;
+    node_t **nodes;
     omp_lock_t lock;
-} queue;
+} queue_t;
 
 typedef struct {
     int max_size;

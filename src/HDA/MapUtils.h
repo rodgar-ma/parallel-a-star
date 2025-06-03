@@ -20,6 +20,8 @@ struct __Map {
 
 extern Map MAP;
 
+extern char MAP_SCEN_FILENAME[256];
+
 Map LoadMap(char *filename);
 void FreeMap(Map map);
 

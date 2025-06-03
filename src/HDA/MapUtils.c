@@ -71,10 +71,11 @@ Map LoadMap(char *filename) {
 
 // Devuelve el `Node` en `map` correspondiente al `id`.
 Node GetNodeById(Map map, int id) {
+    if (!map || id < 0 || id >= map->width * map->height) return NULL;
     int y = id / map->width;
     int x = id % map->width;
-    if (map->grid[y][x] == NULL) return NULL;
-    else return map->grid[y][x];
+    if (x < 0 || x >= map->width || y < 0 || y >= map->height) return NULL;
+    return map->grid[y][x];
 }
 
 // Devuelve `true` si hay un nodo en `map` con coordenadas `x` e `y`.
@@ -141,6 +142,12 @@ float EuclideanHeuristic(int n1_id, int n2_id) {
 // Get Neighbors
 void GetNeighbors(neighbors_list *neighbors, int n_id) {
     Node node = GetNodeById(MAP, n_id);
+
+    if (node == NULL) {
+        fprintf(stderr, "ERROR: GetNodeById devolvió NULL para id = %d\n", n_id);
+        printf("En el mapa = %s\n", MAP_SCEN_FILENAME);
+        return;
+    }
 
     // Movimientos ortogonales (coste 1)
     int dx[] = {-1, 1, 0, 0};
