@@ -4,6 +4,7 @@
 #include <math.h>
 #include "MapUtils.h"
 #include "astar.h"
+#include <omp.h>
 
 // Carga el mapa del fichero `filename`.
 Map LoadMap(char *filename) {
@@ -144,8 +145,11 @@ void GetNeighbors(neighbors_list *neighbors, int n_id) {
     Node node = GetNodeById(MAP, n_id);
 
     if (node == NULL) {
-        fprintf(stderr, "ERROR: GetNodeById devolvió NULL para id = %d\n", n_id);
-        printf("En el mapa = %s\n", MAP_SCEN_FILENAME);
+        #pragma omp critical
+        {
+            fprintf(stderr, "Hilo %d, ERROR: GetNodeById devolvió NULL para id = %d\n", omp_get_thread_num(), n_id);
+            printf("En el mapa = %s\n", MAP_SCEN_FILENAME);
+        }
         return;
     }
 

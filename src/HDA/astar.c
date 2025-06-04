@@ -39,7 +39,8 @@ void add_neighbor(neighbors_list *neighbors, int n_id, float cost) {
 }
 
 int hash(int node, int k) {
-    return node % k;
+    int h = node % k;
+    return (h >= 0 && h < k) ? h : 0;
 }
 
 path *retrace_path(node_t ** closed[], int target, int k) {
@@ -79,7 +80,6 @@ queue_t *queue_init(void) {
     q->size = 0;
     q->capacity = INIT_QUEUE_CAPACITY;
     q->nodes = malloc(q->capacity * sizeof(node_t*));
-    memset(q->nodes, 0, q->capacity * sizeof(node_t*));
     omp_init_lock(&q->lock);
     return q;
 }
@@ -93,10 +93,8 @@ void queue_destroy(queue_t *q) {
 void enqueue(queue_t *q, node_t *n) {
     omp_set_lock(&q->lock);
     if (q->size == q->capacity) {
-        int old_size = q->size;
         q->capacity *= 2;
         q->nodes = realloc(q->nodes, q->capacity * sizeof(node_t*));
-        memset(q->nodes + old_size, 0, (q->capacity - old_size) * sizeof(node_t*));
     }
     q->nodes[q->size++] = n;
     omp_unset_lock(&q->lock);
@@ -133,21 +131,23 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
     enqueue(q[hash(start_id, k)], node_create(start_id, 0, source->heuristic(start_id, goal_id), -1));
 
     int found = 0;
+    int steps = 0;
 
     omp_set_num_threads(k);
 
     #pragma omp parallel shared(source, start_id, goal_id, k, closed, open, q, neighbors, found, closed_locks)
     {
         int tid = omp_get_thread_num();
-        
+        int step = 0;
         #pragma omp flush(found)
         while(!found) {
             node_t *msg;
             while((msg = dequeue(q[tid])) != NULL) {
-                printf("Hilo %d: Actualizando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
+                // printf("Hilo %d: Obtiene el nodo %d de la cola con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                 omp_set_lock(&closed_locks[tid]);
                 if (closed[tid][msg->id]) {
                     if (msg->gCost < closed[tid][msg->id]->gCost) {
+                        // printf("Hilo %d: Actualizando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                         closed[tid][msg->id]->id = msg->id;
                         closed[tid][msg->id]->gCost = msg->gCost;
                         closed[tid][msg->id]->fCost = msg->fCost;
@@ -156,6 +156,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
                     }
                     free(msg);
                 } else {
+                    // printf("Hilo %d: insertando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                     closed[tid][msg->id] = msg;
                     heap_insert(open[tid], msg);
                 }
@@ -163,11 +164,14 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
             }
 
             node_t *current = heap_extract(open[tid]);
-            if (!current) continue;
+            if (current == NULL) continue;
 
-            if (current->id == 262143) {
-                printf("\n");
-            }
+            step++;
+            
+            // #pragma omp critical
+            // {
+            //     printf("Hilo %d: nodo actual %d, step = %d\n", tid, current->id, ++step);
+            // }
 
             if (current->id == goal_id) {
                 #pragma omp critical
@@ -184,10 +188,19 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
             for(int i = 0; i < neighbors[tid]->count; i++) {
                 int id = neighbors[tid]->nodeIds[i];
                 float new_cost = current->gCost + neighbors[tid]->costs[i];
+                // printf("Hilo %d envia nodo %d a hilo %d\n", tid, id, hash(id, k));
                 enqueue(q[hash(id, k)], node_create(id, new_cost, new_cost + source->heuristic(id, goal_id), current->id));
             }
+
+        }
+
+        #pragma omp critical
+        {
+            steps += step;
         }
     }
+
+    printf("Steps: %d\n", steps);
 
     path *p = retrace_path(closed, goal_id, k);
     for(int i = 0; i < k; i++) {

@@ -1,5 +1,6 @@
 #include "astar.h"
 #include "heap.h"
+#include "stdio.h"
 
 node_t *node_create(int id, float gCost, float fCost, int parent) {
     node_t *n = malloc(sizeof(node_t));
@@ -81,8 +82,13 @@ path *astar_search(AStarSource *source, int start_id, int goal_id) {
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
     heap_insert(open, closed[start_id]);
 
+    int steps = 0;
+
     while(!heap_is_empty(open)) {
+        printf("Step: %d\n", ++steps);
         node_t *current = heap_extract(open);
+
+        printf("Nodo actual %d\n", current->id);
 
         if (current->id == goal_id) break;
 
@@ -96,15 +102,20 @@ path *astar_search(AStarSource *source, int start_id, int goal_id) {
                     closed[n_id]->gCost = new_cost;
                     closed[n_id]->fCost = new_cost + source->heuristic(n_id, goal_id);
                     closed[n_id]->parent = current->id;
+                    printf("Actualiza nodo: %d con nuevo gCost = %f\n", n_id, new_cost);
                     if (closed[n_id]->is_open) heap_update(open, closed[n_id]);
                     else heap_insert(open, closed[n_id]);
                 }
+                printf("No actualiza nodo %d\n", n_id);
             } else {
+                printf("Nuevo nodo %d con gCost = %f y fCost = %f\n", n_id, new_cost, new_cost + source->heuristic(n_id, goal_id));
                 closed[n_id] = node_create(n_id,new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
                 heap_insert(open, closed[n_id]);
             }
         }
     }
+
+    printf("Steps: %d\n", steps);
 
     path *p = retrace_path(closed, goal_id);
     closed_list_destroy(closed, source->max_size);

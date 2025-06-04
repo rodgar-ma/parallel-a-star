@@ -37,9 +37,9 @@ void heap_insert(heap_t *heap, node_t *n) {
 }
 
 node_t *heap_extract(heap_t *heap) {
+    if (heap->size == 0) return NULL;
     swap(heap, 1, heap->size);
-    node_t *res = heap->nodes[heap->size];
-    heap->size--;
+    node_t *res = heap->nodes[heap->size--];
     int current = 1;
     while (current < heap->size) {
         int smallest = current;
