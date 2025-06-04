@@ -35,7 +35,7 @@ typedef struct {
 
 void add_neighbor(neighbors_list *neighbors, int n_id, float cost);
 
-path *astar_search(AStarSource *source, int s_id, int t_id);
+path *astar_search(AStarSource *source, int s_id, int t_id, double *cpu_time_used);
 
 void path_destroy(path *path);
 

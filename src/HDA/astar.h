@@ -42,7 +42,7 @@ typedef struct {
 
 void add_neighbor(neighbors_list *neighbors, int n_id, float cost);
 
-path *astar_search(AStarSource *source, int s_id, int t_id, int k);
+path *astar_search(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used);
 
 void path_destroy(path *path);
 

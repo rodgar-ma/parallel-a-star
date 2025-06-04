@@ -50,6 +50,7 @@ int main(int argc, char const *argv[])
     int total_succeed = 0;
     int total_failed = 0;
 
+    double cpu_time_used;
     clock_t start = clock();
     while (keepRunning && fscanf(file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%f\n",
                   &entry.id, entry.filename, &entry.width, &entry.height,
@@ -84,7 +85,7 @@ int main(int argc, char const *argv[])
         int s_id = GetIdAtPos(MAP, entry.start_x, entry.start_y);
         int t_id = GetIdAtPos(MAP, entry.target_x, entry.target_y);
         
-        path *path = astar_search(&source, s_id, t_id, num_threads);
+        path *path = astar_search(&source, s_id, t_id, num_threads, &cpu_time_used);
 
         if (!path) {
             printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n",
@@ -101,7 +102,7 @@ int main(int argc, char const *argv[])
             printf("[Error] ");
             total_failed++;
         }
-        printf("Coste esperado: %.8f, Coste encontrado: %.8f\n", entry.cost, path->cost);
+        printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %lf ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
 
         path_destroy(path);
     }

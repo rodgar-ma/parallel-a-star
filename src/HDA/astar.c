@@ -114,7 +114,7 @@ node_t *dequeue(queue_t *q) {
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
+path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double *cpu_time_used) {
     node_t ***closed = malloc(k * sizeof(node_t**));
     heap_t **open = malloc(k * sizeof(heap_t*));
     queue_t **q = malloc(k * sizeof(queue_t*));
@@ -134,6 +134,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
     int steps = 0;
 
     omp_set_num_threads(k);
+
+    double start = omp_get_wtime();
 
     #pragma omp parallel shared(source, start_id, goal_id, k, closed, open, q, neighbors, found, closed_locks)
     {
@@ -199,6 +201,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k) {
             steps += step;
         }
     }
+
+    *cpu_time_used = omp_get_wtime() - start;
 
     printf("Steps: %d\n", steps);
 

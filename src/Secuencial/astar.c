@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <omp.h>
 #include "astar.h"
 #include "heap.h"
-#include "stdio.h"
 
 node_t *node_create(int id, float gCost, float fCost, int parent) {
     node_t *n = malloc(sizeof(node_t));
@@ -74,7 +75,7 @@ void closed_list_destroy(node_t **closed, int size) {
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
-path *astar_search(AStarSource *source, int start_id, int goal_id) {
+path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_time_used) {
     heap_t *open = heap_init();
     node_t **closed = malloc(source->max_size * sizeof(node_t*));
     neighbors_list *neighbors = neighbors_list_create();
@@ -84,11 +85,13 @@ path *astar_search(AStarSource *source, int start_id, int goal_id) {
 
     int steps = 0;
 
+    double start = omp_get_wtime();
     while(!heap_is_empty(open)) {
-        printf("Step: %d\n", ++steps);
+        // printf("Step: %d\n", ++steps);
+        steps++;
         node_t *current = heap_extract(open);
 
-        printf("Nodo actual %d\n", current->id);
+        // printf("Nodo actual %d\n", current->id);
 
         if (current->id == goal_id) break;
 
@@ -102,18 +105,20 @@ path *astar_search(AStarSource *source, int start_id, int goal_id) {
                     closed[n_id]->gCost = new_cost;
                     closed[n_id]->fCost = new_cost + source->heuristic(n_id, goal_id);
                     closed[n_id]->parent = current->id;
-                    printf("Actualiza nodo: %d con nuevo gCost = %f\n", n_id, new_cost);
+                    // printf("Actualiza nodo: %d con nuevo gCost = %f\n", n_id, new_cost);
                     if (closed[n_id]->is_open) heap_update(open, closed[n_id]);
                     else heap_insert(open, closed[n_id]);
                 }
-                printf("No actualiza nodo %d\n", n_id);
+                // printf("No actualiza nodo %d\n", n_id);
             } else {
-                printf("Nuevo nodo %d con gCost = %f y fCost = %f\n", n_id, new_cost, new_cost + source->heuristic(n_id, goal_id));
+                // printf("Nuevo nodo %d con gCost = %f y fCost = %f\n", n_id, new_cost, new_cost + source->heuristic(n_id, goal_id));
                 closed[n_id] = node_create(n_id,new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
                 heap_insert(open, closed[n_id]);
             }
         }
     }
+    
+    *cpu_time_used = omp_get_wtime() - start;
 
     printf("Steps: %d\n", steps);
 
