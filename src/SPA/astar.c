@@ -158,7 +158,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                         closed[n_id]->parent = current->id;
                         // printf("Actualiza nodo: %d con nuevo gCost = %f\n", n_id, new_cost);
                         omp_set_lock(&open->lock);
-                        heap_insert(open, closed[n_id]);
+                        if (closed[n_id]->is_open) heap_update(open, closed[n_id]);
+                        else heap_insert(open, closed[n_id]);
                         omp_unset_lock(&open->lock);
                     }
                     // printf("No actualiza nodo %d\n", n_id);

@@ -86,14 +86,10 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
     heap_insert(open, closed[start_id]);
 
-    int steps = 0;
-
     double start = omp_get_wtime();
 
     while(!heap_is_empty(open)) {
         // printf("Step: %d\n", ++steps);
-        
-        steps++;
 
         node_t *current; current = heap_extract(open);
 
@@ -125,8 +121,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     }
     
     *cpu_time_used = omp_get_wtime() - start;
-
-    printf("Steps: %d\n", steps);
 
     path *p = retrace_path(closed, goal_id);
     closed_list_destroy(closed, source->max_size);

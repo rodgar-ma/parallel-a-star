@@ -1,11 +1,5 @@
-#ifndef ASTAR_H
-#define ASTAR_H
-
-#include <stdlib.h>
-#include <omp.h>
-
-#define INIT_NEIGHBORS_LIST_CAPACITY 10
-#define INIT_QUEUE_CAPACITY 10
+#ifndef ASTAR_GPU_H
+#define ASTAR_GPU_H
 
 typedef struct node_t {
     int id;
@@ -29,23 +23,12 @@ typedef struct path {
     float cost;
 } path;
 
-typedef struct queue_t {
-    int size;
-    int capacity;
-    node_t **nodes;
-    omp_lock_t lock;
-} queue_t;
-
 typedef struct {
     int max_size;
     void (*get_neighbors)(neighbors_list *neighbors, int n_id);
     float (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
 
-void add_neighbor(neighbors_list *neighbors, int n_id, float cost);
-
-path *astar_search(AStarSource *source, int s_id, int t_id, int k, double *cpu_time_used);
-
-void path_destroy(path *path);
+path *find_path(AStarSource *source, int start_id, int target_id, double *time);
 
 #endif

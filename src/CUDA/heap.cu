@@ -1,25 +1,40 @@
 #include <stdlib.h>
 #include <limits.h>
-#include <string.h>
+#include <cuda.h>
 #include "heap.h"
 
-static inline void swap(heap_t *heap, int i, int j) {
+__device__ static inline void swap(heap_t *heap, int i, int j) {
     node_t *tmp = heap->nodes[i];
     heap->nodes[i] = heap->nodes[j];
     heap->nodes[j] = tmp;
 }
 
 heap_t *heap_init(void) {
-    heap_t *heap = malloc(sizeof(heap_t));
-    heap->size = 0;
-    heap->capacity = INIT_CAPACITY;
-    heap->nodes = malloc(INIT_CAPACITY * sizeof(node_t*));
-    return heap;
+    heap_t heap_cpu;
+    heap_t *heap_gpu;
+    heap_cpu.size = 0;
+    
+    return heap_gpu;
+}
+
+heap_t **heaps_init(int k) {
+    heap_t **heaps = malloc(k * sizeof(heap_t *));
+    for (int i = 0; i < k; i++) {
+        heaps[i] = heap_init();
+    }
+    return heaps;
 }
 
 void heap_destroy(heap_t *heap) {
     free(heap->nodes);
     free(heap);
+}
+
+void heaps_destroy(heap_t **heaps, int k) {
+    for (int i = 0; i < k; i++) {
+        heap_destroy(heaps[i]);
+    }
+    free(heaps);
 }
 
 void heap_insert(heap_t *heap, node_t *node) {

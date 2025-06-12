@@ -129,7 +129,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
     enqueue(queues[hash(start_id, k)], node_create(start_id, 0, source->heuristic(start_id, goal_id), -1));
 
     int found = 0;
-    int steps = 0;
 
     double start = omp_get_wtime();
 
@@ -139,9 +138,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
         neighbors_list *neighbors = neighbors_list_create();
         heap_t *open = heap_init();
 
-        int step = 0;
-
-        #pragma omp flush(found)
         while(!found) {
             node_t *msg;
             while((msg = dequeue(queues[tid])) != NULL) {
@@ -153,7 +149,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                         closed[msg->id]->gCost = msg->gCost;
                         closed[msg->id]->fCost = msg->fCost;
                         closed[msg->id]->parent = msg->parent;
-                        heap_insert(open, closed[msg->id]);
+                        if (closed[msg->id]->is_open) heap_update(open, closed[msg->id]);
+                        else heap_insert(open, closed[msg->id]);
                     }
                     free(msg);
                 } else {
@@ -165,8 +162,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
 
             node_t *current = heap_extract(open);
             if (current == NULL) continue;
-
-            step++;
             
             // #pragma omp critical
             // {
@@ -177,7 +172,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                 #pragma omp critical
                 {
                     found = 1;
-                    #pragma omp flush(found)
                 }
                 continue;
             }
@@ -196,16 +190,9 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
 
         neighbors_list_destroy(neighbors);
         heap_destroy(open);
-
-        #pragma omp critical
-        {
-            steps += step;
-        }
     }
 
     *cpu_time_used = omp_get_wtime() - start;
-
-    printf("Steps: %d\n", steps);
 
     path *p = retrace_path(closed, goal_id, k);
     closed_list_destroy(closed, source->max_size);

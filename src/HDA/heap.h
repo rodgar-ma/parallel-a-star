@@ -19,6 +19,8 @@ node_t *heap_extract(heap_t *heap);
 
 void heap_insert(heap_t *heap, node_t *n);
 
+void heap_update(heap_t *heap, node_t *node);
+
 int heap_is_empty(heap_t *heap);
 
 
