@@ -7,10 +7,9 @@ visited_list *visited_list_create(int capacity) {
     H->capacity = capacity;
     H->nodes = calloc(capacity, sizeof(node*));
     H->locks = calloc(capacity, sizeof(omp_lock_t));
-    // #pragma omp parallel for
-    //for (int i = 0; i < capacity; i++) {
-    //    omp_init_lock(&H->locks[i]);
-    //}
+    for (int i = 0; i < capacity; i++) {
+       omp_init_lock(&H->locks[i]);
+    }
     return H;
 }
 

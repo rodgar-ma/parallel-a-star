@@ -3,6 +3,7 @@
 #include <float.h>
 #include <omp.h>
 #include <time.h>
+#include <string.h>
 #include "astar.h"
 #include "priority_list.h"
 #include "MapUtils.h"
@@ -104,46 +105,38 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
     int steps = 0;
     int n_fallos = 0;
 
-    // double time_1, time_2, t1_1, t1_2, t2_1, t2_2;
-
-    //omp_set_num_threads(k);
+    omp_set_num_threads(k);
 
     double start = omp_get_wtime();
+
+    #pragma omp parallel
     while (Q[0]->size > 0)
     {
-        // list_clear(S);
+        int tid = omp_get_thread_num();
 
-        // t1_1 = omp_get_wtime();
+        if (tid == 0) {
+            list_clear(S);
+        }
 
-        // printf("STEP %d\n", steps);
-        //#pragma omp parallel for
-        // for (int i = 0; i < k; i++) {
-        node *q = priority_list_extract(Q[0]);
+        #pragma omp barrier
 
-            // Node n = GetNodeById(MAP, q->id);
-            // Node p;
-            // if (q->parent != NULL){
-            //     p = GetNodeById(MAP, q->parent->id);
-            //     printf("Thread: %d, (%d, %d)->(%d, %d), fCost = %f\n", omp_get_thread_num(), p->x, p->y, n->x, n->y, q->fCost);
-            // } else {
-            //     printf("Thread: %d, (%d, %d), fCost = %f\n", omp_get_thread_num(), n->x, n->y, q->fCost);
-            // }
+        node *q = priority_list_extract(Q[k]);
             
         if (q->id == t_id) {
             m = q;
-            break;
-                //#pragma omp critical
-                // {
-                //     if (m == NULL || q->fCost < m->fCost) {
-                //         m = q;
-                //     }
-                // }
-                // continue;
+            #pragma omp critical
+            {
+                if (m == NULL || q->fCost < m->fCost) {
+                    m = q;
+                }
             }
+            continue;
+        }
 
         neighbors[0]->count = 0;
         source->get_neighbors(neighbors[0], q->id);
-        // list_insert(S, i, neighbors[0], q);
+
+
 
         for(int j = 0; j < neighbors[0]->count; j++) {
             int neighborId = neighbors[0]->nodeIds[j];

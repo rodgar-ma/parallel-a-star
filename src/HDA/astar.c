@@ -43,22 +43,22 @@ int hash(int node, int k) {
     return (h >= 0 && h < k) ? h : 0;
 }
 
-path *retrace_path(node_t ** closed[], int target, int k) {
+path *retrace_path(node_t **closed, int target, int k) {
     path *p = malloc(sizeof(path));
     p->count = 0;
-    p->cost = closed[hash(target, k)][target]->gCost;
+    p->cost = closed[target]->gCost;
 
     int current = target;
-    while (closed[hash(current, k)][current]->parent != -1) {
+    while (closed[current]->parent != -1) {
         p->count++;
-        current = closed[hash(current, k)][current]->parent;
+        current = closed[current]->parent;
     }
 
     p->nodeIds = malloc(p->count * sizeof(int));
     current = target;
     for (int i = 0; i < p->count; i++) {
         p->nodeIds[p->count - i - 1] = current;
-        current = closed[hash(current, k)][current]->parent;
+        current = closed[current]->parent;
     }
     return p;
 }
@@ -115,57 +115,55 @@ node_t *dequeue(queue_t *q) {
 /**********************************************************************************************************/
 
 path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double *cpu_time_used) {
-    node_t ***closed = malloc(k * sizeof(node_t**));
-    heap_t **open = malloc(k * sizeof(heap_t*));
-    queue_t **q = malloc(k * sizeof(queue_t*));
-    neighbors_list **neighbors = malloc(k * sizeof(neighbors_list*));
-    omp_lock_t *closed_locks = malloc(k * sizeof(omp_lock_t));
+    node_t **closed = malloc(source->max_size * sizeof(node_t*));
+    #pragma omp parallel for
+    for (int i = 0; i < source->max_size; i++) {
+        closed[i] = NULL;
+    }
+
+    queue_t **queues = malloc(k * sizeof(queue_t*));
     for (int i = 0; i < k; i++) {
-        closed[i] = malloc(source->max_size * sizeof(node_t*));
-        open[i] = heap_init();
-        q[i] = queue_init();
-        neighbors[i] = neighbors_list_create();
-        omp_init_lock(&closed_locks[i]);
+        queues[i] = queue_init();
     }
     
-    enqueue(q[hash(start_id, k)], node_create(start_id, 0, source->heuristic(start_id, goal_id), -1));
+    enqueue(queues[hash(start_id, k)], node_create(start_id, 0, source->heuristic(start_id, goal_id), -1));
 
     int found = 0;
     int steps = 0;
 
-    omp_set_num_threads(k);
-
     double start = omp_get_wtime();
 
-    #pragma omp parallel shared(source, start_id, goal_id, k, closed, open, q, neighbors, found, closed_locks)
+    #pragma omp parallel num_threads(k)
     {
         int tid = omp_get_thread_num();
+        neighbors_list *neighbors = neighbors_list_create();
+        heap_t *open = heap_init();
+
         int step = 0;
+
         #pragma omp flush(found)
         while(!found) {
             node_t *msg;
-            while((msg = dequeue(q[tid])) != NULL) {
+            while((msg = dequeue(queues[tid])) != NULL) {
                 // printf("Hilo %d: Obtiene el nodo %d de la cola con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
-                omp_set_lock(&closed_locks[tid]);
-                if (closed[tid][msg->id]) {
-                    if (msg->gCost < closed[tid][msg->id]->gCost) {
+                if (closed[msg->id]) {
+                    if (msg->gCost < closed[msg->id]->gCost) {
                         // printf("Hilo %d: Actualizando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
-                        closed[tid][msg->id]->id = msg->id;
-                        closed[tid][msg->id]->gCost = msg->gCost;
-                        closed[tid][msg->id]->fCost = msg->fCost;
-                        closed[tid][msg->id]->parent = msg->parent;
-                        heap_insert(open[tid], closed[tid][msg->id]);
+                        closed[msg->id]->id = msg->id;
+                        closed[msg->id]->gCost = msg->gCost;
+                        closed[msg->id]->fCost = msg->fCost;
+                        closed[msg->id]->parent = msg->parent;
+                        heap_insert(open, closed[msg->id]);
                     }
                     free(msg);
                 } else {
                     // printf("Hilo %d: insertando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
-                    closed[tid][msg->id] = msg;
-                    heap_insert(open[tid], msg);
+                    closed[msg->id] = msg;
+                    heap_insert(open, msg);
                 }
-                omp_unset_lock(&closed_locks[tid]);
             }
 
-            node_t *current = heap_extract(open[tid]);
+            node_t *current = heap_extract(open);
             if (current == NULL) continue;
 
             step++;
@@ -184,17 +182,20 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                 continue;
             }
 
-            neighbors[tid]->count = 0;
-            source->get_neighbors(neighbors[tid], current->id);
+            neighbors->count = 0;
+            source->get_neighbors(neighbors, current->id);
 
-            for(int i = 0; i < neighbors[tid]->count; i++) {
-                int id = neighbors[tid]->nodeIds[i];
-                float new_cost = current->gCost + neighbors[tid]->costs[i];
+            for(int i = 0; i < neighbors->count; i++) {
+                int id = neighbors->nodeIds[i];
+                float new_cost = current->gCost + neighbors->costs[i];
                 // printf("Hilo %d envia nodo %d a hilo %d\n", tid, id, hash(id, k));
-                enqueue(q[hash(id, k)], node_create(id, new_cost, new_cost + source->heuristic(id, goal_id), current->id));
+                enqueue(queues[hash(id, k)], node_create(id, new_cost, new_cost + source->heuristic(id, goal_id), current->id));
             }
 
         }
+
+        neighbors_list_destroy(neighbors);
+        heap_destroy(open);
 
         #pragma omp critical
         {
@@ -207,17 +208,10 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
     printf("Steps: %d\n", steps);
 
     path *p = retrace_path(closed, goal_id, k);
+    closed_list_destroy(closed, source->max_size);
     for(int i = 0; i < k; i++) {
-        closed_list_destroy(closed[i], source->max_size);
-        heap_destroy(open[i]);
-        queue_destroy(q[i]);
-        neighbors_list_destroy(neighbors[i]);
-        omp_destroy_lock(&closed_locks[i]);
+        queue_destroy(queues[i]);
     }
-    free(closed);
-    free(open);
-    free(q);
-    free(neighbors);
-    free(closed_locks);
+    free(queues);
     return p;
 }

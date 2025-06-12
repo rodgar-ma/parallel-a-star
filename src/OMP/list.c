@@ -26,11 +26,3 @@ void list_clear(list *list) {
 	}
 }
 
-void list_insert(list *list, int id, neighbors_list *neighbors, node *parent) {
-	int index = MAX_NODE_EXPAND * id;
-	for(int i = 0; i < neighbors->count; i++) {
-		list->ids[index + i] = neighbors->nodeIds[i];
-		list->gCosts[index + i] = parent->gCost + neighbors->costs[i];
-		list->parents[index + i] = parent;
-	}
-}

@@ -16,11 +16,13 @@ heap_t *heap_init(void) {
     heap->size = 0;
     heap->capacity = INIT_CAPACITY;
     heap->nodes = malloc(INIT_CAPACITY * sizeof(node_t *));
+    omp_init_lock(&heap->lock);
     return heap;
 }
 
 void heap_destroy(heap_t *heap) {
     free(heap->nodes);
+    omp_destroy_lock(&heap->lock);
     free(heap);
 }
 
@@ -28,11 +30,9 @@ void heap_insert(heap_t *heap, node_t *node) {
     heap->size++;
     if (heap->size == heap->capacity) {
         heap->capacity *= 2;
-        heap->nodes = realloc(heap->nodes, heap->capacity * sizeof(node_t *));
+        heap->nodes = realloc(heap->nodes, heap->capacity * sizeof(node_t*));
     }
     heap->nodes[heap->size] = node;
-    node->is_open = 1;
-    node->open_index = heap->size;
     int current = heap->size;
     while (current > 1 && heap->nodes[current]->fCost < heap->nodes[current / 2]->fCost) {
         swap(heap, current, current / 2);
@@ -41,10 +41,9 @@ void heap_insert(heap_t *heap, node_t *node) {
 }
 
 node_t *heap_extract(heap_t *heap) {
+    if (heap->size == 0) return NULL;
     swap(heap, 1, heap->size);
     node_t *res = heap->nodes[heap->size--];
-    res->is_open = 0;
-    res->open_index = -1;
     int current = 1;
     while (current < heap->size) {
         int smallest = current;
@@ -63,14 +62,10 @@ node_t *heap_extract(heap_t *heap) {
     return res;
 }
 
-void heap_update(heap_t *heap, node_t *node) {
-    int position = node->open_index;
-    while(position > 1 && heap->nodes[position]->fCost < heap->nodes[position / 2]->fCost) {
-        swap(heap, position, position / 2);
-        position = position / 2;
-    }
-}
-
 int heap_is_empty(heap_t *heap) {
     return heap->size == 0;
+}
+
+float heap_min(heap_t *heap) {
+    return heap->size > 0 ? heap->nodes[1]->fCost : FLT_MAX;
 }
