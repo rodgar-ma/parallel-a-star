@@ -136,8 +136,6 @@ path *find_path_omp(AStarSource *source, int s_id, int t_id, int k, double *cpu_
         neighbors[0]->count = 0;
         source->get_neighbors(neighbors[0], q->id);
 
-
-
         for(int j = 0; j < neighbors[0]->count; j++) {
             int neighborId = neighbors[0]->nodeIds[j];
             double newCost = q->gCost + neighbors[0]->costs[j];

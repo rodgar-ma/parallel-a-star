@@ -1,8 +1,9 @@
-#ifndef ASTAR_GPU_H
-#define ASTAR_GPU_H
+#ifndef ASTAR_H
+#define ASTAR_H
 
 #include <stdlib.h>
-#include <cuda.h>
+
+#define INIT_NEIGHBORS_LIST_CAPACITY 10
 
 typedef struct node_t {
     int id;
@@ -26,15 +27,16 @@ typedef struct path {
     float cost;
 } path;
 
-typedef void(*get_neighbors)(neighbors_list *neighbors, int n_id);
-typedef float (*heuristic)(int n1_id, int n2_id);
-
 typedef struct {
     int max_size;
     void (*get_neighbors)(neighbors_list *neighbors, int n_id);
     float (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
 
-path *find_path(AStarSource *source, int start_id, int target_id, double *time);
+void add_neighbor(neighbors_list *neighbors, int n_id, float cost);
+
+path *astar_search(AStarSource *source, int s_id, int t_id, double *cpu_time_used);
+
+void path_destroy(path *path);
 
 #endif

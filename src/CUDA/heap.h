@@ -3,13 +3,13 @@
 
 #include "astar.h"
 
-#define INIT_CAPACITY 1000
+#define INIT_CAPACITY 16 * 1024
 
-typedef struct heap_t {
+struct heap_t {
     int size;
     int capacity;
     node_t **nodes;
-} heap_t;
+};
 
 heap_t *heap_init(void);
 
@@ -19,13 +19,13 @@ void heap_destroy(heap_t *heap);
 
 void heaps_destroy(heap_t **heaps, int k);
 
-node_t *heap_extract(heap_t *heap);
+__device__ node_t *heap_extract(heap_t *heap);
 
-void heap_insert(heap_t *heap, node_t *node);
+__device__ void heap_insert(heap_t *heap, node_t *node);
 
-void heap_update(heap_t *heap, node_t *node);
+__device__ void heap_update(heap_t *heap, node_t *node);
 
-int heap_is_empty(heap_t *heap);
+__device__ int heap_is_empty(heap_t *heap);
 
 
 #endif

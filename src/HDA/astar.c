@@ -130,6 +130,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
 
     int found = 0;
 
+    omp_set_num_threads(k);
+
     double start = omp_get_wtime();
 
     #pragma omp parallel num_threads(k)
@@ -137,14 +139,17 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
         int tid = omp_get_thread_num();
         neighbors_list *neighbors = neighbors_list_create();
         heap_t *open = heap_init();
-
+        int step = 0;
+        if (step == 1444) {
+            
+        }
         while(!found) {
             node_t *msg;
             while((msg = dequeue(queues[tid])) != NULL) {
-                // printf("Hilo %d: Obtiene el nodo %d de la cola con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
+                printf("Hilo %d: Obtiene el nodo %d de la cola con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                 if (closed[msg->id]) {
                     if (msg->gCost < closed[msg->id]->gCost) {
-                        // printf("Hilo %d: Actualizando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
+                        printf("Hilo %d: Actualizando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                         closed[msg->id]->id = msg->id;
                         closed[msg->id]->gCost = msg->gCost;
                         closed[msg->id]->fCost = msg->fCost;
@@ -154,7 +159,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                     }
                     free(msg);
                 } else {
-                    // printf("Hilo %d: insertando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
+                    printf("Hilo %d: insertando nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
                     closed[msg->id] = msg;
                     heap_insert(open, msg);
                 }
@@ -163,10 +168,10 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
             node_t *current = heap_extract(open);
             if (current == NULL) continue;
             
-            // #pragma omp critical
-            // {
-            //     printf("Hilo %d: nodo actual %d, step = %d\n", tid, current->id, ++step);
-            // }
+            #pragma omp critical
+            {
+                printf("Hilo %d: nodo actual %d, step = %d\n", tid, current->id, step++);
+            }
 
             if (current->id == goal_id) {
                 #pragma omp critical
@@ -182,7 +187,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
             for(int i = 0; i < neighbors->count; i++) {
                 int id = neighbors->nodeIds[i];
                 float new_cost = current->gCost + neighbors->costs[i];
-                // printf("Hilo %d envia nodo %d a hilo %d\n", tid, id, hash(id, k));
+                printf("Hilo %d envia nodo %d a hilo %d\n", tid, id, hash(id, k));
                 enqueue(queues[hash(id, k)], node_create(id, new_cost, new_cost + source->heuristic(id, goal_id), current->id));
             }
 

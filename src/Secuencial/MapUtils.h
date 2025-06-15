@@ -2,30 +2,31 @@
 #define MAP_UTILS_H
 
 #include "astar.h"
+#include "graph.h"
 
-typedef struct __Node *Node;
-typedef struct __Map *Map;
+// typedef struct __Node *Node;
+// typedef struct __Map *Map;
 
-struct __Node {
-    unsigned long id;
-    int x;
-    int y;
-};
+// struct __Node {
+//     unsigned long id;
+//     int x;
+//     int y;
+// };
 
-struct __Map {
-    int width;
-    int height;
-    Node** grid;
-};
+// struct __Map {
+//     int width;
+//     int height;
+//     Node** grid;
+// };
 
-extern Map MAP;
+// extern Map MAP;
 
-Map LoadMap(char *filename);
-void FreeMap(Map map);
+Graph *LoadMap(char *filename);
+void FreeMap(Graph *map);
 
-Node GetNodeById(Map map, int id);
-int ExistsNodeAtPos(Map map, int x, int y);
-int GetIdAtPos(Map map, int x, int y);
+Node GetNodeById(Graph *map, int id);
+int ExistsNodeAtPos(Graph *map, int x, int y);
+int GetIdAtPos(Graph *map, int x, int y);
 
 float ChevyshevHeuristic(int n1_id, int n2_id);
 float MahattanHeuristic(int n1_id, int n2_id);
