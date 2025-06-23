@@ -90,12 +90,15 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     
     double start = omp_get_wtime();
 
+    int steps = 0;
+
     while(!heap_is_empty(open)) {
         // printf("Step: %d\n", ++steps);
 
         current = heap_extract(open);
+        steps++;
 
-        // printf("Nodo actual: %d, fCost = %f\n", current->id, current->fCost);
+        printf("%d: Nodo actual: %d, fCost = %f\n", steps, current->id, current->fCost);
 
         if (current->id == goal_id) break;
 

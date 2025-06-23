@@ -15,7 +15,7 @@ heap_t *heap_init(void) {
     heap_t *heap = malloc(sizeof(heap_t));
     heap->size = 0;
     heap->capacity = INIT_CAPACITY;
-    heap->nodes = malloc(INIT_CAPACITY * sizeof(node_t *));
+    heap->nodes = malloc(heap->capacity * sizeof(node_t *));
     return heap;
 }
 
@@ -25,56 +25,86 @@ void heap_destroy(heap_t *heap) {
 }
 
 void heap_insert(heap_t *heap, node_t *node) {
-    heap->size++;
     if (heap->size == heap->capacity) {
         heap->capacity *= 2;
         heap->nodes = realloc(heap->nodes, heap->capacity * sizeof(node_t *));
     }
-    heap->nodes[heap->size] = node;
+
+    int pos = heap->size++;
+    heap->nodes[pos] = node;
     node->is_open = 1;
-    node->open_index = heap->size;
-    int current = heap->size;
-    while (current > 1 && heap->nodes[current]->fCost <= heap->nodes[current / 2]->fCost) {
-        swap(heap, current, current / 2);
-        current = current / 2;
+    node->open_index = pos;
+
+    // Bubble up
+    while (pos > 0) {
+        int parent = (pos - 1) / 2;
+        if (heap->nodes[pos]->fCost >= heap->nodes[parent]->fCost) break;
+        swap(heap, pos, parent);
+        pos = parent;
     }
 }
 
 node_t *heap_extract(heap_t *heap) {
     if (heap->size == 0) return NULL;
-    swap(heap, 1, heap->size);
-    node_t *res = heap->nodes[heap->size--];
-    res->is_open = 0;
-    res->open_index = -1;
-    int current = 1;
-    while (current < heap->size) {
-        int smallest = current;
-        int child = 2 * current;
-        if (child <= heap->size && heap->nodes[child]->fCost < heap->nodes[smallest]->fCost) {
-            smallest = child;
-        }
-        child = 2 * current + 1;
-        if (child <= heap->size && heap->nodes[child]->fCost < heap->nodes[smallest]->fCost) {
-            smallest = child;
-        }
-        if (current == smallest) break;
-        swap(heap, current, smallest);
-        current = smallest;
+
+    node_t *min = heap->nodes[0];
+    heap->size--;
+    heap->nodes[0] = heap->nodes[heap->size];
+    heap->nodes[0]->open_index = 0;
+
+    min->is_open = 0;
+    min->open_index = -1;
+
+    // Bubble down
+    int pos = 0;
+    while (1) {
+        int left = 2 * pos + 1;
+        int right = 2 * pos + 2;
+        int smallest = pos;
+
+        if (left < heap->size && heap->nodes[left]->fCost < heap->nodes[smallest]->fCost)
+            smallest = left;
+        if (right < heap->size && heap->nodes[right]->fCost < heap->nodes[smallest]->fCost)
+            smallest = right;
+
+        if (smallest == pos) break;
+        swap(heap, pos, smallest);
+        pos = smallest;
     }
-    return res;
+
+    return min;
 }
 
 void heap_update(heap_t *heap, node_t *node) {
-    int position = node->open_index;
-    while(position > 1 && heap->nodes[position]->fCost <= heap->nodes[position / 2]->fCost) {
-        swap(heap, position, position / 2);
-        position = position / 2;
+    int pos = node->open_index;
+
+    // Bubble up
+    while (pos > 0) {
+        int parent = (pos - 1) / 2;
+        if (heap->nodes[pos]->fCost >= heap->nodes[parent]->fCost) break;
+        swap(heap, pos, parent);
+        pos = parent;
+    }
+
+    // Bubble down
+    while (1) {
+        int left = 2 * pos + 1;
+        int right = 2 * pos + 2;
+        int smallest = pos;
+
+        if (left < heap->size && heap->nodes[left]->fCost < heap->nodes[smallest]->fCost)
+            smallest = left;
+        if (right < heap->size && heap->nodes[right]->fCost < heap->nodes[smallest]->fCost)
+            smallest = right;
+
+        if (smallest == pos) break;
+        swap(heap, pos, smallest);
+        pos = smallest;
     }
 }
 
 int heap_is_empty(heap_t *heap) {
-    int ret = heap->size;
-    return ret == 0;
+    return heap->size == 0;
 }
 
 float heap_min(heap_t *heap) {

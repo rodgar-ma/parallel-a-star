@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <omp.h>
+#include <float.h>
 #include "astar.h"
 #include "heap.h"
 
@@ -77,7 +78,24 @@ void closed_list_destroy(node_t **closed, int size) {
 /*                                            SPA* Algorithm                                              */
 /**********************************************************************************************************/
 
+int idle_threads = 0;
+int total_threads = 0;
+omp_lock_t idle_lock;
+
+int terminate_condition() {
+    int result = 0;
+    omp_set_lock(&idle_lock);
+    if (idle_threads >= total_threads) {
+        result = 1;
+    }
+    omp_unset_lock(&idle_lock);
+    return result;
+}
+
 path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double *cpu_time_used) {
+
+    omp_init_lock(&idle_lock);
+    total_threads = k;
 
     heap_t *open = heap_init();
     omp_lock_t open_lock;
@@ -91,42 +109,56 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
         omp_init_lock(&closed_locks[i]);
     }
     
-    closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
-    heap_insert(open, closed[start_id]);
-
     node_t *m = NULL;
     omp_lock_t m_lock;
     omp_init_lock(&m_lock);
 
-    int found = 0;
-
     double start = omp_get_wtime();
 
-    #pragma omp parallel num_threads(k) 
-    {
-        neighbors_list *neighbors = neighbors_list_create();
-        // int tid = omp_get_thread_num();
-        while(!found) {
+    closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
+    heap_insert(open, closed[start_id]);
 
+    #pragma omp parallel num_threads(total_threads) shared(open, closed)
+    {
+        int steps = 0;
+        neighbors_list *neighbors = neighbors_list_create();
+
+        int tid = omp_get_thread_num();
+        while(!terminate_condition()) {
+
+            omp_set_lock(&open_lock);
             if (heap_is_empty(open) || (m != NULL && heap_min(open) >= m->fCost)) {
-                continue;
+                omp_unset_lock(&open_lock);
+
+                omp_set_lock(&idle_lock);
+                idle_threads++;
+                omp_unset_lock(&idle_lock);
+
+                while (!terminate_condition()) {
+                    #pragma omp flush
+                }
+                break;
             }
             
-            omp_set_lock(&open_lock);
             node_t *current = heap_extract(open);
             omp_unset_lock(&open_lock);
+
             if (current == NULL) continue;
 
-            // printf("Hilo %d, nodo actual: %d, fCost = %f\n", tid, current->id, current->fCost);
+            omp_set_lock(&idle_lock);
+            if (idle_threads > 0) idle_threads--;
+            omp_unset_lock(&idle_lock);
+
+            printf("Hilo %d, step %d, nodo actual: %d, fCost = %f\n", tid, steps++, current->id, current->fCost);
             
             if (current->id == goal_id) {
+                int cost = current->gCost;
                 omp_set_lock(&m_lock);
-                if (m == NULL || current->fCost < m->fCost) {
+                if (m == NULL || cost < m->fCost) {
                     m = current;
-                    found = 1;
                 }
                 omp_unset_lock(&m_lock);
-                break;
+                continue;
             }
 
             neighbors->count = 0;
@@ -135,7 +167,6 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
             for(int i = 0; i < neighbors->count; i++) {
                 int n_id = neighbors->nodeIds[i];
                 float new_cost = closed[current->id]->gCost + neighbors->costs[i];
-                omp_set_lock(&closed_locks[n_id]);
                 if (closed[n_id]) {
                     if (new_cost < closed[n_id]->gCost) {
                         closed[n_id]->gCost = new_cost;
@@ -155,25 +186,35 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double
                     // printf("No actualiza nodo %d\n", n_id);
                 } else {
                     // printf("Nuevo nodo %d con gCost = %f y fCost = %f\n", n_id, new_cost, new_cost + source->heuristic(n_id, goal_id));
-                    closed[n_id] = node_create(n_id,new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
+                    closed[n_id] = node_create(n_id, new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
                     omp_set_lock(&open_lock);
                     heap_insert(open, closed[n_id]);
                     omp_unset_lock(&open_lock);
+                    
                 }
-                omp_unset_lock(&closed_locks[n_id]);
             }
         }
 
         neighbors_list_destroy(neighbors);
     }
 
-    #pragma omp barrier
-    
     *cpu_time_used = omp_get_wtime() - start;
     
     path *p = retrace_path(closed, goal_id);
+    
     closed_list_destroy(closed, source->max_size);
+    for (int i = 0; i < source->max_size; i++) {
+        omp_destroy_lock(&closed_locks[i]);
+    }
+    free(closed_locks);
+
+    printf("Ok!");
+
     heap_destroy(open);
+    omp_destroy_lock(&open_lock);
     omp_destroy_lock(&m_lock);
+
+    printf("Ok!");
+
     return p;
 }

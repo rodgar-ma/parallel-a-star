@@ -34,7 +34,7 @@ void heap_insert(heap_t *heap, node_t *node) {
     node->is_open = 1;
     node->open_index = heap->size;
     int current = heap->size;
-    while (current > 1 && heap->nodes[current]->fCost <= heap->nodes[current / 2]->fCost) {
+    while (current > 1 && heap->nodes[current]->fCost < heap->nodes[current / 2]->fCost) {
         swap(heap, current, current / 2);
         current = current / 2;
     }
@@ -66,7 +66,7 @@ node_t *heap_extract(heap_t *heap) {
 
 void heap_update(heap_t *heap, node_t *node) {
     int position = node->open_index;
-    while(position > 1 && heap->nodes[position]->fCost <= heap->nodes[position / 2]->fCost) {
+    while(position > 1 && heap->nodes[position]->fCost < heap->nodes[position / 2]->fCost) {
         swap(heap, position, position / 2);
         position = position / 2;
     }
