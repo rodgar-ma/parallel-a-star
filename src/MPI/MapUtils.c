@@ -4,6 +4,7 @@
 #include <math.h>
 #include "MapUtils.h"
 #include "astar.h"
+#include <omp.h>
 
 // Carga el mapa del fichero `filename`.
 Map LoadMap(char *filename) {
@@ -71,10 +72,11 @@ Map LoadMap(char *filename) {
 
 // Devuelve el `Node` en `map` correspondiente al `id`.
 Node GetNodeById(Map map, int id) {
+    if (!map || id < 0 || id >= map->width * map->height) return NULL;
     int y = id / map->width;
     int x = id % map->width;
-    if (map->grid[y][x] == NULL) return NULL;
-    else return map->grid[y][x];
+    if (x < 0 || x >= map->width || y < 0 || y >= map->height) return NULL;
+    return map->grid[y][x];
 }
 
 // Devuelve `true` si hay un nodo en `map` con coordenadas `x` e `y`.
@@ -112,7 +114,7 @@ float ChevyshevHeuristic(int n1_id, int n2_id) {
 }
 
 // Manhattan Heuristic.
-float ManhattanHeuristic(int n1_id, int n2_id) {
+float MahattanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
@@ -141,6 +143,11 @@ float EuclideanHeuristic(int n1_id, int n2_id) {
 // Get Neighbors
 void GetNeighbors(neighbors_list *neighbors, int n_id) {
     Node node = GetNodeById(MAP, n_id);
+
+    if (node == NULL) {
+	printf("Error en GetNeighbors\n");
+        return;
+    }
 
     // Movimientos ortogonales (coste 1)
     int dx[] = {-1, 1, 0, 0};

@@ -86,14 +86,16 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
     heap_insert(open, closed[start_id]);
 
+    node_t *current = NULL;
+    
     double start = omp_get_wtime();
 
     while(!heap_is_empty(open)) {
         // printf("Step: %d\n", ++steps);
 
-        node_t *current; current = heap_extract(open);
+        current = heap_extract(open);
 
-        // printf("Nodo actual %d\n", current->id);
+        // printf("Nodo actual: %d, fCost = %f\n", current->id, current->fCost);
 
         if (current->id == goal_id) break;
 
@@ -107,14 +109,11 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
                     closed[n_id]->gCost = new_cost;
                     closed[n_id]->fCost = new_cost + source->heuristic(n_id, goal_id);
                     closed[n_id]->parent = current->id;
-                    // printf("Actualiza nodo: %d con nuevo gCost = %f\n", n_id, new_cost);
                     if (closed[n_id]->is_open) heap_update(open, closed[n_id]);
                     else heap_insert(open, closed[n_id]);
                 }
-                // printf("No actualiza nodo %d\n", n_id);
             } else {
-                // printf("Nuevo nodo %d con gCost = %f y fCost = %f\n", n_id, new_cost, new_cost + source->heuristic(n_id, goal_id));
-                closed[n_id] = node_create(n_id,new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
+                closed[n_id] = node_create(n_id, new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
                 heap_insert(open, closed[n_id]);
             }
         }
@@ -122,7 +121,12 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     
     *cpu_time_used = omp_get_wtime() - start;
 
-    path *p = retrace_path(closed, goal_id);
+    path *p = NULL;
+    if (current->id != goal_id) {
+        printf("No se encontro el camino\n");
+    } else {
+        p = retrace_path(closed, goal_id);
+    }
     closed_list_destroy(closed, source->max_size);
     heap_destroy(open);
     neighbors_list_destroy(neighbors);

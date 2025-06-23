@@ -20,6 +20,8 @@ struct __Map {
 
 extern Map MAP;
 
+extern char MAP_SCEN_FILENAME[256];
+
 Map LoadMap(char *filename);
 void FreeMap(Map map);
 
@@ -28,7 +30,7 @@ int ExistsNodeAtPos(Map map, int x, int y);
 int GetIdAtPos(Map map, int x, int y);
 
 float ChevyshevHeuristic(int n1_id, int n2_id);
-float ManhattanHeuristic(int n1_id, int n2_id);
+float MahattanHeuristic(int n1_id, int n2_id);
 float DiagonalHeuristic(int n1_id, int n2_id);
 
 void GetNeighbors8Tiles(neighbors_list *neighbors, int n_id);
