@@ -29,10 +29,16 @@ typedef struct path {
     float cost;
 } path;
 
-typedef struct queue_t {
+typedef struct {
+    int node_id;
+    int parent_id;
+    float gCost;
+} queue_elem_t;
+
+typedef struct {
     int size;
     int capacity;
-    node_t **nodes;
+    queue_elem_t *elems;
     omp_lock_t lock;
 } queue_t;
 

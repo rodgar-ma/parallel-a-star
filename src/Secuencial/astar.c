@@ -98,7 +98,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
         current = heap_extract(open);
         steps++;
 
-        printf("%d: Nodo actual: %d, fCost = %f\n", steps, current->id, current->fCost);
+        // printf("%d: Nodo actual: %d, fCost = %f\n", steps, current->id, current->fCost);
 
         if (current->id == goal_id) break;
 
@@ -123,6 +123,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     }
     
     *cpu_time_used = omp_get_wtime() - start;
+
+    printf("Total de explansiones: %d\n", steps);
 
     path *p = NULL;
     if (current->id != goal_id) {

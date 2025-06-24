@@ -8,7 +8,7 @@
 // Carga el mapa del fichero `filename`.
 Map LoadMap(char *filename) {
 
-    printf("Abriendo: %s\n", filename);
+    // printf("Abriendo: %s\n", filename);
     FILE *file = fopen(filename, "r");
 
     if (!file) {

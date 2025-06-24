@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <float.h>
 #include <string.h>
+#include <stdio.h>
 #include "heap.h"
 
 static inline void swap(heap_t *heap, int i, int j) {
@@ -49,29 +50,33 @@ node_t *heap_extract(heap_t *heap) {
 
     node_t *min = heap->nodes[0];
     heap->size--;
-    heap->nodes[0] = heap->nodes[heap->size];
-    heap->nodes[0]->open_index = 0;
+
+    if (heap->size > 0) {
+        heap->nodes[0] = heap->nodes[heap->size];
+        heap->nodes[0]->open_index = 0;
+
+        // Bubble down
+        int pos = 0;
+        int steps = 0;
+        while (1) {
+            steps++;
+            int left = 2 * pos + 1;
+            int right = 2 * pos + 2;
+            int smallest = pos;
+
+            if (left < heap->size && heap->nodes[left]->fCost < heap->nodes[smallest]->fCost)
+                smallest = left;
+            if (right < heap->size && heap->nodes[right]->fCost < heap->nodes[smallest]->fCost)
+                smallest = right;
+
+            if (smallest == pos) break;
+            swap(heap, pos, smallest);
+            pos = smallest;
+        }
+    }
 
     min->is_open = 0;
     min->open_index = -1;
-
-    // Bubble down
-    int pos = 0;
-    while (1) {
-        int left = 2 * pos + 1;
-        int right = 2 * pos + 2;
-        int smallest = pos;
-
-        if (left < heap->size && heap->nodes[left]->fCost < heap->nodes[smallest]->fCost)
-            smallest = left;
-        if (right < heap->size && heap->nodes[right]->fCost < heap->nodes[smallest]->fCost)
-            smallest = right;
-
-        if (smallest == pos) break;
-        swap(heap, pos, smallest);
-        pos = smallest;
-    }
-
     return min;
 }
 
@@ -85,12 +90,18 @@ void heap_update(heap_t *heap, node_t *node) {
         swap(heap, pos, parent);
         pos = parent;
     }
-
+    
+    int steps = 0;
     // Bubble down
     while (1) {
+        steps++;
         int left = 2 * pos + 1;
         int right = 2 * pos + 2;
         int smallest = pos;
+
+        if (left == -1) {
+            printf("\n");
+        }
 
         if (left < heap->size && heap->nodes[left]->fCost < heap->nodes[smallest]->fCost)
             smallest = left;
@@ -108,5 +119,7 @@ int heap_is_empty(heap_t *heap) {
 }
 
 float heap_min(heap_t *heap) {
-    return heap->size > 0 ? heap->nodes[1]->fCost : FLT_MAX;
+    if (heap == NULL || heap->size < 0 || heap->nodes == NULL || heap->nodes[0] == NULL)
+        return FLT_MAX;
+    return heap->nodes[0]->fCost;
 }

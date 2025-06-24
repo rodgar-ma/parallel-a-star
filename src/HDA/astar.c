@@ -2,6 +2,7 @@
 #include "heap.h"
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 
 node_t *node_create(int id, float gCost, float fCost, int parent) {
     node_t *n = malloc(sizeof(node_t));
@@ -42,7 +43,7 @@ static inline int hash(int node, int k) {
     return node % k;
 }
 
-path *retrace_path(node_t **closed, int target, int k) {
+path *retrace_path(node_t **closed, int target) {
     path *p = malloc(sizeof(path));
     p->count = 0;
     p->cost = closed[target]->gCost;
@@ -78,165 +79,180 @@ queue_t *queue_init(void) {
     queue_t *q = malloc(sizeof(queue_t));
     q->size = 0;
     q->capacity = INIT_QUEUE_CAPACITY;
-    q->nodes = malloc(q->capacity * sizeof(node_t*));
+    q->elems = malloc(q->capacity * sizeof(queue_elem_t));
     omp_init_lock(&q->lock);
     return q;
 }
 
 void queue_destroy(queue_t *q) {
     omp_destroy_lock(&q->lock);
-    free(q->nodes);
+    free(q->elems);
     free(q);
 }
 
-void enqueue(queue_t *q, node_t *n) {
-    omp_set_lock(&q->lock);
+void enqueue(queue_t *q, queue_elem_t elem) {
     if (q->size == q->capacity) {
         q->capacity *= 2;
-        q->nodes = realloc(q->nodes, q->capacity * sizeof(node_t*));
+        q->elems = realloc(q->elems, q->capacity * sizeof(node_t*));
     }
-    q->nodes[q->size++] = n;
-    omp_unset_lock(&q->lock);
+    q->elems[q->size].node_id = elem.node_id;
+    q->elems[q->size].gCost = elem.gCost;
+    q->elems[q->size].parent_id = elem.parent_id;
+    q->size++;
 }
 
-node_t *dequeue(queue_t *q) {
-    node_t *res = NULL;
-    omp_set_lock(&q->lock);
+queue_elem_t dequeue(queue_t *q) {
     if (q->size > 0) {
-        res = q->nodes[--q->size];
+        return q->elems[--q->size];
     }
-    omp_unset_lock(&q->lock);
-    return res;
+    return (queue_elem_t){.node_id = -1, .gCost = -1, .parent_id = -1};
 }
-
-int *found;
-
-int termination(int k) {
-    for (int i = 0; i < k; i++) {
-        if (found[i] == 0) return 0;
-    }
-    return 1;
-}
-
 
 /**********************************************************************************************************/
 /*                                              A* Algorithm                                              */
 /**********************************************************************************************************/
 
+inline int hasterminated(int *terminate, int k) {
+    for (int i = 0; i < k; ++i) {
+        if (terminate[i] == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 path *astar_search(AStarSource *source, int start_id, int goal_id, int k, double *cpu_time_used) {
     node_t **closed = malloc(source->max_size * sizeof(node_t*));
-    heap_t **open = heaps_init(k);
-
     queue_t **queues = malloc(k * sizeof(queue_t*));
-    neighbors_list **neighbors_lists = malloc(k * sizeof(neighbors_list*));
+    int *terminate = malloc(k * sizeof(int));
+    node_t *m = NULL;
+    // float incumbent = FLT_MAX;
     for (int i = 0; i < k; i++) {
         queues[i] = queue_init();
-        neighbors_lists[i] = neighbors_list_create();
+        terminate[i] = 0;
     }
     
     closed[start_id] = node_create(start_id, 0, source->heuristic(start_id, goal_id), -1);
-    source->get_neighbors(neighbors_lists[0], start_id);
-    for (int i = 0; i < neighbors_lists[0]->count; i++) {
-        int n_id = neighbors_lists[0]->nodeIds[i];
-        float new_cost = neighbors_lists[0]->costs[i] + source->heuristic(start_id, n_id);
-        enqueue(queues[hash(n_id, k)], node_create(n_id, new_cost, new_cost + source->heuristic(start_id, goal_id), start_id));
+
+    if (start_id == goal_id) {
+        path *p = retrace_path(closed, start_id);
+        return p;
     }
 
-    found = malloc(k * sizeof(int));
-    for (int i = 0; i < k; i++) {
-        found[i] = 0;
+    neighbors_list *neighbors = neighbors_list_create();
+    source->get_neighbors(neighbors, start_id);
+    for (int i = 0; i < neighbors->count; i++) {
+        int n_id = neighbors->nodeIds[i];
+        float new_cost = neighbors->costs[i] + source->heuristic(start_id, n_id);
+        enqueue(queues[hash(n_id, k)], (queue_elem_t){.node_id = n_id, .gCost = new_cost, .parent_id = start_id});
     }
-
-    node_t *m = NULL;
-    omp_lock_t m_lock;
-    omp_init_lock(&m_lock);
-
-    omp_set_num_threads(k);
+    neighbors_list_destroy(neighbors);
 
     double start = omp_get_wtime();
+    int income_threshold = 10;
 
-    #pragma omp parallel num_threads(k)
+    #pragma omp parallel if(k>1) num_threads(k)
     {
         int tid = omp_get_thread_num();
+        heap_t *open = heap_init();
+        queue_elem_t *outgobuffer = malloc(INIT_NEIGHBORS_LIST_CAPACITY * sizeof(queue_elem_t));
+        int buffer_max_size = INIT_NEIGHBORS_LIST_CAPACITY;
+        int buffer_size = 0;
+        queue_elem_t *buffer = malloc(buffer_size * sizeof(queue_elem_t));
 
-        while(!termination(k)) {
-            node_t *msg;
-            while((msg = dequeue(queues[tid])) != NULL) {
-                // printf("Hilo %d: Recibe el nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
-                if (closed[msg->id]) {
-                    if (msg->gCost < closed[msg->id]->gCost) {
-                        // printf("Hilo %d: Actualiza nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
-                        closed[msg->id]->gCost = msg->gCost;
-                        closed[msg->id]->fCost = msg->fCost;
-                        closed[msg->id]->parent = msg->parent;
-                        if (closed[msg->id]->is_open) heap_update(open[tid], closed[msg->id]);
-                        else heap_insert(open[tid], closed[msg->id]);
+        while(1) {
+            queue_elem_t msg;
+
+            // omp_set_lock(&queues[tid]->lock);
+
+            if (queues[tid]->size > 0) {
+                terminate[tid] = 0;
+                if (queues[tid]->size > income_threshold) {
+                    omp_set_lock(&queues[tid]->lock);
+                    buffer_size = queues[tid]->size;
+                    if (buffer_max_size < buffer_size) {
+                        buffer_max_size = buffer_size;
+                        buffer = realloc(buffer, buffer_size * sizeof(queue_elem_t));
                     }
-                    free(msg);
+                    memcpy(buffer, queues[tid]->elems, buffer_size * sizeof(queue_elem_t));
+                    omp_unset_lock(&queues[tid]->lock);
+                } else if (omp_test_lock(&queues[tid]->lock)) {
+                    buffer_size = queues[tid]->size;
+                    if (buffer_max_size < buffer_size) {
+                        buffer_max_size = buffer_size;
+                        buffer = realloc(buffer, buffer_size * sizeof(queue_elem_t));
+                    }
+                    memcpy(buffer, queues[tid]->elems, buffer_size * sizeof(queue_elem_t));
+                    omp_unset_lock(&queues[tid]->lock);
+                }
+            }
+                
+            for (int i = 0; i < buffer_size; i++) {
+                queue_elem_t msg = buffer[i];
+                if (closed[msg.node_id]) {
+                    if (msg.gCost < closed[msg.node_id]->gCost) {
+                        // printf("Hilo %d: Actualiza nodo %d con gCost %.2f y fCost %.2f\n", tid, msg->id, msg->gCost, msg->fCost);
+                        closed[msg.node_id]->gCost = msg.gCost;
+                        closed[msg.node_id]->fCost = source->heuristic(msg.node_id, goal_id);
+                        closed[msg.node_id]->parent = msg.parent_id;
+                        if (closed[msg.node_id]->is_open) heap_update(open, closed[msg.node_id]);
+                        else heap_insert(open, closed[msg.node_id]);
+                    }
                 } else {
-                    // printf("Hilo %d: Nodo %d es nuevo\n", tid, msg->id);
-                    closed[msg->id] = msg;
-                    heap_insert(open[tid], msg);
+                    // printf("Hilo %d: Nodo %d es nuevo\n", tid, msg.node_id);
+                    closed[msg.node_id] = node_create(msg.node_id, msg.gCost, source->heuristic(msg.node_id, goal_id), msg.parent_id);
+                    closed[msg.node_id]->is_open = 1;
+                    heap_insert(open, closed[msg.node_id]);
                 }
             }
 
-            if ((m != NULL && heap_min(open[tid]) >= m->fCost)) {
-                found[tid] = 1;
+            if (heap_is_empty(open) || (m != NULL && heap_min(open) < m->fCost)) {
+                terminate[tid] = 1;
+                if (hasterminated(terminate, k)) {
+                    break;
+                }
                 continue;
             }
-
-            node_t *current = heap_extract(open[tid]);
-            if (current == NULL) continue;
-
-            // printf("Nodo actual: %d, fCost = %f\n", current->id, current->fCost);
+            
+            node_t *current = heap_extract(open);
 
             if (current->id == goal_id) {
-                omp_set_lock(&m_lock);
-                if (m == NULL || current->fCost < m->fCost) {
-                    m = current;
+                #pragma omp critical
+                {
+                    if (current->fCost < m->fCost) {
+                        m = current;
+                    }
                 }
-                omp_unset_lock(&m_lock);
-                continue;
             }
 
-            neighbors_lists[tid]->count = 0;
-            source->get_neighbors(neighbors_lists[tid], current->id);
+            neighbors->count = 0;
+            source->get_neighbors(neighbors, current->id);
 
-            for(int i = 0; i < neighbors_lists[tid]->count; i++) {
-                int n_id = neighbors_lists[tid]->nodeIds[i];
-                float new_cost = current->gCost + neighbors_lists[tid]->costs[i];
+            for (int i = 0; i < neighbors->count; i++) {
+                int n_id = neighbors->nodeIds[i];
+                float new_cost = neighbors->costs[i];
                 int owner = hash(n_id, k);
+
                 if (owner == tid) {
-                    if (closed[n_id]) {
-                        if (new_cost < closed[n_id]->gCost) {
-                            closed[n_id]->gCost = new_cost;
-                            closed[n_id]->fCost = new_cost + source->heuristic(n_id, goal_id);
-                            closed[n_id]->parent = current->id;
-                            if (closed[n_id]->is_open) heap_update(open[tid], closed[n_id]);
-                            else heap_insert(open[tid], closed[n_id]);
-                        }
-                    } else {
-                        closed[n_id] = node_create(n_id, new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
-                        heap_insert(open[tid], closed[n_id]);
-                    }
-                } else {
-                    enqueue(queues[owner], node_create(n_id, new_cost, new_cost + source->heuristic(n_id, goal_id), current->id));
+                    
                 }
             }
 
         }
+
+        heap_destroy(open);
+        neighbors_list_destroy(neighbors);
+        free(outgobuffer);
+        free(buffer);
     }
 
     *cpu_time_used = omp_get_wtime() - start;
 
-    path *p = retrace_path(closed, goal_id, k);
+    path *p = retrace_path(closed, m->id);
     closed_list_destroy(closed, source->max_size);
-    heaps_destroy(open, k);
     for(int i = 0; i < k; i++) {
         queue_destroy(queues[i]);
-        neighbors_list_destroy(neighbors_lists[i]);
     }
     free(queues);
-    free(neighbors_lists);
     return p;
 }
