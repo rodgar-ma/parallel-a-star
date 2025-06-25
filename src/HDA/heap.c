@@ -22,8 +22,8 @@ heap_t **heaps_init(int k) {
 heap_t *heap_init(void) {
     heap_t *heap = malloc(sizeof(heap_t));
     heap->size = 0;
-    heap->capacity = INIT_CAPACITY;
-    heap->nodes = malloc(INIT_CAPACITY * sizeof(node_t *));
+    heap->capacity = INIT_HEAP_CAPACITY;
+    heap->nodes = malloc(INIT_HEAP_CAPACITY * sizeof(node_t *));
     return heap;
 }
 

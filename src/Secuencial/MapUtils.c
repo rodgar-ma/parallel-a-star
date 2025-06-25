@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 #include <math.h>
 #include "MapUtils.h"
 #include "astar.h"
 
+
 // Carga el mapa del fichero `filename`.
-Map LoadMap(char *filename) {
+Map *LoadMap(char *filename) {
 
     // printf("Abriendo: %s\n", filename);
     FILE *file = fopen(filename, "r");
@@ -43,19 +45,23 @@ Map LoadMap(char *filename) {
     }
 
     // Reservar memoria para el mapa
-    Map map = malloc(sizeof(struct __Map));
+    Map *map = malloc(sizeof(Map));
     map->width = width;
     map->height = height;
-    map->grid = calloc(height, sizeof(Node **));
+    map->grid = calloc(height, sizeof(Node**));
+
+    char *line_buffer = malloc(width + 2);
 
     // Leer el mapa
     for (int y = 0; y < height; y++) {
-        fgets(buffer, sizeof(buffer), file);
-        buffer[strcspn(buffer, "\r\n")] = 0;
-        map->grid[y] = calloc(width, sizeof(Node *));
+        fgets(line_buffer, width + 2, file);
+        map->grid[y] = calloc(width, sizeof(Node*));
         for (int x = 0; x < width; x++) {
-            if (buffer[x] == '.') {
-                map->grid[y][x] = malloc(sizeof(struct __Node));
+            if (x == 1 && y == 3) {
+                printf("\n");
+            }
+            if (line_buffer[x] == '.') {
+                map->grid[y][x] = malloc(sizeof(Node));
                 map->grid[y][x]->x = x;
                 map->grid[y][x]->y = y;
                 map->grid[y][x]->id = y*map->width + x;
@@ -64,35 +70,34 @@ Map LoadMap(char *filename) {
             }
         }
     }
+    free(line_buffer);
 
     // Cierra el fichero
     fclose(file);
-    MAP = map;
     return map;
 }
 
 // Devuelve el `Node` en `map` correspondiente al `id`.
-Node GetNodeById(Map map, int id) {
+Node *GetNodeById(Map *map, int id) {
     int y = id / map->width;
     int x = id % map->width;
-    if (map->grid[y][x] == NULL) return NULL;
-    else return map->grid[y][x];
+    return map->grid[y][x];
 }
 
 // Devuelve `true` si hay un nodo en `map` con coordenadas `x` e `y`.
 // Devuelve `false` en caso contrario.
-int ExistsNodeAtPos(Map map, int x, int y) {
+int ExistsNodeAtPos(Map *map, int x, int y) {
     if (x < 0 || x >= map->width || y < 0 || y >= map->height) return 0;
     return map->grid[y][x] != NULL;
 }
 
 // Devuelve el id del nodo en `map` con coordenadas `x` e `y`.
-int GetIdAtPos(Map map, int x, int y) {
+int GetIdAtPos(Map *map, int x, int y) {
     return map->grid[y][x]->id;
 }
 
 // Libera `map`.
-void FreeMap(Map map) {
+void FreeMap(Map *map) {
     for (int y = 0; y < map->height; y++) {
         for (int x = 0; x < map->width; x++) {
             if (map->grid[y][x]) free(map->grid[y][x]);
@@ -105,8 +110,12 @@ void FreeMap(Map map) {
 
 // Chevyshev Heuristic.
 float ChevyshevHeuristic(int n1_id, int n2_id) {
-    Node n1 = GetNodeById(MAP, n1_id);
-    Node n2 = GetNodeById(MAP, n2_id);
+    Node *n1 = GetNodeById(MAP, n1_id);
+    Node *n2 = GetNodeById(MAP, n2_id);
+    if (n1 == NULL || n2 == NULL) {
+        perror("Error al obtener los nodos");
+        return FLT_MAX;
+    }
     float distX = abs(n2->x - n1->x);
     float distY = abs(n2->y - n1->y);
     if (distX > distY) return distX;
@@ -115,15 +124,23 @@ float ChevyshevHeuristic(int n1_id, int n2_id) {
 
 // Manhattan Heuristic.
 float ManhattanHeuristic(int n1_id, int n2_id) {
-    Node n1 = GetNodeById(MAP, n1_id);
-    Node n2 = GetNodeById(MAP, n2_id);
+    Node *n1 = GetNodeById(MAP, n1_id);
+    Node *n2 = GetNodeById(MAP, n2_id);
+    if (n1 == NULL || n2 == NULL) {
+        perror("Error al obtener los nodos");
+        return FLT_MAX;
+    }
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
 }
 
 // Diagonal Heuristic
 float DiagonalHeuristic(int n1_id, int n2_id) {
-    Node n1 = GetNodeById(MAP, n1_id);
-    Node n2 = GetNodeById(MAP, n2_id);
+    Node *n1 = GetNodeById(MAP, n1_id);
+    Node *n2 = GetNodeById(MAP, n2_id);
+    if (n1 == NULL || n2 == NULL) {
+        perror("Error al obtener los nodos");
+        return FLT_MAX;
+    }
     float dx = abs(n2->x - n1->x);
     float dy = abs(n2->y - n1->y);
     return dx + dy + (sqrt(2) - 2.0) * fmin(dx, dy); 

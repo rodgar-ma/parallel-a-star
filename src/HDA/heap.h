@@ -3,7 +3,7 @@
 
 #include "astar.h"
 
-#define INIT_CAPACITY 1000
+#define INIT_HEAP_CAPACITY 1000
 
 typedef struct heap_t {
     int size;

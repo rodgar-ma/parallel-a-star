@@ -4,10 +4,11 @@
 #include <math.h>
 #include "MapUtils.h"
 #include "astar.h"
-#include <omp.h>
 
 // Carga el mapa del fichero `filename`.
 Map LoadMap(char *filename) {
+
+    // printf("Abriendo: %s\n", filename);
     FILE *file = fopen(filename, "r");
 
     if (!file) {
@@ -47,13 +48,14 @@ Map LoadMap(char *filename) {
     map->height = height;
     map->grid = calloc(height, sizeof(Node **));
 
+    char *line_buffer = malloc(width + 2);
+
     // Leer el mapa
     for (int y = 0; y < height; y++) {
-        fgets(buffer, sizeof(buffer), file);
-        buffer[strcspn(buffer, "\r\n")] = 0;
+        fgets(line_buffer, width + 2, file);
         map->grid[y] = calloc(width, sizeof(Node *));
         for (int x = 0; x < width; x++) {
-            if (buffer[x] == '.') {
+            if (line_buffer[x] == '.') {
                 map->grid[y][x] = malloc(sizeof(struct __Node));
                 map->grid[y][x]->x = x;
                 map->grid[y][x]->y = y;
@@ -63,20 +65,19 @@ Map LoadMap(char *filename) {
             }
         }
     }
+    free(line_buffer);
 
     // Cierra el fichero
     fclose(file);
-    MAP = map;
     return map;
 }
 
 // Devuelve el `Node` en `map` correspondiente al `id`.
 Node GetNodeById(Map map, int id) {
-    if (!map || id < 0 || id >= map->width * map->height) return NULL;
     int y = id / map->width;
     int x = id % map->width;
-    if (x < 0 || x >= map->width || y < 0 || y >= map->height) return NULL;
-    return map->grid[y][x];
+    if (map->grid[y][x] == NULL) return NULL;
+    else return map->grid[y][x];
 }
 
 // Devuelve `true` si hay un nodo en `map` con coordenadas `x` e `y`.
@@ -114,7 +115,7 @@ float ChevyshevHeuristic(int n1_id, int n2_id) {
 }
 
 // Manhattan Heuristic.
-float MahattanHeuristic(int n1_id, int n2_id) {
+float ManhattanHeuristic(int n1_id, int n2_id) {
     Node n1 = GetNodeById(MAP, n1_id);
     Node n2 = GetNodeById(MAP, n2_id);
     return abs(n2->x - n1->x) + abs(n2->y - n1->y);
@@ -143,15 +144,6 @@ float EuclideanHeuristic(int n1_id, int n2_id) {
 // Get Neighbors
 void GetNeighbors(neighbors_list *neighbors, int n_id) {
     Node node = GetNodeById(MAP, n_id);
-
-    if (node == NULL) {
-        #pragma omp critical
-        {
-            fprintf(stderr, "Hilo %d, ERROR: GetNodeById devolvió NULL para id = %d\n", omp_get_thread_num(), n_id);
-            printf("En el mapa = %s\n", MAP_SCEN_FILENAME);
-        }
-        return;
-    }
 
     // Movimientos ortogonales (coste 1)
     int dx[] = {-1, 1, 0, 0};

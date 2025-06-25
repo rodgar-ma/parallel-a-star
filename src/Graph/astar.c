@@ -77,8 +77,8 @@ void closed_list_destroy(node_t **closed, int size) {
 
 path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_time_used) {
     heap_t *open = heap_init();
-    node_t **closed = malloc(source->max_size * sizeof(node_t*));
-    for (int i = 0; i < source->max_size; i++) {
+    node_t **closed = malloc(source->graph->num_nodes * sizeof(node_t*));
+    for (int i = 0; i < source->graph->num_nodes; i++) {
         closed[i] = NULL;
     }
     neighbors_list *neighbors = neighbors_list_create();

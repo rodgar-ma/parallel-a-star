@@ -31,8 +31,8 @@ typedef struct path {
 
 typedef struct {
     int node_id;
-    int parent_id;
     float gCost;
+    int parent_id;
 } queue_elem_t;
 
 typedef struct {
@@ -41,6 +41,12 @@ typedef struct {
     queue_elem_t *elems;
     omp_lock_t lock;
 } queue_t;
+
+typedef struct {
+    int size;
+    int capacity;
+    queue_elem_t *elems;
+} buffer_t;
 
 typedef struct {
     int max_size;

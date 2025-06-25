@@ -96,6 +96,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
         // printf("Step: %d\n", ++steps);
 
         current = heap_extract(open);
+        closed[current->id] = current;
         steps++;
 
         // printf("%d: Nodo actual: %d, fCost = %f\n", steps, current->id, current->fCost);

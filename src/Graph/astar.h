@@ -2,6 +2,7 @@
 #define ASTAR_H
 
 #include <stdlib.h>
+#include "graph.h"
 
 #define INIT_NEIGHBORS_LIST_CAPACITY 10
 
@@ -28,7 +29,7 @@ typedef struct path {
 } path;
 
 typedef struct {
-    int max_size;
+    Graph *graph;
     void (*get_neighbors)(neighbors_list *neighbors, int n_id);
     float (*heuristic)(int n1_id, int n2_id);
 } AStarSource;
