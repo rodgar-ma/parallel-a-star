@@ -7,7 +7,7 @@ typedef struct {
     unsigned long id;
     int x;
     int y;
-    int walkable:1;
+    unsigned int walkable:1;
 } Node;
 
 typedef struct {
