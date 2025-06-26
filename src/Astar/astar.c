@@ -126,7 +126,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     
     *cpu_time_used = omp_get_wtime() - start;
 
-    printf("Total de explansiones: %d\n", steps);
+    // printf("Total de explansiones: %d\n", steps);
 
     path *p = NULL;
     if (current->id != goal_id) {

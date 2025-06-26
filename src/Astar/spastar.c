@@ -60,7 +60,7 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
             }
             omp_unset_lock(&terminated_lock);
 
-            // Get the best actual path cost
+            // Get best actual path cost
             omp_set_lock(&m_lock);
             float m_cost = (m != NULL) ? m->fCost : FLT_MAX;
             omp_unset_lock(&m_lock);

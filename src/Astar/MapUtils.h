@@ -13,7 +13,7 @@ typedef struct {
 typedef struct {
     int width;
     int height;
-    Node*** grid;
+    Node** grid;
 } Map;
 
 extern Map *MAP;

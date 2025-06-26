@@ -47,23 +47,22 @@ Map *LoadMap(char *filename) {
     Map *map = malloc(sizeof(Map));
     map->width = width;
     map->height = height;
-    map->grid = malloc(height * sizeof(Node**));
+    map->grid = malloc(height * sizeof(Node*));
 
     char *line_buffer = malloc(width + 3);
 
     // Leer el mapa
     for (int y = 0; y < height; y++) {
         fgets(line_buffer, width + 3, file);
-        map->grid[y] = malloc(width * sizeof(Node*));
+        map->grid[y] = malloc(width * sizeof(Node));
         for (int x = 0; x < width; x++) {
-            map->grid[y][x] = malloc(sizeof(Node));
-            map->grid[y][x]->x = x;
-            map->grid[y][x]->y = y;
-            map->grid[y][x]->id = y * map->width + x;
+            map->grid[y][x].x = x;
+            map->grid[y][x].y = y;
+            map->grid[y][x].id = y * map->width + x;
             if (line_buffer[x] == '.') {
-                map->grid[y][x]->walkable = 1;
+                map->grid[y][x].walkable = 1;
             } else {
-                map->grid[y][x]->walkable = 0;
+                map->grid[y][x].walkable = 0;
             }
         }
     }
@@ -77,6 +76,9 @@ Map *LoadMap(char *filename) {
 // Libera `map`.
 void FreeMap(Map *map) {
     for (int y = 0; y < map->height; y++) {
+        // for (int x = 0; x < map->width; x++) {
+        //     free(map->grid[y][x]);
+        // }
         free(map->grid[y]);
     }
     free(map->grid);
@@ -99,7 +101,7 @@ int inrange(int x, int y) {
 
 int is_walkable(int x, int y) {
     if (inrange(x, y)) {
-        return MAP->grid[y][x]->walkable;
+        return MAP->grid[y][x].walkable;
     }
     return 0;
 }

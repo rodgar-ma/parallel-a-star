@@ -99,7 +99,6 @@ static inline int hasterminated(int *terminate, int k) {
 }
 
 path *hdastar_search(AStarSource *source, int start_id, int goal_id, int k, double *cpu_time_used) {
-    
     node_t **visited = calloc(source->max_size, sizeof(node_t*));
     queue_t **queues = malloc(k * sizeof(queue_t*));
     int *terminate = malloc(k * sizeof(int));
@@ -133,10 +132,10 @@ path *hdastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
     }
     neighbors_list_destroy(neighbors);
 
-    int income_threshold = 1;
-    int outgo_threshold = 1;
+    int income_threshold = 5;
+    int outgo_threshold = 5;
 
-    #pragma omp parallel num_threads(k) shared(visited, queues, terminate, m, income_threshold)
+    #pragma omp parallel if(k > 1) num_threads(k) shared(visited, queues, terminate, m, income_threshold)
     {
         int tid = omp_get_thread_num();
         heap_t *open = heap_init();
