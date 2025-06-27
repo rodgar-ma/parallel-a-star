@@ -69,6 +69,7 @@ void visited_list_destroy(node_t **visited, int size) {
     for(int i = 0; i < size; i++) {
         if (visited[i] != NULL) free(visited[i]);
     }
+    free(visited);
 }
 
 /**********************************************************************************************************/
