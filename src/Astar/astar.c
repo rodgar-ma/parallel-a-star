@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <omp.h>
 #include "astar.h"
@@ -93,6 +94,8 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
 
     int steps = 0;
 
+    int nodes = 1;
+
     while(!heap_is_empty(open)) {
         // printf("Step: %d\n", ++steps);
 
@@ -120,6 +123,7 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
                 }
             } else { // New node
                 visited[n_id] = node_create(n_id, new_cost, new_cost + source->heuristic(n_id, goal_id), current->id);
+                nodes++;
                 heap_insert(open, visited[n_id]);
             }
         }
@@ -127,12 +131,10 @@ path *astar_search(AStarSource *source, int start_id, int goal_id, double *cpu_t
     
     *cpu_time_used = omp_get_wtime() - start;
 
-    // printf("Total de explansiones: %d\n", steps);
+    // printf("Total de nodos generados: %d\n", nodes);
 
     path *p = NULL;
-    if (current->id != goal_id) {
-        printf("No se encontro el camino\n");
-    } else {
+    if (current->id == goal_id) {
         p = retrace_path(visited, goal_id);
     }
     visited_list_destroy(visited, source->max_size);

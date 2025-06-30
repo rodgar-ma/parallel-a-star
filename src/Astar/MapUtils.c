@@ -3,6 +3,7 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
+#include <unistd.h>
 #include "MapUtils.h"
 
 
@@ -190,10 +191,9 @@ float EuclideanHeuristic(int n1_id, int n2_id) {
     return sqrt(dx * dx + dy * dy); 
 }
 
-
-
 // Get Neighbors
 void GetNeighbors(neighbors_list *neighbors, int n_id) {
+    // sleep(1);
     int x, y;
     idToXY(n_id, &x, &y);
     if (!inrange(x, y)) {

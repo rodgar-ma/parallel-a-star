@@ -1,11 +1,9 @@
 #ifndef ASTAR_H
 #define ASTAR_H
 
-#include <stdlib.h>
-
 #define INIT_NEIGHBORS_LIST_CAPACITY 10
 
-typedef struct node_t {
+typedef struct {
     int id;
     float gCost;
     float fCost;
@@ -14,14 +12,14 @@ typedef struct node_t {
     int open_index;
 } node_t;
 
-typedef struct neighbors_list {
+typedef struct {
     int capacity;
     int count;
     int *nodeIds;
     float *costs;
 } neighbors_list;
 
-typedef struct path {
+typedef struct {
     int count;
     int *nodeIds;
     float cost;

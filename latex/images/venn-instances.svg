@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="171.37682mm"
+   height="90.42971mm"
+   viewBox="0 0 171.37682 90.42971"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8" />
+    </marker>
+    <pattern
+       xlink:href="#Strips1_5"
+       preserveAspectRatio="xMidYMid"
+       id="pattern3"
+       patternTransform="matrix(1.4142136,1.4142136,-1.4142136,1.4142136,0,0)"
+       x="0"
+       y="0" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="6"
+       height="1"
+       patternTransform="translate(0,0) scale(2,2)"
+       preserveAspectRatio="xMidYMid"
+       id="Strips1_5"
+       style="fill:#000000">
+      <rect
+         style="stroke:none"
+         x="0"
+         y="-0.5"
+         width="1"
+         height="2"
+         id="rect164" />
+    </pattern>
+    <pattern
+       xlink:href="#Strips1_5-8"
+       preserveAspectRatio="xMidYMid"
+       id="pattern3-4"
+       patternTransform="matrix(1.4142136,-1.4142136,1.4142136,1.4142136,-0.70119732,53.02717)"
+       x="0"
+       y="0" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="6"
+       height="1"
+       patternTransform="translate(0,0) scale(2,2)"
+       preserveAspectRatio="xMidYMid"
+       id="Strips1_5-8"
+       style="fill:#000000">
+      <rect
+         style="stroke:none"
+         x="0"
+         y="-0.5"
+         width="1"
+         height="2"
+         id="rect164-8" />
+    </pattern>
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle-1"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8-3" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="ConcaveTriangle-7"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="M -2,-4 9,0 -2,4 c 2,-2.33 2,-5.66 0,-8 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8-9" />
+    </marker>
+  </defs>
+  <g
+     id="layer1"
+     transform="matrix(0.55738691,0,0,0.55738691,12.078094,-31.116714)">
+    <ellipse
+       style="fill:url(#pattern3);fill-opacity:1;stroke:#000000;stroke-width:0.965;stroke-dasharray:none;stroke-opacity:1"
+       id="path1"
+       cx="104.15241"
+       cy="110.04089"
+       rx="83.542755"
+       ry="53.732342" />
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.44196;stroke-dasharray:none;stroke-opacity:1"
+       id="path1-7"
+       cx="103.88633"
+       cy="137.05373"
+       rx="124.83448"
+       ry="80.290016" />
+    <ellipse
+       style="fill:url(#pattern3-4);fill-opacity:1;stroke:#000000;stroke-width:0.965;stroke-dasharray:none;stroke-opacity:1"
+       id="path1-5"
+       cx="103.45122"
+       cy="163.06805"
+       rx="83.542755"
+       ry="53.732342" />
+    <text
+       xml:space="preserve"
+       style="font-size:25.3165px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none;stroke-opacity:1"
+       x="243.28163"
+       y="75.795479"
+       id="text3"><tspan
+         id="tspan3"
+         style="font-size:25.3165px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none"
+         x="243.28163"
+         y="75.795479">I<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan5">AD</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.3165px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none;stroke-opacity:1"
+       x="243.10323"
+       y="110.65017"
+       id="text3-3"><tspan
+         id="tspan3-2"
+         style="font-size:25.3165px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none"
+         x="243.10323"
+         y="110.65017">I<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan5-2">AD</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.3165px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none;stroke-opacity:1"
+       x="243.28261"
+       y="143.99406"
+       id="text3-3-7"><tspan
+         id="tspan3-2-6"
+         style="font-size:25.3165px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none"
+         x="243.28261"
+         y="143.99406">I<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan5-2-1">CON</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:25.3165px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none;stroke-opacity:1"
+       x="243.87425"
+       y="184.53622"
+       id="text3-3-9"><tspan
+         id="tspan3-2-5"
+         style="font-size:25.3165px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.73129;stroke-dasharray:none"
+         x="243.87425"
+         y="184.53622">I<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan5-2-4">CON</tspan></tspan></text>
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.19307;stroke-dasharray:none;stroke-opacity:1"
+       d="m 255.71777,66.611956 h 15.40725"
+       id="path5" />
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.35992;stroke-dasharray:none;stroke-opacity:1"
+       d="m 253.8139,133.84602 h 31.98171"
+       id="path5-3" />
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.53933;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle)"
+       d="M 240.1707,66.415541 H 134.65439"
+       id="path6" />
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.53933;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle-1)"
+       d="M 239.35738,135.61415 H 150.52644"
+       id="path6-4" />
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.40228;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle)"
+       d="M 239.31704,104.23333 H 210.16158"
+       id="path9" />
+    <path
+       style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:1.53933;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ConcaveTriangle-7)"
+       d="M 240.06759,175.89801 H 137.19239"
+       id="path6-9" />
+  </g>
+</svg>

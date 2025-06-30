@@ -70,9 +70,13 @@ int main(int argc, char *argv[])
     
     int total_succeed = 0;
     int total_failed = 0;
+    int map_succeed = 0;
+    int map_failed = 0;
 
     double cpu_time_used;
+    double acumulated_time = 0;
     clock_t start = clock();
+    int last_id = -1;
 
     while (keepRunning && fscanf(scen_file, "%d\t%255s\t%d\t%d\t%d\t%d\t%d\t%d\t%f\n",
                   &entry.id, entry.map_file, &entry.width, &entry.height,
@@ -80,8 +84,20 @@ int main(int argc, char *argv[])
                   &entry.cost) == 9)
     {
         // If not same map then load the new map.
-        if (strcmp(map_file, entry.map_file) != 0) {
+        if (strcmp(map_file, entry.map_file) != 0 || entry.id != last_id) {
+
+            if (map_succeed + map_failed != 0) {
+                printf("Mapa %s terminado.\n", map_file);
+                printf("Tiempo total: %lf ms\n", acumulated_time);
+                printf("Tiempo medio por mapa: %lf\n\n", acumulated_time / (map_succeed + map_failed));
+            }
+
+            map_succeed = 0;
+            map_failed = 0;
+            acumulated_time = 0;
+
             strcpy(map_file, entry.map_file);
+            last_id = entry.id;
             char maps_dir[256] = "../maps/";
             if (MAP) FreeMap(MAP);
             MAP = LoadMap(strcat(maps_dir, map_file));
@@ -102,6 +118,7 @@ int main(int argc, char *argv[])
             error = 1;
         }
         if (error) {
+            map_failed++;
             total_failed++;
             continue;
         }
@@ -123,21 +140,24 @@ int main(int argc, char *argv[])
         
 
         if (!path) {
-            printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n", entry.start_x, entry.start_y, entry.target_x, entry.target_y);
+            // printf("[Error] No se encontró ningún camino de (%d, %d) a (%d, %d)\n", entry.start_x, entry.start_y, entry.target_x, entry.target_y);
+            map_failed++;
             total_failed++;
             continue;
         }
 
-        printf("%d-", entry.id);
+        // printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1) {
-            printf("[OK] ");
+            // printf("[OK] ");
+            map_succeed++;
             total_succeed++;
         } else {
-            printf("[Error] ");
+            // printf("[Error] ");
+            map_failed++;
             total_failed++;
         }
-        printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %lf ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
-
+        // printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %lf ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
+        acumulated_time += 10e3 * cpu_time_used;
         path_destroy(path);
     }
 
@@ -145,10 +165,18 @@ int main(int argc, char *argv[])
 
     if (MAP) FreeMap(MAP);
 
+    if (map_succeed + map_failed != 0) {
+        printf("Mapa %s terminado.\n", map_file);
+        printf("Tiempo total: %lf ms\n", acumulated_time);
+        printf("Tiempo medio por mapa: %lf\n\n", acumulated_time / (map_succeed + map_failed));
+    }
+
     printf("\nResultados:\n");
     printf("Tiempo total: %ld segundos\n", (end - start) / CLOCKS_PER_SEC);
     printf("Total de mapas: %d\n", total_succeed + total_failed);
     printf("Total de exitos: %d\n", total_succeed);
     printf("Total de fallos: %d\n", total_failed);
+    printf("Tiempo medio por mapa: %f\n\n", acumulated_time / (total_succeed + total_failed));
+
     return EXIT_SUCCESS;
 }

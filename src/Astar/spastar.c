@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdlib.h>
 #include <omp.h>
 #include <float.h>
 #include "spastar.h"
@@ -42,7 +42,6 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
     {
         int steps = 0;
         neighbors_list *neighbors = neighbors_list_create();
-        int tid = omp_get_thread_num();
         int waiting = 0;
 
         #pragma omp master
@@ -143,7 +142,7 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
             *cpu_time_used = omp_get_wtime() - start;
         }
 
-        printf("Hilo %d. Total de expansiones: %d\n", tid, steps);
+        // printf("Hilo %d. Total de expansiones: %d\n", tid, steps);
 
         neighbors_list_destroy(neighbors);
     }
@@ -154,6 +153,7 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
     
     visited_list_destroy(visited, source->max_size);
 
+    #pragma omp parallel for
     for (int i = 0; i < source->max_size; i++) {
         omp_destroy_lock(&visited_locks[i]);
     }
@@ -162,6 +162,6 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
     heap_destroy(open);
     omp_destroy_lock(&m_lock);
     omp_destroy_lock(&open_lock);
-
+    omp_destroy_lock(&terminated_lock);
     return p;
 }
