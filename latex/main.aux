@@ -1,6 +1,6 @@
 \relax 
 \providecommand{\transparent@use}[1]{}
-\providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
+\providecommand\babel@aux[2]{}
 \@nameuse{bbl@beforestart}
 \catcode `"\active 
 \catcode `<\active 
@@ -24,11 +24,11 @@
 \newlabel{sec:conceptos}{{1.1}{7}{Conceptos matemáticos}{subsection.1.1}{}}
 \newlabel{def1}{{1}{7}{}{defn.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Grafo no dirigido}}{7}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:undirected}{{1}{7}{Grafo no dirigido}{figure.caption.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Grafo dirigido}}{7}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:directed}{{2}{7}{Grafo dirigido}{figure.caption.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Caption}}{8}{figure.caption.3}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:weighted}{{3}{8}{Caption}{figure.caption.3}{}}
 \newlabel{def:shortest_path_problem}{{5}{8}{}{defn.5}{}}
 \citation{dijkstra_note_1959}
@@ -96,40 +96,43 @@
 \citation{rao1988superlinear}
 \citation{kumar1988parallel}
 \citation{fukunaga2017survey}
+\citation{fukunaga2017survey}
+\citation{fukunaga2017survey}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Estado del arte}{21}{section.2}\protected@file@percent }
 \newlabel{sec:estado_arte}{{2}{21}{Estado del arte}{section.2}{}}
-\citation{fukunaga2017survey}
-\citation{fukunaga2017survey}
 \citation{leifker1984hybrid}
 \citation{huang1987tight}
+\citation{grama1995parallel}
+\citation{grama1995parallel}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Clasificación de las distintas estrategias de paralelización \cite  {fukunaga2017survey}.}}{22}{figure.caption.7}\protected@file@percent }
 \newlabel{fig:clasficiacion}{{6}{22}{Clasificación de las distintas estrategias de paralelización \cite {fukunaga2017survey}}{figure.caption.7}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}A* centralizado}{22}{subsection.2.1}\protected@file@percent }
 \newlabel{sec:centralizado}{{2.1}{22}{A* centralizado}{subsection.2.1}{}}
-\citation{grama1995parallel}
-\citation{grama1995parallel}
 \@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Estrategia centralizada con lista abierta compartida en memoria global. Cada proceso bloque la lista, inserta los nodos expandidos en la iteración anterior, extrae el de menor coste y la desbloquea para el siguiente proceso \cite  {grama1995parallel}.}}{23}{figure.caption.8}\protected@file@percent }
 \newlabel{fig:centralizado}{{7}{23}{Estrategia centralizada con lista abierta compartida en memoria global. Cada proceso bloque la lista, inserta los nodos expandidos en la iteración anterior, extrae el de menor coste y la desbloquea para el siguiente proceso \cite {grama1995parallel}}{figure.caption.8}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Simple Parallel A* (SPA*)}}{24}{algorithm.2}\protected@file@percent }
+\newlabel{spastar}{{2}{24}{Simple Parallel A* (SPA*)}{algorithm.2}{}}
 \citation{lai1984anomalies}
 \citation{phillips2014pa}
 \citation{vidal2010adaptive}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Simple Parallel A* (SPA*)}}{25}{algorithm.2}\protected@file@percent }
-\newlabel{spastar}{{2}{25}{Simple Parallel A* (SPA*)}{algorithm.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}A* descentralizado}{25}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:descentralizado}{{2.2}{25}{A* descentralizado}{subsection.2.2}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces A* descentralizado}}{26}{algorithm.3}\protected@file@percent }
+\newlabel{decentralized-astar}{{3}{26}{A* descentralizado}{algorithm.3}{}}
 \citation{karp1988randomized}
 \citation{karp1993randomized}
 \citation{kumar1988parallel}
 \citation{rios2011pnba}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}A* descentralizado}{26}{subsection.2.2}\protected@file@percent }
-\newlabel{sec:descentralizado}{{2.2}{26}{A* descentralizado}{subsection.2.2}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces A* descentralizado}}{27}{algorithm.3}\protected@file@percent }
-\newlabel{decentralized-astar}{{3}{27}{A* descentralizado}{algorithm.3}{}}
 \citation{evett1995massively}
 \citation{mahapatra2002scalable}
 \citation{kishimoto2009scalable}
 \citation{kishimoto2013evaluation}
 \citation{burns2010best}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Hash Distributed A*}{27}{subsection.2.3}\protected@file@percent }
 \citation{jinnai2016abstract}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Hash Distributed A*}{28}{subsection.2.3}\protected@file@percent }
+\citation{zhou2015massively}
+\citation{horie2017block}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Implementaciones en GPU}{28}{subsection.2.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Objetivos}{29}{section.3}\protected@file@percent }
 \newlabel{sec:objetivos}{{3}{29}{Objetivos}{section.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Metodología}{30}{section.4}\protected@file@percent }
@@ -165,10 +168,10 @@
 \newlabel{synthetic}{{13}{44}{Resultados de tiempos de ejecución frente al número de hilos en mapas sintéticos. El primero corresponde al escenario de la Figura \ref {fig:custom} y el segundo a un escenario sin ningún obstáculo}{figure.caption.14}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Efecto del parámetro \texttt  {threshold} en el algoritmo HDA* con cuatro y ocho hilos. Eje de abscisas en escala logarítmica.}}{45}{figure.caption.15}\protected@file@percent }
 \newlabel{fig:threshold}{{14}{45}{Efecto del parámetro \texttt {threshold} en el algoritmo HDA* con cuatro y ocho hilos. Eje de abscisas en escala logarítmica}{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusiones y Trabajo Futuro}{46}{section.7}\protected@file@percent }
-\newlabel{sec:conclusiones}{{7}{46}{Conclusiones y Trabajo Futuro}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Conclusiones}{46}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Trabajo Futuro}{46}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusiones}{46}{section.7}\protected@file@percent }
+\newlabel{sec:conclusiones}{{7}{46}{Conclusiones}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Trabajo futuro}{47}{section.8}\protected@file@percent }
+\newlabel{sec:conclusiones}{{8}{47}{Trabajo futuro}{section.8}{}}
 \bibdata{bibfile}
 \bibcite{barnouti_pathfinding_2016}{1}
 \bibcite{boruuvka1926jistem}{2}
@@ -183,7 +186,7 @@
 \bibcite{eckstein1977parallel}{11}
 \bibcite{euler1741solutio}{12}
 \bibcite{evett1995massively}{13}
-\@writefile{toc}{\contentsline {section}{Referencias}{47}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{Referencias}{48}{section.8}\protected@file@percent }
 \bibcite{felner_adding_2018}{14}
 \bibcite{fredman1987fibonacci}{15}
 \bibcite{freeman1991parallel}{16}
@@ -194,39 +197,41 @@
 \bibcite{harabor_online_2011}{21}
 \bibcite{hart_formal_1968}{22}
 \bibcite{hart_correction_1972}{23}
-\bibcite{huang1987tight}{24}
-\bibcite{jinnai2016abstract}{25}
-\bibcite{karp1988randomized}{26}
-\bibcite{karp1993randomized}{27}
-\bibcite{kishimoto2009scalable}{28}
-\bibcite{kishimoto2013evaluation}{29}
-\bibcite{koenig2001incremental}{30}
-\bibcite{korf1985depth}{31}
-\bibcite{kumar1988parallel}{32}
-\bibcite{kumar1987parallel}{33}
-\bibcite{lai1984anomalies}{34}
-\bibcite{leifker1984hybrid}{35}
-\bibcite{mahapatra2002scalable}{36}
-\bibcite{martins_improved_2022}{37}
-\bibcite{nillsson1971problem}{38}
-\bibcite{nilsson2014principles}{39}
-\bibcite{phillips2014pa}{40}
-\bibcite{rafiq_pathfinding_2020}{41}
-\bibcite{rao1987parallel}{42}
-\bibcite{rao1988superlinear}{43}
-\bibcite{reghbati1978parallel}{44}
-\bibcite{reif1985depth}{45}
-\bibcite{rios2011pnba}{46}
-\bibcite{russell1992cient}{47}
-\bibcite{russell2016artificial}{48}
-\bibcite{schrijver2012history}{49}
-\bibcite{standley_complete_2011}{50}
-\bibcite{stentz1994optimal}{51}
-\bibcite{sturtevant2012benchmarks}{52}
-\bibcite{tero2010rules}{53}
-\bibcite{vidal2010adaptive}{54}
-\bibcite{wiener1873ueber}{55}
-\bibcite{wyllie1979complexity}{56}
-\bibcite{goos_grid-based_2002}{57}
-\gdef\svg@ink@ver@settings{{\m@ne }{inkscape}{1}}
-\gdef \@abspage@last{51}
+\bibcite{horie2017block}{24}
+\bibcite{huang1987tight}{25}
+\bibcite{jinnai2016abstract}{26}
+\bibcite{karp1988randomized}{27}
+\bibcite{karp1993randomized}{28}
+\bibcite{kishimoto2009scalable}{29}
+\bibcite{kishimoto2013evaluation}{30}
+\bibcite{koenig2001incremental}{31}
+\bibcite{korf1985depth}{32}
+\bibcite{kumar1988parallel}{33}
+\bibcite{kumar1987parallel}{34}
+\bibcite{lai1984anomalies}{35}
+\bibcite{leifker1984hybrid}{36}
+\bibcite{mahapatra2002scalable}{37}
+\bibcite{martins_improved_2022}{38}
+\bibcite{nillsson1971problem}{39}
+\bibcite{nilsson2014principles}{40}
+\bibcite{phillips2014pa}{41}
+\bibcite{rafiq_pathfinding_2020}{42}
+\bibcite{rao1987parallel}{43}
+\bibcite{rao1988superlinear}{44}
+\bibcite{reghbati1978parallel}{45}
+\bibcite{reif1985depth}{46}
+\bibcite{rios2011pnba}{47}
+\bibcite{russell1992cient}{48}
+\bibcite{russell2016artificial}{49}
+\bibcite{schrijver2012history}{50}
+\bibcite{standley_complete_2011}{51}
+\bibcite{stentz1994optimal}{52}
+\bibcite{sturtevant2012benchmarks}{53}
+\bibcite{tero2010rules}{54}
+\bibcite{vidal2010adaptive}{55}
+\bibcite{wiener1873ueber}{56}
+\bibcite{wyllie1979complexity}{57}
+\bibcite{goos_grid-based_2002}{58}
+\bibcite{zhou2015massively}{59}
+\gdef\svg@ink@ver@settings{{\m@ne }{inkscape}{\m@ne }}
+\gdef \@abspage@last{52}

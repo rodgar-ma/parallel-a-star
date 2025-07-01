@@ -90,7 +90,7 @@
 
 \title{{\Large{Trabajo de Fin de Grado}} \\
         \vspace{1.25cm}
-        {{\textbf{Paralelización del algoritmo A*}}}  \\
+        {{\textbf{Estrategias de paralelización del algoritmo A* en entornos de memoria compartida}}}  \\
 
 
 
@@ -182,11 +182,11 @@
 
 En este trabajo exploramos la paralelización del algoritmo de búsqueda A*. Se trata de un algoritmo heurísitco que resuelve el problema de encontrar el camino más corto entre dos vértices de un grafo, y que a día de hoy es ampliamente utilizado en una gran variedad de campos como el desarrollo de videojuegos, el transporte o la robótica. A lo largo de los últimos años, se han propuesto diversas estrategias para obtener una versión paralela de este algoritmo, tarea que no ha sido facil debido al fuerte carátacter secuecial que presenta.
 
-Comenzaremos introduciendo los conceptos matemáticos necesarios relacionados con la teoría de grafos para entender la terminología utilizada en el resto del trabajo. A continuación, introduciremos los distintos paradigmas de algoritmos búsqueda que han surgieron en la segunda mitad del siglo XX y explicaremos en detalle el funcionamiento de A*. También haremos un análisis del mismo en términos de admisibildad y optimalidad para resolver el problema del camino más corto.
+Comenzaremos introduciendo los conceptos matemáticos necesarios relacionados con la teoría de grafos para entender la terminología utilizada en el resto del trabajo. Introduciremos los distintos paradigmas de algoritmos búsqueda que han surgieron en la segunda mitad del siglo XX y explicaremos en detalle el funcionamiento de A*. También haremos un análisis del mismo en términos de admisibildad y optimalidad para resolver el problema del camino más corto.
 
-A continuación, se presentarán las distintas estrategias de paralelización propuestas en la literatura, evaluando sus ventajas y limitaciones. Veremos cómo varias ideas clave han impulsado una evolución progresiva en este campo a lo largo de las últimas décadas, desembocando en dos paradigmas principales para el desarrollo de formulaciones paralelas del algoritmo.
+A continuación, se presentarán las distintas estrategias de paralelización propuestas en la literatura, evaluando sus ventajas y limitaciones. Veremos cómo varias ideas clave han impulsado una evolución progresiva en este campo a lo largo de las últimas décadas, desembocando en diferentes formulaciones paralelas del algoritmo basadas en los modelos de memoria compartida y distribuida.
 
-Finalmente, se expondrá el desarrollo e implementación de tres versiones de A*: una secuecnial y dos paralela basadas en los dos principales paradigmas de paralelización, siendo uno de ellos el algoritmo del estado del arte actual. Analizaremos los resultados obtenidos y veremos como cambian radicalemente los resultados obtenidos según el enfoque utilizado.
+Finalmente, se expondrá el desarrollo e implementación de tres versiones de A*: una secuecnial y dos paralelas basadas en acercamientos diferentes de paralelización, siendo uno de ellos el algoritmo del estado del arte actual. Analizaremos los resultados obtenidos y veremos como cambian radicalemente los resultados obtenidos según el enfoque utilizado.
 
 \newpage
 
@@ -195,13 +195,13 @@ Finalmente, se expondrá el desarrollo e implementación de tres versiones de A*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \thispagestyle{empty}
 
-In this work, we explore the parallelization of the A* search algorithm. This is a heuristic algorithm that solves the problem of finding the shortest path between two vertices in a graph and is widely used today in a variety of fields such as video game development, transportation, and robotics. Over the past few years, various strategies have been proposed to obtain a parallel version of this algorithm—a task that has proven challenging due to the algorithm’s inherently sequential nature.
+In this work, we explore the parallelization of the A* search algorithm. A* is a heuristic algorithm that solves the problem of finding the shortest path between two vertices in a graph, and it is widely used today in a variety of fields such as video game development, transportation, and robotics. Over the past few years, several strategies have been proposed to obtain a parallel version of this algorithm—a task that has proven to be challenging due to its inherently sequential nature.
 
-We begin by introducing the necessary mathematical concepts from graph theory to understand the terminology used throughout the rest of the work. Then, we review the main search algorithm paradigms that emerged in the second half of the 20th century and provide a detailed explanation of how A* works. We also analyze the algorithm in terms of admissibility and optimality for solving the shortest path problem.
+We begin by introducing the necessary mathematical concepts related to graph theory in order to understand the terminology used throughout the rest of the work. We will present the various search algorithm paradigms that emerged in the second half of the 20th century and provide a detailed explanation of how A* works. We will also analyze the algorithm in terms of admissibility and optimality with respect to the shortest path problem.
 
-Next, we present the different parallelization strategies proposed in the literature, evaluating their advantages and limitations. We examine how several key ideas have driven steady progress in this field over recent decades, leading to two main paradigms for developing parallel formulations of the algorithm.
+Next, we will present the different parallelization strategies proposed in the literature, evaluating their advantages and limitations. We will see how several key ideas have driven the progressive evolution of this field over the last few decades, leading to various parallel formulations of the algorithm based on both shared-memory and distributed-memory models.
 
-Finally, we describe the development and implementation of three versions of A*: one sequential and two parallel, based on the two main parallelization paradigms, one of which represents the current state of the art. We analyze the results obtained and observe how the performance outcomes vary significantly depending on the chosen approach.
+Finally, we will present the development and implementation of three versions of A*: one sequential and two parallel, based on different approaches to parallelization, one of which represents the current state of the art. We will analyze the results obtained and observe how the outcomes change drastically depending on the approach used.
 
 \newpage
 
@@ -284,11 +284,6 @@ Dado un grafo dirigido con pesos positivos y dos nodos $s$ y $t$, el \textbf{pro
 \end{defn}
 
 %{\color{blue} lo anterior lo pondría o bien indexado o bien redactado, pero no mezclado como está ahora}
-
-
-
-
-
 
 
 \subsection{Algoritmos de búsqueda}\label{sec:alg-busqueda}
@@ -539,11 +534,11 @@ El algoritmo A* es eficaz para encontrar caminos óptimos en grafos, pero su ren
 
 Las primeras propuestas para paralelizar un algoritmo de búsqueda aparecen en las décadas de los 70 y 80. Wyllie \cite{wyllie1979complexity} propone en su tesis doctoral paralelizar la estrategia de búsqueda en anchura y, aunque otros autores desestimaron su idea afirmando que no era posible \cite{eckstein1977parallel, reghbati1978parallel, reif1985depth}, a principios de la década de los 80 comenzaron a surgir avances en éste área y que podemos encontrar en orden cronológico en el artículo de Freeman \cite{freeman1991parallel}, demostrando la viabilidad de la idea. Aunque estas ideas no incorporaban la información heurística en el problema como A*, sentaron las bases para muchos de los principios que se aplicarían después. Rao y Kumar \cite{rao1987parallel, kumar1987parallel} también trabajaron con la búsqueda en profundidad y, como resultado de su trabajo, unieron la búsqueda en profundidad con el algoritmo IDA*, consiguiendo una aumento en la velocidad superlineal \cite{rao1988superlinear}. 
 
-Estos primeros trabajos se enfocaban en dividir el espacio de búsqueda entre distintos procesadores, cada uno de los cuales exploraba una región diferente del grafo o árbol de búsqueda. En general, se trataba de problemas en los que el espacio de estados se puede representar como una estructura tipo árbol. De ésta manera, los subárboles generados a partir de cada nodo son independientes, y la paralelización es casi inmediata. Sin embargo, en la mayoría de aplicaciones, los subárboles generados son irregulares, provocando un desbalanceo en la carga de trabajo entre los procesadores.
+Estos primeros trabajos se enfocaban en dividir el espacio de búsqueda entre distintos procesos, cada uno de los cuales exploraba una región diferente del grafo o árbol de búsqueda. En general, se trataba de problemas en los que el espacio de estados se puede representar como una estructura tipo árbol. De ésta manera, los subárboles generados a partir de cada nodo son independientes, y la paralelización es casi inmediata. Sin embargo, en la mayoría de aplicaciones, los subárboles generados son irregulares, provocando un desbalanceo en la carga de trabajo entre los procesos.
 
-Antes de abordar las técnicas concretas de paralelización de A*, es necesario introducir brevemente los principales modelos de computación paralela que, además, representan fielmente las dos principales estrategias con las que se intenta paraleliza el algoritmo. En primer lugar, tenemos el modelo de memoria compartida, en el que varios hilos se ejecutan en paralelo y acceden a una memoria común, lo que facilita el intercambio de información pero requiere mecanismos de sincronización para evitar condiciones de carrera. Por otro lado, tenemos el modelo de memoria distribuida, que se basa en procesos que no comparten memoria y se comunican entre sí mediante el envío de mensajes. Este segundo modelo implica un diseño más explícito de la coordinación entre procesos, pero ofrece una mejor escalabilidad en arquitecturas con muchos núcleos o nodos.
+% Antes de abordar las técnicas concretas de paralelización de A*, es necesario introducir brevemente los principales modelos de computación paralela que, además, representan fielmente las dos principales estrategias con las que se intenta paraleliza el algoritmo. En primer lugar, tenemos el modelo de memoria compartida, en el que varios procesos se ejecutan en paralelo y acceden a una memoria común, lo que facilita el intercambio de información pero requiere mecanismos de sincronización para evitar condiciones de carrera. Por otro lado, tenemos el modelo de memoria distribuida, que se basa en procesos que no comparten memoria y se comunican entre sí mediante el envío de mensajes. Este segundo modelo implica un diseño más explícito de la coordinación entre procesos, pero ofrece una mejor escalabilidad en arquitecturas con muchos núcleos o nodos.
 
-Al diseñar algoritmos de búsqueda paralelos, es importante tener en cuenta tres problemas principales: la sobrecarga de búsqueda, que se refiere a los estados que se generan en paralelo pero que no serían explorados en una búsqueda secuencial; la sobrecarga de comunicación, que surge al distribuir el espacio de búsqueda entre distintos hilos; y la sobrecarga de coordinación, que tiene que ver con el coste de sincronizar correctamente los hilos durante la ejecución. Las diferentes estrategias que se han propuesto en la literatura se diferencian principalmente en cómo tratan estos problemas. Kumar \cite{kumar1988parallel} propone dos enfoques para paralelizar las búsquedas primero el mejor, diferenciados por cómo usan y gestionan la lista abierta entre los diferentes procesos. En la revisión de Fukunaga \cite{fukunaga2017survey} encontramos una imagen que se ha traducido al castellano para este trabajo y que representa muy bien las distintas estrategias y a qué algoritmos han dado lugar (Figura \ref{fig:clasficiacion}).
+Al diseñar algoritmos de búsqueda paralelos, es importante tener en cuenta tres problemas principales: la sobrecarga de búsqueda, que se refiere a las implementaciones paralelas que expande más nodos que una implementación secuecnial; la sobrecarga de sincronización, que se refiere a cuando un proceso está a que otros lleguen a un punto de sincronización; y la sobrecarga de comunicación, que tiene que ver con el coste de compartir información entre los procesos. Las diferentes estrategias que se han propuesto en la literatura se diferencian principalmente en cómo tratan estos problemas. Kumar \cite{kumar1988parallel} propone dos enfoques para paralelizar las búsquedas primero el mejor, diferenciados por cómo usan y gestionan la lista abierta entre los diferentes procesos. En la revisión de Fukunaga \cite{fukunaga2017survey} encontramos una imagen que se ha traducido al castellano para este trabajo y que representa muy bien las distintas estrategias y a qué algoritmos han dado lugar (Figura \ref{fig:clasficiacion}).
 
 \begin{figure}[H]
     \centering
@@ -555,7 +550,7 @@ Al diseñar algoritmos de búsqueda paralelos, es importante tener en cuenta tre
 
 \subsection{A* centralizado} \label{sec:centralizado}
 
-La idea más sencilla para paralelizar A* es extraer tantos nodos de la lista abierta como procesos estén participando en la búsqueda. Esta estrategia es conocida como la estrategia centralizada, pues tanto la lista abierta como la cerrada se mantiene en una memoria global compartida por todos los procesos (Figura \ref{fig:centralizado}). Este enfoque presenta dos desafíos principalmente, el primero es que el criterio de terminación del algoritmo secuencial deja de ser válido. No podemos asegurar que cuando un nodo es extraído de a lista abierta, éste sea la mejor solución, pues puede haber otro proceso que en su próxima expansión encuentra una solución mejor. Esto ocurre cuando hay más de un nodo objetivo, y el criterio de terminación puede modificarse para que el algoritmo termine únicamente cuando encuentra la mejor solución \cite{leifker1984hybrid}. Por otro lado, los continuos accesos a la lista abierta generan una zona de contención entre los hilos, ya que ésta debe protegerse mediante un cerrojo para evitar condiciones de carrera. Esta contención limitaría el \textit{speedup} obtenido en la versión paralela a $(T_{exp} + T_{access})/T_{access}$, donde $T_{exp}$ es el tiempo promedio para una expansión, y $T_{access}$ es el tiempo promedio accediendo a la lista abierta por cada expansión \cite{huang1987tight}. También es necesario proteger la lista cerrada, pues diferentes procesos pueden estar leyendo y escribiendo a la vez para comprobar si el nodo ya ha sido visitado o si es un nodo nuevo. Lo más habitual es establecer un cerrojo por nodo, de manera que no se bloquee la estructura entera para el resto de procesos que puedan estar expandiendo otros nodos diferentes.
+La idea más sencilla para paralelizar A* es extraer tantos nodos de la lista abierta como procesos estén participando en la búsqueda. Esta estrategia es conocida como la estrategia centralizada, pues tanto la lista abierta como la cerrada se mantiene en una memoria global compartida por todos los procesos (Figura \ref{fig:centralizado}). Este enfoque presenta dos desafíos principalmente, el primero es que el criterio de terminación del algoritmo secuencial deja de ser válido. No podemos asegurar que cuando un nodo es extraído de a lista abierta, éste sea la mejor solución, pues puede haber otro proceso que en su próxima expansión encuentra una solución mejor. Esto ocurre cuando hay más de un nodo objetivo, y el criterio de terminación puede modificarse para que el algoritmo termine únicamente cuando encuentra la mejor solución \cite{leifker1984hybrid}. Por otro lado, los continuos accesos a la lista abierta generan una zona de contención entre los procesos, ya que ésta debe protegerse mediante un cerrojo para evitar condiciones de carrera. Esta contención limitaría el \textit{speedup} obtenido en la versión paralela a $(T_{exp} + T_{access})/T_{access}$, donde $T_{exp}$ es el tiempo promedio para una expansión, y $T_{access}$ es el tiempo promedio accediendo a la lista abierta por cada expansión \cite{huang1987tight}. También es necesario proteger la lista cerrada, pues diferentes procesos pueden estar leyendo y escribiendo a la vez para comprobar si el nodo ya ha sido visitado o si es un nodo nuevo. Lo más habitual es establecer un cerrojo por nodo, de manera que no se bloquee la estructura entera para el resto de procesos que puedan estar expandiendo otros nodos diferentes.
 
 \begin{figure}[H]
     \centering
@@ -567,10 +562,6 @@ La idea más sencilla para paralelizar A* es extraer tantos nodos de la lista ab
 Este algoritmo recibe el nombre de \textit{Simple Parallel A*} o SPA* (Algoritmo \ref{spastar}). En el pseudocódigo no se muestran los cerrojos de la lista cerrada y una variable atómica extra que es necesaria para detectar la terminación. Se comentarán estas diferencias a lo largo de la explicación, pero se ha decidido no incluirlas para no hacerlo excesivamente largo y difícil de entender a simple vista.
 
 La estructura general es similar a A*, inicializa la lista abierta con el nodo inicial y la lista cerrada vacía, pero ahora cuenta con un cerrojo para la lista abierta y otro para $m$, que representa la mejor solución encontrada hasta ahora (líneas 1-4). En esta parte también se inicializarían los cerrojos de la lista cerrada y el contador atómico. El bucle principal del algoritmo se ejecuta en paralelo para cada proceso $p$ (líneas 6-41). En esta versión no podemos terminar el algoritmo cuando $Q\neq \emptyset$ (línea 7), ya que puede darse el caso de que la lista esté vacía y otro proceso esté expandiendo un nodo sin haber introducido todavía los vecinos en la lista, algo que suele ocurrir muy a menudo al comienzo del algoritmo. Además, se debe comprobar también que el próximo nodo no empeora el coste del objetivo actual, pues se harían expansiones innecesarias. El valor estimado para $m$ cuando aún no hemos encontrado el objetivo debería ser un valor lo suficientemente alto, esto es, $\hat{f}(\text{NULL})=\infty$. Cuando se cumple alguna de las condiciones, se debe comprobar que ningún proceso puede descubrir una mejor solución. Para detectar la correcta terminación del algoritmo se utiliza variable atómica que cada proceso aumenta cuando se cumple alguna de las condiciones y que vuelve a decrementar si no se cumplen en alguna iteración posterior. Al inicio de cada iteración del bucle, \textsc{TerminateDetection()} se encarga de comprobar si el valor de esta variable es igual al número de procesos, en cuyo caso se puede dar por terminado el algoritmo. 
-
-A continuación los procesos se disponen a extraer el siguiente nodo de la lista abierta, protegiendo el acceso con un cerrojo para evitar condiciones de carrera (líneas 10-12). La inserción en la lista cerrada (línea 13) puede hacerse sin ningún cerrojo, ya que cada proceso habrá extraído un nodo diferente. La comprobación del objetivo es similar a la de la versión secuencial, pero protegiendo la variable $m$ con un cerrojo (líneas 14-20). El resto del algoritmo, es decir, la expansión del nodo actual, se realiza igual que en el algoritmo secuencial (líneas 21-41), pero en este caso, tanto los accesos a $Q$ como a $H$ deben protegerse. Puede darse el caso de que dos procesos obtengan el mismo vecino desde dos nodos diferentes, siendo necesaria la sincronización a la hora de comprobar cuál de los dos debe actualizar los valores del nodo si éste está cerrado y se han encontrado mejores caminos. Cuando el bucle principal termina, se comprueba si se ha encontrado el nodo objetivo y, si es el caso, se devuelve el camino (líneas 42-46).
-
-SPA* es muy sencillo de implementar en un modelo de memoria compartida, pero ha probado ser poco eficiente \cite{lai1984anomalies}, incluso peor que la versión secuencial para problemas en los que la operación de expansión de un nodo es rápida, debido a que la mayor parte del tiempo de ejecución de los procesos se desperdicia mientras esperan a obtener un nodo de la lista abierta. Aun así, ha servido de base para otras propuestas como PA*SE \cite{phillips2014pa}, que introduce un mecanismo para evitar reexpansiones innecesarias en SPA*, o PKBFS \cite{vidal2010adaptive}, que realiza la expansión paralela de los $k$ mejores nodos en cada iteración.
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
@@ -624,15 +615,15 @@ SPA* es muy sencillo de implementar en un modelo de memoria compartida, pero ha 
 \end{algorithmic}
 \end{algorithm}
 
+A continuación los procesos se disponen a extraer el siguiente nodo de la lista abierta, protegiendo el acceso con un cerrojo para evitar condiciones de carrera (líneas 10-12). La inserción en la lista cerrada (línea 13) puede hacerse sin ningún cerrojo, ya que cada proceso habrá extraído un nodo diferente. La comprobación del objetivo es similar a la de la versión secuencial, pero protegiendo la variable $m$ con un cerrojo (líneas 14-20). El resto del algoritmo, es decir, la expansión del nodo actual, se realiza igual que en el algoritmo secuencial (líneas 21-41), pero en este caso, tanto los accesos a $Q$ como a $H$ deben protegerse. Puede darse el caso de que dos procesos obtengan el mismo vecino desde dos nodos diferentes, siendo necesaria la sincronización a la hora de comprobar cuál de los dos debe actualizar los valores del nodo si éste está cerrado y se han encontrado mejores caminos. Cuando el bucle principal termina, se comprueba si se ha encontrado el nodo objetivo y, si es el caso, se devuelve el camino (líneas 42-46).
+
+SPA* es muy sencillo de implementar en un modelo de memoria compartida, pero ha probado ser poco eficiente \cite{lai1984anomalies}, incluso peor que la versión secuencial para problemas en los que la operación de expansión de un nodo es rápida, debido a que la mayor parte del tiempo de ejecución de los procesos se desperdicia mientras esperan a obtener un nodo de la lista abierta. Aun así, ha servido de base para otras propuestas como PA*SE \cite{phillips2014pa}, que introduce un mecanismo para evitar reexpansiones innecesarias en SPA*, o PKBFS \cite{vidal2010adaptive}, que realiza la expansión paralela de los $k$ mejores nodos en cada iteración.
+
 \subsection{A* descentralizado} \label{sec:descentralizado}
 
 La estrategia descentralizada surge para aliviar la sobrecarga debida a los accesos constantes a las listas abierta y cerrada en SPA*. En contraste con la estrategia centralizada, cada proceso tiene su propia lista abierta. Al inicio, el proceso padre expande el primer nodo y reparte los sucesores entre el resto de procesos hijos, que empezará una búsqueda en cada uno de ellos. Al descentralizar la lista abierta, se eliminan las condiciones de carrera al intentar acceder a una estructura global, pero surge la necesidad de balancear la carga de trabajo.
 
 En una estrategia distribuida, cada proceso extrae un nodo de su lista local. Cuando el espacio de búsqueda tiene forma de árbol, esta estrategia divide el trabajo de forma equitativa entre los procesos, pero puede llevar a que alguno de ellos explore una parte del árbol que hubiese sido descartada por la versión secuencial. Varios autores han propuesto estrategias de comunicación para repartir los nodos entre los procesos y aliviar esta sobrecarga en la búsqueda, lo que representa el clásico intercambio entre computación y comunicación en las arquitecturas distribuidas. Cuando el espacio de búsqueda es un grafo, además, surge el problema de detectar la duplicación de nodos, es decir, dos procesos pueden obtener el mismo nodo como resultado de la expansión de dos nodos diferentes.
-
-En una estrategia descentralizada (Algoritmo \ref{decentralized-astar}), cada proceso cuenta con su propia lista abierta (línea 1), cerrada y un \textit{buffer} de recepción. La función \textsc{ComputeRecipient}$(n)$ devuelve el índice del proceso al que debe mandarse el nodo $n$. Al entrar en el bucle principal (líneas 5-42), cada proceso comprueba si hay algún elemento en el \textit{buffer}. Extrae la información sobre el nodo, su nuevo coste y su padre (línea 7). A continuación comprueba si es un duplicado, si mejora el coste anterior, si es un nuevo nodo o si se puede descartar, al igual que en las otras versiones centralizada y secuencial (líneas 8-24). Una vez vaciado el \textit{buffer}, comprueba si debe terminar (líneas 26-28). Extrae un nodo de su lista abierta y lo inserta en su lista cerrada (líneas 29-30). Si es un nodo objetivo, actualiza el valor de $m$ (líneas 31-37). En caso contrario, expande el nodo, calculando el nuevo coste para alcanzarlo y enviando al propietario la información.
-
-Gran parte de la eficiencia de estas estrategias depende de la función \textsc{ComputeRecipient(n)} y de cómo reparta los nodos entre procesos. Karp y Zhang \cite{karp1988randomized, karp1993randomized} proponen una estrategia de distribución de trabajo aleatoria en la que cada vez que se obtiene un nodo al expandir, se calcula a qué proceso debe asignarse. Kumar et al. \cite{kumar1988parallel} proponen otro tipo de estrategia de distribución aleatoria a la que denominan \textit{blackboard}, en la que los procesadores comparten información a través de un estructura común. Otro ejemplo de estrategia distribuida es la denominada búsqueda bidireccional, que consiste en la ejecución del algoritmo de búsqueda desde el nodo inicial hacia el final y desde el nodo final hacia el inicial \cite{rios2011pnba}.
 
 % {\color{blue} revisa errores tipograficos y gramaticale en textos anteriores} % 
 
@@ -690,6 +681,10 @@ Gran parte de la eficiencia de estas estrategias depende de la función \textsc{
 \end{algorithmic}
 \end{algorithm}
 
+En una estrategia descentralizada (Algoritmo \ref{decentralized-astar}), cada proceso cuenta con su propia lista abierta (línea 1), cerrada y un \textit{buffer} de recepción. La función \textsc{ComputeRecipient}$(n)$ devuelve el índice del proceso al que debe mandarse el nodo $n$. Al entrar en el bucle principal (líneas 5-42), cada proceso comprueba si hay algún elemento en el \textit{buffer}. Extrae la información sobre el nodo, su nuevo coste y su padre (línea 7). A continuación comprueba si es un duplicado, si mejora el coste anterior, si es un nuevo nodo o si se puede descartar, al igual que en las otras versiones centralizada y secuencial (líneas 8-24). Una vez vaciado el \textit{buffer}, comprueba si debe terminar (líneas 26-28). Extrae un nodo de su lista abierta y lo inserta en su lista cerrada (líneas 29-30). Si es un nodo objetivo, actualiza el valor de $m$ (líneas 31-37). En caso contrario, expande el nodo, calculando el nuevo coste para alcanzarlo y enviando al propietario la información.
+
+Gran parte de la eficiencia de estas estrategias depende de la función \textsc{ComputeRecipient(n)} y de cómo reparta los nodos entre procesos. Karp y Zhang \cite{karp1988randomized, karp1993randomized} proponen una estrategia de distribución de trabajo aleatoria en la que cada vez que se obtiene un nodo al expandir, se calcula a qué proceso debe asignarse. Kumar et al. \cite{kumar1988parallel} proponen otro tipo de estrategia de distribución aleatoria a la que denominan \textit{blackboard}, en la que los procesos comparten información a través de un estructura común. Otro ejemplo de estrategia distribuida es la denominada búsqueda bidireccional, que consiste en la ejecución del algoritmo de búsqueda desde el nodo inicial hacia el final y desde el nodo final hacia el inicial \cite{rios2011pnba}.
+
 El problema con las estrategias aleatorias es que los nodos duplicados solo son detectados si se mandan fortuitamente al mismo proceso. Otro enfoque más simple para distribuir la carga de trabajo entre los procesos fue introducido por Evett et al. \cite{evett1995massively}. En su artículo presentan PRA*, una versión paralela de A* distribuida en la que el reparto de nodos entre los procesos se realiza mediante una función \textit{hash} que asigna cada nodo a único proceso. Al expandir un nodo, cada proceso debe calcular a qué proceso debe mandar cada sucesor de manera síncrona. Cada proceso cuenta con un \textit{buffer} que el resto deben bloquear cada vez que envían un nodo. Esta idea de asignar el trabajo a los procesos mediante una función \textit{hash} también fue usada por Mahapatra \cite{mahapatra2002scalable} para paralelizar una versión de A* llamada SEQ\_A*, pero tanto Evett et al. como Mahapatra no explorar esta técnica lo suficiente en sus trabajos, ya que se centraban en otros aspectos del problema, como la retracción de nodos en el caso de Evett.
 
 \subsection{Hash Distributed A*}
@@ -699,12 +694,30 @@ Kishimoto, Fukunawa y Botea \cite{kishimoto2009scalable, kishimoto2013evaluation
 Los primeros trabajos sobre HDA* no evaluaron de forma cuantitativa el impacto que tiene la elección de la función \textit{hash}, lo que llevó a que investigaciones posteriores arrojaran resultados poco precisos. Posteriormente, Jinnai y Fukunaga \cite{jinnai2016abstract} realizaron una comparación entre diferentes funciones de dispersión utilizadas en la literatura, demostrando que tanto la función \textit{hash} de Zobrist como su versión mejorada, conocida como Abstract Zobrist hashing, superan con claridad a otras alternativas empleadas anteriormente.
 
 
+\subsection{Implementaciones en GPU}
+
+En los últimos años se han desarrollado implementaciones de A* en arquitecturas de procesamiento gráfico (GPU). Zheng y Zhou \cite{zhou2015massively} proponen GA*, un algoritmo que explota el paralelismo para la expansión de nodos utilizando grandes cantidades de listas abiertas distribuidas entre los hilos. Esto provoca la generación de una gran cantidad de nodos duplicados, pero proponen dos técnicas efectivas basadas en \textit{hashing} para detectarlos. La principal limitación de esta implementación es la limitada memoria de las GPU, lo que ha llevado a otras propuestas basadas en versiones limitadas en memoria como IDA* \cite{horie2017block}.
+
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Objetivos} \label{sec:objetivos}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-El objetivo de este trabajo es implementar y evaluar tres versiones del algoritmo A*: una versión secuencial y dos versiones paralelas basadas en las estrategias centralzada y descentralizada que se han explicado en la Sección \ref{sec:estado_arte}.
+El objetivo principal de este trabajo es analizar el impacto del paralelismo en el rendimiento del algoritmo A*. Para ello, se implementará una versión secuencial y dos paralelas: una centralizada y otra descentralizada, ambas implementadas en un modelo de memoria compartida. A través de esta comparación, se pretende conseguir una mejora en el tiempo de ejecución con respecto a la versión secuencial, así como estudiar las limitaciones y desafíos asociados a ambos enfoques de paralelización.
+
+En concreto, se plantean los siguientes objetivos específicos:
+
+\begin{itemize}
+\item Implementar una versión secuencial del algoritmo A* que sirva como referencia para las comparaciones.
+
+\item Desarrollar una versión paralela centralizada del algoritmo basada en SPA*.
+
+\item Implementar una versión paralela descentralizada basada en el algoritmo HDA* y adaptada a un entorno de memoria compartida.
+
+\item Evaluar el rendimiento de cada versión en términos de tiempo de ejecución, escalabilidad y eficiencia en distintos tipos grafos.
+
+\item Analizar los resultados obtenidos y extraer conclusiones sobre la viabilidad de los dos enfoques principales de paralelización del algoritmo.
+\end{itemize}
 
 \newpage
 
@@ -712,8 +725,17 @@ El objetivo de este trabajo es implementar y evaluar tres versiones del algoritm
 \section{Metodología} \label{sec:metodologia}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-La segunda mitad de este trabajo consiste en el desarrollo y la evalución de distintas versiones del algoritmo A*, en concreto, una versión secuencial, una versión centralizada y una versión descentralizada, que se evaluarán en distintos escenarios. El objetivo principal es obtener una mejora en la versiones paralela con respecto a la versión secuencial. Todo el código se desarrollará en el lenguaje de programación C, y se compilará con la herramienta \verb|gcc|. Para implementar el paralelismo se ha utilizado OpenMP. La versión centralizada estará basada en SPA*, y la descentralizada en HDA*. Aunque HDA* está pensado para implementarse en un entorno de memoria distribuida mediante MPI, en este trabajo se propone una implementación con OpenMP que simula la comunicación asíncrona entre hilos.
+Para abordar los objetivos planteados, se ha implementado las disitintas versiones usando el lenguaje de programación C y el compilador GCC. Para la implementación del paralelismo y la gestión de la memoria compartida se ha utilizado la librería OpenMP.
 
+La primera fase del trabajo consistió en la implementación de una versión secuencial, la cual actúa como línea base para evaluar los beneficios de las versiones paralelas.
+
+La versión paralela centralizada se basa en el enfoque SPA* (Simple Parallel A*), donde múltiples hilos de OpenMP comparten las listas abierta y cerrada y cooperan en la expansión de nodos. La sincronización y la gestión de la concurrencia se realizan mediante directivas de OpenMP, lo que permite aprovechar el paralelismo sin salir del entorno de memoria compartida.
+
+La versión descentralizada se inspira en el algoritmo HDA* (Hash Distributed A*), originalmente diseñado para entornos distribuidos y programado típicamente con MPI. En este trabajo, se ha adaptado dicho enfoque para funcionar en un entorno compartido, simulando la comunicación asíncrona entre procesos mediante \textit{bufferes} mecanismos de reparto dinámico de nodos. Esta adaptación permite estudiar las características del paralelismo descentralizado sin la necesidad de implementar una infraestructura distribuida real.
+
+El rendimiento de las distintas versiones se ha realizado con las utilizades que provee la propia librería OpenMP para extraer información del tiempo en ejecución. Se ha seleccionado un conjunto de escenarios de prueba que incluyen grafos de diferentes tamaños y densidades. 
+
+Los resultados obtenidos nos muestra las ventajas y limitaciones de cada enfoque de paralelización. Se estudian el tiempo de ejecución de cada versión al variar el número de hilos y el tipo de grafo con el fin de analizar la escalabilidad y eficiencia de cada enfoque.
 
 \newpage
 
@@ -1178,7 +1200,7 @@ En la Figura \ref{synthetic} podemos ver como ambos algoritmos funcionan peor en
     \label{synthetic}
 \end{figure}
 
-El mal desempeño de HDA* en el mapa de dos caminos se explica debido a que los hilos pasan la mayor parte del tiempo esperando a recibir un nodo para expandir. Por cómo se ha implementado la función \textit{hahs} para repartir los nodos entre hilos, cada nodo consecutivo del escenario pertenecerá a un proceso distinto, por lo que solo el hilo con el nodo actual en el camino óptimo estará realmente trabajando. Cabe destacar que podría obtenerse un mejor resultado diseñando una función \textit{hash} específica para este escenario que repartiera el trabajo entre los hilos de otra manera, como por ejemplo asignando cada fila a un hilo. En el caso del mapa vacío, lo que ocurre es que la heurística guía al camino perfectamente, por lo que la versión secuencial solamente explora los nodos en el camino óptimo, y cualquier otro trabajo extra realizado por HDA* afecta negativamente a su resultado, además del coste añadido por comunicar los nodos entre procesos.
+El mal desempeño de HDA* en el mapa de dos caminos se debe a que los hilos pasan la mayor parte del tiempo esperando a recibir un nodo para expandir. Por cómo se ha implementado la función \textit{hash} para repartir los nodos entre hilos, cada nodo consecutivo del camino óptimo pertenecerá a un proceso distinto, por lo que solo el hilo con el nodo actual en el camino óptimo estará realmente trabajando. Cabe destacar que podría obtenerse un mejor resultado diseñando una función \textit{hash} específica para este escenario que repartiera el trabajo entre los hilos de otra manera, como por ejemplo asignando cada fila a un hilo. En el caso del mapa vacío, lo que ocurre es que la heurística guía al camino perfectamente, por lo que la versión secuencial solamente explora los nodos en el camino óptimo, y cualquier otro trabajo extra realizado por HDA* afecta negativamente a su resultado, además del coste añadido por comunicar los nodos entre procesos.
 
 Por último, vamos ver cómo afecta al rendimiento de HDA* el parámetro \verb|threshold|, que recordemos que es el número máximo de nodos que puede acumular un hilo antes de enviárselos a su propietario. En realidad definíamos dos valores: uno para el \textit{buffer} de recepción y otro para el de envío. Asignamos el mismo valor a ambos, por eso en la Figura \ref{fig:threshold} se nombra el eje de abscisas como \verb|threshold|. Se ha ejecutado el algoritmo con cuatro y ocho hilos en el mapa con forma de laberinto de $1000 \times 1000 \times 1$.
 
@@ -1200,15 +1222,16 @@ Se observa una tendencia a disminuir el tiempo de ejecución a medida que aument
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusiones y Trabajo Futuro} \label{sec:conclusiones}
+\section{Conclusiones} \label{sec:conclusiones}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Conclusiones}
 
 
+\newpage
 
-\subsection{Trabajo Futuro}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Trabajo futuro} \label{sec:conclusiones}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
 

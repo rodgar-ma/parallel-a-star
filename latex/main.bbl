@@ -4,290 +4,180 @@
 \providecommand{\doi}[1]{https://doi.org/#1}
 
 \bibitem{barnouti_pathfinding_2016}
-Barnouti, N.H., Al-Dabbagh, S.S.M., Naser, M.A.S.: Pathfinding in {Strategy}
-  {Games} and {Maze} {Solving} {Using} {A}* {Search} {Algorithm}. Journal of
-  Computer and Communications  \textbf{4}(11),  15--25 (Sep 2016).
-  \doi{10.4236/jcc.2016.411002},
-  \url{https://www.scirp.org/journal/paperinformation?paperid=70460}, number:
-  11 Publisher: Scientific Research Publishing
+Barnouti, N.H., Al-Dabbagh, S.S.M., Naser, M.A.S.: Pathfinding in {Strategy} {Games} and {Maze} {Solving} {Using} {A}* {Search} {Algorithm}. Journal of Computer and Communications  \textbf{4}(11),  15--25 (Sep 2016). \doi{10.4236/jcc.2016.411002}, \url{https://www.scirp.org/journal/paperinformation?paperid=70460}, number: 11 Publisher: Scientific Research Publishing
 
 \bibitem{boruuvka1926jistem}
-Borůvka, O.: O jist{\'e}m probl{\'e}mu minim{\'a}ln{\'\i}m. Práce Mor.
-  Přírodověd. Spol. V Brně III  \textbf{3},  37--58 (1926)
+Borůvka, O.: O jist{\'e}m probl{\'e}mu minim{\'a}ln{\'\i}m. Práce Mor. Přírodověd. Spol. V Brně III  \textbf{3},  37--58 (1926)
 
 \bibitem{bulitko2006learning}
-Bulitko, V., Lee, G.: Learning in real-time search: A unifying framework.
-  Journal of Artificial Intelligence Research  \textbf{25},  119--157 (2006)
+Bulitko, V., Lee, G.: Learning in real-time search: A unifying framework. Journal of Artificial Intelligence Research  \textbf{25},  119--157 (2006)
 
 \bibitem{burns2010best}
-Burns, E., Lemons, S., Ruml, W., Zhou, R.: Best-first heuristic search for
-  multicore machines. Journal of Artificial Intelligence Research  \textbf{39},
-   689--743 (2010)
+Burns, E., Lemons, S., Ruml, W., Zhou, R.: Best-first heuristic search for multicore machines. Journal of Artificial Intelligence Research  \textbf{39},  689--743 (2010)
 
 \bibitem{colorni1991distributed}
-Colorni, A., Dorigo, M., Maniezzo, V., et~al.: Distributed optimization by ant
-  colonies. In: Proceedings of the first European conference on artificial
-  life. vol.~142, pp. 134--142. Paris, France (1991)
+Colorni, A., Dorigo, M., Maniezzo, V., et~al.: Distributed optimization by ant colonies. In: Proceedings of the first European conference on artificial life. vol.~142, pp. 134--142. Paris, France (1991)
 
 \bibitem{daniel2010theta}
-Daniel, K., Nash, A., Koenig, S., Felner, A.: Theta$^*$: Any-angle path
-  planning on grids. Journal of Artificial Intelligence Research  \textbf{39},
-  533--579 (2010)
+Daniel, K., Nash, A., Koenig, S., Felner, A.: Theta$^*$: Any-angle path planning on grids. Journal of Artificial Intelligence Research  \textbf{39},  533--579 (2010)
 
 \bibitem{dechter1983optimality}
-Dechter, R., Pearl, J.: The optimality of {A}$^*$ revisited. In: Proceedings of
-  the Third AAAI Conference on Artificial Intelligence. pp. 95--99 (1983)
+Dechter, R., Pearl, J.: The optimality of {A}$^*$ revisited. In: Proceedings of the Third AAAI Conference on Artificial Intelligence. pp. 95--99 (1983)
 
 \bibitem{dechter1985generalized}
-Dechter, R., Pearl, J.: Generalized best-first search strategies and the
-  optimality of {A}$^*$. Journal of the ACM (JACM)  \textbf{32}(3),  505--536
-  (1985)
+Dechter, R., Pearl, J.: Generalized best-first search strategies and the optimality of {A}$^*$. Journal of the ACM (JACM)  \textbf{32}(3),  505--536 (1985)
 
 \bibitem{dijkstra_note_1959}
-Dijkstra, E.W.: A note on two problems in connexion with graphs. Numerische
-  Mathematik  \textbf{1}(1),  269--271 (Dec 1959). \doi{10.1007/BF01386390},
-  \url{https://doi.org/10.1007/BF01386390}
+Dijkstra, E.W.: A note on two problems in connexion with graphs. Numerische Mathematik  \textbf{1}(1),  269--271 (Dec 1959). \doi{10.1007/BF01386390}, \url{https://doi.org/10.1007/BF01386390}
 
 \bibitem{doran_experiments_1997}
-Doran, J.E., Michie, D., Kendall, D.G.: Experiments with the {Graph}
-  {Traverser} program. Proceedings of the Royal Society of London. Series A.
-  Mathematical and Physical Sciences  \textbf{294}(1437),  235--259 (Jan 1997).
-  \doi{10.1098/rspa.1966.0205},
-  \url{https://royalsocietypublishing.org/doi/10.1098/rspa.1966.0205},
-  publisher: Royal Society
+Doran, J.E., Michie, D., Kendall, D.G.: Experiments with the {Graph} {Traverser} program. Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences  \textbf{294}(1437),  235--259 (Jan 1997). \doi{10.1098/rspa.1966.0205}, \url{https://royalsocietypublishing.org/doi/10.1098/rspa.1966.0205}, publisher: Royal Society
 
 \bibitem{eckstein1977parallel}
-Eckstein, D.M., Alton, D.A.: Parallel graph processing using depth-first
-  search. University of Iowa. Department of Computer Science (1977)
+Eckstein, D.M., Alton, D.A.: Parallel graph processing using depth-first search. University of Iowa. Department of Computer Science (1977)
 
 \bibitem{euler1741solutio}
-Euler, L.: Solutio problematis ad geometriam situs pertinentis. Commentarii
-  academiae scientiarum Petropolitanae pp. 128--140 (1741)
+Euler, L.: Solutio problematis ad geometriam situs pertinentis. Commentarii academiae scientiarum Petropolitanae pp. 128--140 (1741)
 
 \bibitem{evett1995massively}
-Evett, M., Hendler, J., Mahanti, A., Nau, D.: {P}{R}{A}$^*$: Massively parallel
-  heuristic search. Journal of Parallel and Distributed Computing
-  \textbf{25}(2),  133--143 (1995)
+Evett, M., Hendler, J., Mahanti, A., Nau, D.: {P}{R}{A}$^*$: Massively parallel heuristic search. Journal of Parallel and Distributed Computing  \textbf{25}(2),  133--143 (1995)
 
 \bibitem{felner_adding_2018}
-Felner, A., Li, J., Boyarski, E., Ma, H., Cohen, L., Kumar, T.K.S., Koenig, S.:
-  Adding {Heuristics} to {Conflict}-{Based} {Search} for {Multi}-{Agent} {Path}
-  {Finding}. Proceedings of the International Conference on Automated Planning
-  and Scheduling  \textbf{28},  83--87 (Jun 2018).
-  \doi{10.1609/icaps.v28i1.13883},
-  \url{https://ojs.aaai.org/index.php/ICAPS/article/view/13883}
+Felner, A., Li, J., Boyarski, E., Ma, H., Cohen, L., Kumar, T.K.S., Koenig, S.: Adding {Heuristics} to {Conflict}-{Based} {Search} for {Multi}-{Agent} {Path} {Finding}. Proceedings of the International Conference on Automated Planning and Scheduling  \textbf{28},  83--87 (Jun 2018). \doi{10.1609/icaps.v28i1.13883}, \url{https://ojs.aaai.org/index.php/ICAPS/article/view/13883}
 
 \bibitem{fredman1987fibonacci}
-Fredman, M.L., Tarjan, R.E.: Fibonacci heaps and their uses in improved network
-  optimization algorithms. Journal of the ACM (JACM)  \textbf{34}(3),  596--615
-  (1987)
+Fredman, M.L., Tarjan, R.E.: Fibonacci heaps and their uses in improved network optimization algorithms. Journal of the ACM (JACM)  \textbf{34}(3),  596--615 (1987)
 
 \bibitem{freeman1991parallel}
-Freeman, J.: Parallel algorithms for depth-first search. Department of Computer
-  and Information Science. University of Pennsylvania  (1991)
+Freeman, J.: Parallel algorithms for depth-first search. Department of Computer and Information Science. University of Pennsylvania  (1991)
 
 \bibitem{fukunaga2017survey}
-Fukunaga, A., Botea, A., Jinnai, Y., Kishimoto, A.: A survey of parallel
-  {A}$^*$. arXiv preprint arXiv:1708.05296  (2017)
+Fukunaga, A., Botea, A., Jinnai, Y., Kishimoto, A.: A survey of parallel {A}$^*$. arXiv preprint arXiv:1708.05296  (2017)
 
 \bibitem{gelperin1977optimality}
-Gelperin, D.: On the optimality of {A}$^*$. Artificial Intelligence
-  \textbf{8}(1),  69--76 (1977)
+Gelperin, D.: On the optimality of {A}$^*$. Artificial Intelligence  \textbf{8}(1),  69--76 (1977)
 
 \bibitem{grama1995parallel}
-Grama, A., Kumar, V.: Parallel search algorithms for discrete optimization
-  problems. ORSA Journal on Computing  \textbf{7}(4),  365--385 (1995)
+Grama, A., Kumar, V.: Parallel search algorithms for discrete optimization problems. ORSA Journal on Computing  \textbf{7}(4),  365--385 (1995)
 
 \bibitem{hansen2007anytime}
-Hansen, E.A., Zhou, R.: Anytime heuristic search. Journal of Artificial
-  Intelligence Research  \textbf{28},  267--297 (2007)
+Hansen, E.A., Zhou, R.: Anytime heuristic search. Journal of Artificial Intelligence Research  \textbf{28},  267--297 (2007)
 
 \bibitem{harabor_online_2011}
-Harabor, D., Grastien, A.: Online {Graph} {Pruning} for {Pathfinding} {On}
-  {Grid} {Maps}. Proceedings of the AAAI Conference on Artificial Intelligence
-  \textbf{25}(1),  1114--1119 (Aug 2011). \doi{10.1609/aaai.v25i1.7994},
-  \url{https://ojs.aaai.org/index.php/AAAI/article/view/7994}
+Harabor, D., Grastien, A.: Online {Graph} {Pruning} for {Pathfinding} {On} {Grid} {Maps}. Proceedings of the AAAI Conference on Artificial Intelligence  \textbf{25}(1),  1114--1119 (Aug 2011). \doi{10.1609/aaai.v25i1.7994}, \url{https://ojs.aaai.org/index.php/AAAI/article/view/7994}
 
 \bibitem{hart_formal_1968}
-Hart, P.E., Nilsson, N.J., Raphael, B.: A {Formal} {Basis} for the {Heuristic}
-  {Determination} of {Minimum} {Cost} {Paths}. IEEE Transactions on Systems
-  Science and Cybernetics  \textbf{4}(2),  100--107 (Jul 1968).
-  \doi{10.1109/TSSC.1968.300136},
-  \url{https://ieeexplore.ieee.org/document/4082128}, conference Name: IEEE
-  Transactions on Systems Science and Cybernetics
+Hart, P.E., Nilsson, N.J., Raphael, B.: A {Formal} {Basis} for the {Heuristic} {Determination} of {Minimum} {Cost} {Paths}. IEEE Transactions on Systems Science and Cybernetics  \textbf{4}(2),  100--107 (Jul 1968). \doi{10.1109/TSSC.1968.300136}, \url{https://ieeexplore.ieee.org/document/4082128}, conference Name: IEEE Transactions on Systems Science and Cybernetics
 
 \bibitem{hart_correction_1972}
-Hart, P.E., Nilsson, N.J., Raphael, B.: Correction to ``{A} {Formal} {Basis}
-  for the {Heuristic} {Determination} of {Minimum} {Cost} {Paths}''. ACM SIGART
-  Bulletin  \textbf{37},  28--29 (Dec 1972). \doi{10.1145/1056777.1056779},
-  \url{https://dl.acm.org/doi/10.1145/1056777.1056779}
+Hart, P.E., Nilsson, N.J., Raphael, B.: Correction to ``{A} {Formal} {Basis} for the {Heuristic} {Determination} of {Minimum} {Cost} {Paths}''. ACM SIGART Bulletin  \textbf{37},  28--29 (Dec 1972). \doi{10.1145/1056777.1056779}, \url{https://dl.acm.org/doi/10.1145/1056777.1056779}
+
+\bibitem{horie2017block}
+Horie, S., Fukunaga, A.: Block-parallel ida* for gpus. In: Proceedings of the International Symposium on Combinatorial Search. vol.~8, pp. 134--138 (2017)
 
 \bibitem{huang1987tight}
-HUANG, S.R.: A tight upper bound for the speed-up of parallel best-first
-  branch-and-bound algorithms. Center for Automation Research, University of
-  Maryland  (1987)
+HUANG, S.R.: A tight upper bound for the speed-up of parallel best-first branch-and-bound algorithms. Center for Automation Research, University of Maryland  (1987)
 
 \bibitem{jinnai2016abstract}
-Jinnai, Y., Fukunaga, A.: Abstract zobrist hashing: An efficient work
-  distribution method for parallel best-first search. In: Proceedings of the
-  AAAI Conference on Artificial Intelligence. vol.~30 (2016)
+Jinnai, Y., Fukunaga, A.: Abstract zobrist hashing: An efficient work distribution method for parallel best-first search. In: Proceedings of the AAAI Conference on Artificial Intelligence. vol.~30 (2016)
 
 \bibitem{karp1988randomized}
-Karp, R., Zhang, Y.: A randomized parallel branch-and-bound procedure. In:
-  Proceedings of the twentieth annual ACM symposium on Theory of computing. pp.
-  290--300 (1988)
+Karp, R., Zhang, Y.: A randomized parallel branch-and-bound procedure. In: Proceedings of the twentieth annual ACM symposium on Theory of computing. pp. 290--300 (1988)
 
 \bibitem{karp1993randomized}
-Karp, R.M., Zhang, Y.: Randomized parallel algorithms for backtrack search and
-  branch-and-bound computation. Journal of the ACM (JACM)  \textbf{40}(3),
-  765--789 (1993)
+Karp, R.M., Zhang, Y.: Randomized parallel algorithms for backtrack search and branch-and-bound computation. Journal of the ACM (JACM)  \textbf{40}(3),  765--789 (1993)
 
 \bibitem{kishimoto2009scalable}
-Kishimoto, A., Fukunaga, A., Botea, A.: Scalable, parallel best-first search
-  for optimal sequential planning. In: Proceedings of the International
-  Conference on Automated Planning and Scheduling. vol.~19, pp. 201--208 (2009)
+Kishimoto, A., Fukunaga, A., Botea, A.: Scalable, parallel best-first search for optimal sequential planning. In: Proceedings of the International Conference on Automated Planning and Scheduling. vol.~19, pp. 201--208 (2009)
 
 \bibitem{kishimoto2013evaluation}
-Kishimoto, A., Fukunaga, A., Botea, A.: Evaluation of a simple, scalable,
-  parallel best-first search strategy. Artificial Intelligence  \textbf{195},
-  222--248 (2013)
+Kishimoto, A., Fukunaga, A., Botea, A.: Evaluation of a simple, scalable, parallel best-first search strategy. Artificial Intelligence  \textbf{195},  222--248 (2013)
 
 \bibitem{koenig2001incremental}
-Koenig, S., Likhachev, M.: Incremental {A}$^*$. Advances in neural information
-  processing systems  \textbf{14} (2001)
+Koenig, S., Likhachev, M.: Incremental {A}$^*$. Advances in neural information processing systems  \textbf{14} (2001)
 
 \bibitem{korf1985depth}
-Korf, R.E.: Depth-first iterative-deepening: An optimal admissible tree search.
-  Artificial intelligence  \textbf{27}(1),  97--109 (1985)
+Korf, R.E.: Depth-first iterative-deepening: An optimal admissible tree search. Artificial intelligence  \textbf{27}(1),  97--109 (1985)
 
 \bibitem{kumar1988parallel}
-Kumar, V., Ramesh, K., Rao, V.N.: Parallel best-first search of state-space
-  graphs: A summary of results. In: AAAI. vol.~88, pp. 122--127. Citeseer
-  (1988)
+Kumar, V., Ramesh, K., Rao, V.N.: Parallel best-first search of state-space graphs: A summary of results. In: AAAI. vol.~88, pp. 122--127. Citeseer (1988)
 
 \bibitem{kumar1987parallel}
-Kumar, V., Rao, V.N.: Parallel depth first search. part ii. analysis.
-  International Journal of Parallel Programming  \textbf{16}(6),  501--519
-  (1987)
+Kumar, V., Rao, V.N.: Parallel depth first search. part ii. analysis. International Journal of Parallel Programming  \textbf{16}(6),  501--519 (1987)
 
 \bibitem{lai1984anomalies}
-Lai, T.H., Sahni, S.: Anomalies in parallel branch-and-bound algorithms.
-  Communications of the ACM  \textbf{27}(6),  594--602 (1984)
+Lai, T.H., Sahni, S.: Anomalies in parallel branch-and-bound algorithms. Communications of the ACM  \textbf{27}(6),  594--602 (1984)
 
 \bibitem{leifker1984hybrid}
-Leifker, D.B., Kanal, L.N.: A Hybrid SSS*/Alpha-Beta Algorithm for Parallel
-  Search of Game Trees. University of Maryland. Computer Science (1984)
+Leifker, D.B., Kanal, L.N.: A Hybrid SSS*/Alpha-Beta Algorithm for Parallel Search of Game Trees. University of Maryland. Computer Science (1984)
 
 \bibitem{mahapatra2002scalable}
-Mahapatra, N.R., Dutt, S.: Scalable global and local hashing strategies for
-  duplicate pruning in parallel a* graph search. IEEE Transactions on Parallel
-  and Distributed Systems  \textbf{8}(7),  738--756 (2002)
+Mahapatra, N.R., Dutt, S.: Scalable global and local hashing strategies for duplicate pruning in parallel a* graph search. IEEE Transactions on Parallel and Distributed Systems  \textbf{8}(7),  738--756 (2002)
 
 \bibitem{martins_improved_2022}
-Martins, O.O., Adekunle, A.A., Olaniyan, O.M., Bolaji, B.O.: An {Improved}
-  multi-objective a-star algorithm for path planning in a large workspace:
-  {Design}, {Implementation}, and {Evaluation}. Scientific African
-  \textbf{15},  e01068 (Mar 2022). \doi{10.1016/j.sciaf.2021.e01068},
-  \url{https://www.sciencedirect.com/science/article/pii/S2468227621003690}
+Martins, O.O., Adekunle, A.A., Olaniyan, O.M., Bolaji, B.O.: An {Improved} multi-objective a-star algorithm for path planning in a large workspace: {Design}, {Implementation}, and {Evaluation}. Scientific African  \textbf{15},  e01068 (Mar 2022). \doi{10.1016/j.sciaf.2021.e01068}, \url{https://www.sciencedirect.com/science/article/pii/S2468227621003690}
 
 \bibitem{nillsson1971problem}
-Nillsson, N.J.: Problem Solving Methods in Artificial Intelligence. McGraw-Hill
-  Book Company, New York, New York (1971)
+Nillsson, N.J.: Problem Solving Methods in Artificial Intelligence. McGraw-Hill Book Company, New York, New York (1971)
 
 \bibitem{nilsson2014principles}
 Nilsson, N.J.: Principles of artificial intelligence. Morgan Kaufmann (2014)
 
 \bibitem{phillips2014pa}
-Phillips, M., Likhachev, M., Koenig, S.: Pa* se: Parallel a* for slow
-  expansions. In: Proceedings of the International Conference on Automated
-  Planning and Scheduling. vol.~24, pp. 208--216 (2014)
+Phillips, M., Likhachev, M., Koenig, S.: Pa* se: Parallel a* for slow expansions. In: Proceedings of the International Conference on Automated Planning and Scheduling. vol.~24, pp. 208--216 (2014)
 
 \bibitem{rafiq_pathfinding_2020}
-Rafiq, A., Asmawaty Abdul~Kadir, T., Normaziah~Ihsan, S.: Pathfinding
-  {Algorithms} in {Game} {Development}. IOP Conference Series: Materials
-  Science and Engineering  \textbf{769}(1),  012021 (Feb 2020).
-  \doi{10.1088/1757-899X/769/1/012021},
-  \url{https://iopscience.iop.org/article/10.1088/1757-899X/769/1/012021}
+Rafiq, A., Asmawaty Abdul~Kadir, T., Normaziah~Ihsan, S.: Pathfinding {Algorithms} in {Game} {Development}. IOP Conference Series: Materials Science and Engineering  \textbf{769}(1),  012021 (Feb 2020). \doi{10.1088/1757-899X/769/1/012021}, \url{https://iopscience.iop.org/article/10.1088/1757-899X/769/1/012021}
 
 \bibitem{rao1987parallel}
-Rao, V.N., Kumar, V.: Parallel depth first search. part i. implementation.
-  International Journal of Parallel Programming  \textbf{16}(6),  479--499
-  (1987)
+Rao, V.N., Kumar, V.: Parallel depth first search. part i. implementation. International Journal of Parallel Programming  \textbf{16}(6),  479--499 (1987)
 
 \bibitem{rao1988superlinear}
-Rao, V.N., Kumar, V.: Superlinear speedup in parallel state-space search. In:
-  Foundations of Software Technology and Theoretical Computer Science: Eighth
-  Conference, Pune, India December 21--23, 1988 Proceedings 8. pp. 161--174.
-  Springer (1988)
+Rao, V.N., Kumar, V.: Superlinear speedup in parallel state-space search. In: Foundations of Software Technology and Theoretical Computer Science: Eighth Conference, Pune, India December 21--23, 1988 Proceedings 8. pp. 161--174. Springer (1988)
 
 \bibitem{reghbati1978parallel}
-Reghbati, E., Corneil, D.G.: Parallel computations in graph theory. SIAM
-  Journal on Computing  \textbf{7}(2),  230--237 (1978)
+Reghbati, E., Corneil, D.G.: Parallel computations in graph theory. SIAM Journal on Computing  \textbf{7}(2),  230--237 (1978)
 
 \bibitem{reif1985depth}
-Reif, J.H.: Depth-first search is inherently sequential. Information Processing
-  Letters  \textbf{20}(5),  229--234 (1985)
+Reif, J.H.: Depth-first search is inherently sequential. Information Processing Letters  \textbf{20}(5),  229--234 (1985)
 
 \bibitem{rios2011pnba}
-Rios, L.H.O., Chaimowicz, L.: Pnba*: A parallel bidirectional heuristic search
-  algorithm. In: ENIA VIII Encontro Nacional de Intelig{\^e} ncia Artificial
-  (2011)
+Rios, L.H.O., Chaimowicz, L.: Pnba*: A parallel bidirectional heuristic search algorithm. In: ENIA VIII Encontro Nacional de Intelig{\^e} ncia Artificial (2011)
 
 \bibitem{russell1992cient}
-Russell, S.: E cient memory-bounded search methods. In: Proc of ECAI-92.
-  Citeseer (1992)
+Russell, S.: E cient memory-bounded search methods. In: Proc of ECAI-92. Citeseer (1992)
 
 \bibitem{russell2016artificial}
-Russell, S.J., Norvig, P.: Artificial intelligence: a modern approach. pearson
-  (2016)
+Russell, S.J., Norvig, P.: Artificial intelligence: a modern approach. pearson (2016)
 
 \bibitem{schrijver2012history}
-Schrijver, A.: On the history of the shortest path problem. In: Grötschel, M.
-  (ed.) Documenta {Mathematica} {Series}, vol.~6, pp. 155--167. EMS Press, 1
-  edn. (jan 2012). \doi{10.4171/dms/6/19},
-  \url{https://ems.press/doi/10.4171/dms/6/19}
+Schrijver, A.: On the history of the shortest path problem. In: Grötschel, M. (ed.) Documenta {Mathematica} {Series}, vol.~6, pp. 155--167. EMS Press, 1 edn. (jan 2012). \doi{10.4171/dms/6/19}, \url{https://ems.press/doi/10.4171/dms/6/19}
 
 \bibitem{standley_complete_2011}
-Standley, T.S., Korf, R.: Complete {Algorithms} for {Cooperative} {Pathfinding}
-  {Problems}. International Joint Conference on Artificial Intelligence
-  (2011),
-  \url{https://www.semanticscholar.org/paper/Complete-Algorithms-for-Cooperative-Pathfinding-Standley-Korf/146061be1affd4af17b8996f1d0316ad147368f5}
+Standley, T.S., Korf, R.: Complete {Algorithms} for {Cooperative} {Pathfinding} {Problems}. International Joint Conference on Artificial Intelligence  (2011), \url{https://www.semanticscholar.org/paper/Complete-Algorithms-for-Cooperative-Pathfinding-Standley-Korf/146061be1affd4af17b8996f1d0316ad147368f5}
 
 \bibitem{stentz1994optimal}
-Stentz, A.: Optimal and efficient path planning for partially-known
-  environments. In: Proceedings of the 1994 IEEE international conference on
-  robotics and automation. pp. 3310--3317. IEEE (1994)
+Stentz, A.: Optimal and efficient path planning for partially-known environments. In: Proceedings of the 1994 IEEE international conference on robotics and automation. pp. 3310--3317. IEEE (1994)
 
 \bibitem{sturtevant2012benchmarks}
-Sturtevant, N.: Benchmarks for grid-based pathfinding. Transactions on
-  Computational Intelligence and AI in Games  \textbf{4}(2),  144 -- 148
-  (2012), \url{http://web.cs.du.edu/~sturtevant/papers/benchmarks.pdf}
+Sturtevant, N.: Benchmarks for grid-based pathfinding. Transactions on Computational Intelligence and AI in Games  \textbf{4}(2),  144 -- 148 (2012), \url{http://web.cs.du.edu/~sturtevant/papers/benchmarks.pdf}
 
 \bibitem{tero2010rules}
-Tero, A., Takagi, S., Saigusa, T., Ito, K., Bebber, D.P., Fricker, M.D.,
-  Yumiki, K., Kobayashi, R., Nakagaki, T.: Rules for biologically inspired
-  adaptive network design. Science  \textbf{327}(5964),  439--442 (2010)
+Tero, A., Takagi, S., Saigusa, T., Ito, K., Bebber, D.P., Fricker, M.D., Yumiki, K., Kobayashi, R., Nakagaki, T.: Rules for biologically inspired adaptive network design. Science  \textbf{327}(5964),  439--442 (2010)
 
 \bibitem{vidal2010adaptive}
-Vidal, V., Bordeaux, L., Hamadi, Y.: Adaptive k-parallel best-first search: A
-  simple but efficient algorithm for multi-core domain-independent planning.
-  In: Proceedings of the International Symposium on Combinatorial Search.
-  vol.~1, pp. 100--107 (2010)
+Vidal, V., Bordeaux, L., Hamadi, Y.: Adaptive k-parallel best-first search: A simple but efficient algorithm for multi-core domain-independent planning. In: Proceedings of the International Symposium on Combinatorial Search. vol.~1, pp. 100--107 (2010)
 
 \bibitem{wiener1873ueber}
-Wiener, C.: Ueber eine aufgabe aus der geometria situs. Mathematische Annalen
-  \textbf{6}(1),  29--30 (1873)
+Wiener, C.: Ueber eine aufgabe aus der geometria situs. Mathematische Annalen  \textbf{6}(1),  29--30 (1873)
 
 \bibitem{wyllie1979complexity}
-Wyllie, J.C.: The complexity of parallel computations. Tech. rep., Cornell
-  University (1979)
+Wyllie, J.C.: The complexity of parallel computations. Tech. rep., Cornell University (1979)
 
 \bibitem{goos_grid-based_2002}
-Yap, P.: Grid-{Based} {Path}-{Finding}. In: Goos, G., Hartmanis, J.,
-  Van~Leeuwen, J., Cohen, R., Spencer, B. (eds.) Advances in {Artificial}
-  {Intelligence}, vol.~2338, pp. 44--55. Springer Berlin Heidelberg, Berlin,
-  Heidelberg (2002). \doi{10.1007/3-540-47922-8_4},
-  \url{http://link.springer.com/10.1007/3-540-47922-8_4}, series Title: Lecture
-  Notes in Computer Science
+Yap, P.: Grid-{Based} {Path}-{Finding}. In: Goos, G., Hartmanis, J., Van~Leeuwen, J., Cohen, R., Spencer, B. (eds.) Advances in {Artificial} {Intelligence}, vol.~2338, pp. 44--55. Springer Berlin Heidelberg, Berlin, Heidelberg (2002). \doi{10.1007/3-540-47922-8_4}, \url{http://link.springer.com/10.1007/3-540-47922-8_4}, series Title: Lecture Notes in Computer Science
+
+\bibitem{zhou2015massively}
+Zhou, Y., Zeng, J.: Massively parallel a* search on a gpu. In: Proceedings of the AAAI conference on artificial intelligence. vol.~29 (2015)
 
 \end{thebibliography}
