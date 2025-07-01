@@ -146,17 +146,17 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        // printf("%d-", entry.id);
+        printf("%d-", entry.id);
         if (fabs(path->cost - entry.cost) < 1) {
-            // printf("[OK] ");
+            printf("[OK] ");
             map_succeed++;
             total_succeed++;
         } else {
-            // printf("[Error] ");
+            printf("[Error] ");
             map_failed++;
             total_failed++;
         }
-        // printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %lf ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
+        printf("Coste esperado: %.8f, Coste encontrado: %.8f, Tiempo: %lf ms\n", entry.cost, path->cost, 10e3 * cpu_time_used);
         acumulated_time += 10e3 * cpu_time_used;
         path_destroy(path);
     }

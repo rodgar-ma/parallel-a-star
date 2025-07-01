@@ -193,7 +193,7 @@ float EuclideanHeuristic(int n1_id, int n2_id) {
 
 // Get Neighbors
 void GetNeighbors(neighbors_list *neighbors, int n_id) {
-    // sleep(1);
+    sleep(1);
     int x, y;
     idToXY(n_id, &x, &y);
     if (!inrange(x, y)) {
