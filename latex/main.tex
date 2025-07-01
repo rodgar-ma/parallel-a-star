@@ -186,8 +186,8 @@ Comenzaremos introduciendo los conceptos matemáticos necesarios relacionados co
 
 A continuación, se presentarán las distintas estrategias de paralelización propuestas en la literatura, evaluando sus ventajas y limitaciones. Veremos cómo varias ideas clave han impulsado una evolución progresiva en este campo a lo largo de las últimas décadas, desembocando en diferentes formulaciones paralelas del algoritmo basadas en los modelos de memoria compartida y distribuida.
 
-Finalmente, se expondrá el desarrollo e implementación de tres versiones de A*: una secuecnial y dos paralelas basadas en acercamientos diferentes de paralelización, siendo uno de ellos el algoritmo del estado del arte actual. Analizaremos los resultados obtenidos y veremos como cambian radicalemente los resultados obtenidos según el enfoque utilizado.
 
+Finalmente, se expondrá el desarrollo y la implementación de tres versiones de A*: una secuencial y dos paralelas, basadas en acercamientos diferentes de paralelización, que se implementarán en un entorno de memoria compartida. Analizaremos los tiempo de ejecución obtenidos con cada estrategia y estudiaremos su comportamiento en función del número de hilos utilizados y las características del problema.
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -214,7 +214,7 @@ Finally, we will present the development and implementation of three versions of
 \section{Introducción} \label{sec:introduccion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-El Algoritmo A* es un tipo de algoritmo de búsqueda en grafos heurístico (o informado) que garantiza, bajo unas determinadas condiciones, encontrar el camino de coste mínimo entre un par de nodos. Este problema, conocido como el problema del camino más corto (\textit{Shortest Path Problem}), puede parecer trivial a simple vista, pero es fácil darse cuenta de que, a medida que se consideran un mayor número de nodos y aristas, la dificultad de resolverlo aumenta rápidamente. Podemos pensar que este tipo de problemas tienen una relevancia natural relacionada con las necesidades de los seres humanos, los animales o las plantas. Localizar la ruta más corta para, por ejemplo, conseguir comida o refugio, podría representar una ventaja en la adaptación de una especie a su entorno.
+El Algoritmo A* es un algoritmo de búsqueda en grafos heurístico (o informado) que garantiza, bajo unas determinadas condiciones, encontrar el camino de coste mínimo entre un par de nodos. Este problema, conocido como el problema del camino más corto (\textit{Shortest Path Problem}), puede parecer trivial a simple vista, pero es fácil darse cuenta de que, a medida que se consideran un mayor número de nodos y aristas, la dificultad de resolverlo aumenta rápidamente. Podemos pensar que este tipo de problemas tienen una relevancia natural relacionada con las necesidades de los seres humanos, los animales o las plantas. Localizar la ruta más corta para, por ejemplo, conseguir comida o refugio, podría representar una ventaja en la adaptación de una especie a su entorno.
 
 Lo cierto es que sí podemos encontrar en la naturaleza varios ejemplos de estrategias y acercamientos a este tipo de problemas. Uno de ellos es la forma en que las hormigas utilizan las feromonas para encontrar la ruta óptima entre la colonia y una fuente de alimento \cite{colorni1991distributed}. Tras explorar el espacio aleatoriamente, cuando una de las hormigas encuentra alimento, vuelve a la colonia de forma más o menos correcta, dejando un rastro de feromonas. Este rastro será seguido por otras hormigas, que lo reforzarán al volver si efectivamente encontraron alimento. Otro ejemplo son los túbulos que produce el moho \textit{Physarum polucephalum} para conectar distintas colonias con sus fuentes de alimentos. Con este último se realizó un experimento en el que, sobre una placa translúcida que replicaba los accidentes geográficos de Tokio, y colocando alimento en las ubicaciones de Tokio y sus ciudades periféricas, se observó que el moho construyó una red de túbulos muy cercana a la actual red ferroviaria de Tokio \cite{tero2010rules}. Este experimento les valió a sus investigadores el premio Ig Nobel de Planificación de Transporte en 2010.
 
@@ -1225,12 +1225,12 @@ Se observa una tendencia a disminuir el tiempo de ejecución a medida que aument
 \section{Conclusiones} \label{sec:conclusiones}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+Hemos analizado e implementado las estrategias centralizada y descentralizada de paralelización del algoritmo A* en un entorno de memoria compartida, y hemos comparado su desempeño con su versión secuencial. Tras estudiar el comportamiento de estas dos estrategias hemos visto rápidamente que la centralizada resulta ser muy ineficiente, empeorando a la versión secuencial a medida que se involucran un mayor número de procesos en la búsqueda. Se ha propuesto una adaptación en memoria compartida de una versión distribuida de A* llamada HDA*, que consigue una mejora notable en el tiempo de ejecución cuando se utilizan mapas grandes y con una estructura adecuada, como los mapas aleatorios o los laberintos. Sin embargo, en mapas pequeños o con una estructura muy regular, como los laberintos con pasillos estrechos, la mejora es mínima o incluso negativa.
 
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Trabajo futuro} \label{sec:conclusiones}
+\section{Trabajo futuro} \label{sec:futuro}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
