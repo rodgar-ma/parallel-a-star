@@ -39,7 +39,7 @@ path *spastar_search(AStarSource *source, int start_id, int goal_id, int k, doub
 
     double start;
 
-    #pragma omp parallel if(k > 1) num_threads(k) shared(open, open_lock, visited, visited_locks, m, m_lock, terminated, terminated_lock)
+    #pragma omp parallel num_threads(k) shared(open, open_lock, visited, visited_locks, m, m_lock, terminated, terminated_lock)
     {
         int steps = 0;
         neighbors_list *neighbors = neighbors_list_create();

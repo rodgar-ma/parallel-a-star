@@ -601,6 +601,7 @@ La estructura general es similar a A*, inicializa la lista abierta con el nodo i
 
 \begin{algorithm}[H]
 \begin{algorithmic}[1]
+\small
 \caption{Simple Parallel A* (SPA*)}\label{spastar}
 \State $Q \gets \{s\}$;
 \State $H \gets \emptyset$;
@@ -667,6 +668,7 @@ En una estrategia distribuida, cada proceso extrae un nodo de su lista local. Cu
 \begin{algorithm}[H]
 \caption{A* descentralizado}\label{decentralized-astar}
 \begin{algorithmic}[1]
+\small
 \State $Q \gets \{Q_i\}_{i=1}^p$;
 \State $\textsc{Insert}(Q_{\textsc{ComputeRecipient}(s)}, s)$;
 \State $m \gets$ NULL;
@@ -711,9 +713,8 @@ En una estrategia distribuida, cada proceso extrae un nodo de su lista local. Cu
 \EndWhile
 \If{$m =$ NULL}
     \State \textbf{return} \textsc{error}
-\Else
-    \State \textbf{return} \textsc{RetracePath}($m$);
 \EndIf
+\State \textbf{return} \textsc{RetracePath}($m$);
 \end{algorithmic}
 \end{algorithm}
 
