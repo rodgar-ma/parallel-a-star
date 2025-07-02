@@ -1,48 +1,48 @@
-This is BibTeX, Version 0.99d
+This is BibTeX, Version 0.99d (TeX Live 2024)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
-Reallocating 'name_of_file' (item size: 1) to 9 items.
-The style file: splncs04.bst
-Reallocating 'name_of_file' (item size: 1) to 8 items.
-Database file #1: bibfile.bib
-You've used 59 entries,
-            2850 wiz_defined-function locations,
-            967 strings with 15221 characters,
-and the built_in function-call counts, 34340 in all, are:
-= -- 2956
-> -- 813
-< -- 86
-+ -- 344
-- -- 276
-* -- 2159
-:= -- 4219
-add.period$ -- 89
-call.type$ -- 59
-change.case$ -- 344
+I found no \citation commands---while reading file main.aux
+I found no \bibdata command---while reading file main.aux
+I found no \bibstyle command---while reading file main.aux
+You've used 0 entries,
+            0 wiz_defined-function locations,
+            83 strings with 482 characters,
+and the built_in function-call counts, 0 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 0
+:= -- 0
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
 chr.to.int$ -- 0
-cite$ -- 59
-duplicate$ -- 3156
-empty$ -- 3172
-format.name$ -- 319
-if$ -- 7628
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 0
+format.name$ -- 0
+if$ -- 0
 int.to.chr$ -- 0
-int.to.str$ -- 59
-missing$ -- 598
-newline$ -- 183
-num.names$ -- 122
-pop$ -- 1034
-preamble$ -- 1
-purify$ -- 252
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 0
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 0
+purify$ -- 0
 quote$ -- 0
-skip$ -- 1040
+skip$ -- 0
 stack$ -- 0
-substring$ -- 2237
-swap$ -- 1815
-text.length$ -- 86
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 226
+type$ -- 0
 warning$ -- 0
-while$ -- 308
-width$ -- 61
-write$ -- 639
+while$ -- 0
+width$ -- 0
+write$ -- 0
+(There were 3 error messages)
