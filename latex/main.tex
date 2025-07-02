@@ -29,6 +29,7 @@
         language=C,
         extendedchars=true,
         basicstyle=\small}
+\renewcommand{\lstlistingname}{Código}
 
 % Paquetes para imprimir pseudocodigo:
 \usepackage{algorithm}
@@ -570,7 +571,7 @@ El algoritmo A* es eficaz para encontrar caminos óptimos en grafos, pero su ren
 
 Las primeras propuestas para paralelizar un algoritmo de búsqueda aparecen en las décadas de los 70 y 80. Wyllie \cite{wyllie1979complexity} propone en su tesis doctoral paralelizar la estrategia de búsqueda en anchura y, aunque otros autores desestimaron su idea afirmando que no era posible \cite{eckstein1977parallel, reghbati1978parallel, reif1985depth}, a principios de la década de los 80 comenzaron a surgir avances en éste área y que podemos encontrar en orden cronológico en el artículo de Freeman \cite{freeman1991parallel}, demostrando la viabilidad de la idea. Aunque estas ideas no incorporaban la información heurística en el problema como A*, sentaron las bases para muchos de los principios que se aplicarían después. Rao y Kumar \cite{rao1987parallel, kumar1987parallel} también trabajaron con la búsqueda en profundidad y, como resultado de su trabajo, unieron la búsqueda en profundidad con el algoritmo IDA*, consiguiendo una aumento en la velocidad superlineal \cite{rao1988superlinear}. 
 
-Estos primeros trabajos se enfocaban en dividir el espacio de búsqueda entre distintos procesos, cada uno de los cuales exploraba una región diferente del grafo o árbol de búsqueda. En general, se trataba de problemas en los que el espacio de estados se puede representar como una estructura tipo árbol. De ésta manera, los subárboles generados a partir de cada nodo son independientes, y la paralelización es casi inmediata. Sin embargo, en la mayoría de aplicaciones, los subárboles generados son irregulares, provocando un desbalanceo en la carga de trabajo entre los procesos.
+Estos primeros trabajos se enfocaban en dividir el espacio de búsqueda entre distintos procesos \footnote{En este trabajo se utiliza el término *proceso* para referirse a una unidad de ejecución con su propio espacio de memoria, típicamente gestionada por el sistema operativo, y *hilo* para designar una unidad de ejecución más ligera que comparte el espacio de memoria con otros hilos del mismo proceso.}, cada uno de los cuales exploraba una región diferente del grafo o árbol de búsqueda. En general, se trataba de problemas en los que el espacio de estados se puede representar como una estructura tipo árbol. De ésta manera, los subárboles generados a partir de cada nodo son independientes, y la paralelización es casi inmediata. Sin embargo, en la mayoría de aplicaciones, los subárboles generados son irregulares, provocando un desbalanceo en la carga de trabajo entre los procesos.
 
 % Antes de abordar las técnicas concretas de paralelización de A*, es necesario introducir brevemente los principales modelos de computación paralela que, además, representan fielmente las dos principales estrategias con las que se intenta paraleliza el algoritmo. En primer lugar, tenemos el modelo de memoria compartida, en el que varios procesos se ejecutan en paralelo y acceden a una memoria común, lo que facilita el intercambio de información pero requiere mecanismos de sincronización para evitar condiciones de carrera. Por otro lado, tenemos el modelo de memoria distribuida, que se basa en procesos que no comparten memoria y se comunican entre sí mediante el envío de mensajes. Este segundo modelo implica un diseño más explícito de la coordinación entre procesos, pero ofrece una mejor escalabilidad en arquitecturas con muchos núcleos o nodos.
 
@@ -909,11 +910,11 @@ Las variables compartidas entre hilos corresponden, en el orden en que aparecen 
 path *spastar_search(AStarSource *source, int start_id, int goal_id, int k)
 \end{lstlisting}
 
-Las principales diferencias de esta versión con la secuencial son dos. En primer lugar, la adquisición y liberación de cerrojos al extraer nodos de la lista abierta y en la evaluación de los vecinos de cada nodo, como ya hemos comentado. La segunda diferencia es la condición de terminación que podemos implementar mediante el uso de un contador atómico (Sección \ref{sec:centralizado}). Este contador es la variable \verb|terminated|, y los accesos atómicos se controlan mediante el cerrojo \verb|terminated_lock|, aunque se podrían haber encapsulado también las modificaciones dentro de una directiva \verb|critical| de OpenMP. El código para la detección de la terminación (\ref{terminacion}) se ejecuta al comenzar cada iteración del bucle principal. En primer lugar se comprueba si todos los hilos han terminado (líneas 2-7). Si no es así, se obtiene el valor del mejor camino encontrado actualmente (líneas 9-11) con exclusión mutua mediante el cerrojo \verb|m_lock|. Se debe comprobar si la lista abierta está vacía o si el próximo nodo a extraer es peor que la mejor solución encontrada hasta ahora (línea 14). Esta operación también se hace con exclusión mutua sobre la lista abierta, pues puede haber otros hilos insertando nodos en ese momento. Si se cumple alguna de las condiciones, el hilo aumenta el valor de la variable \verb|terminated| también con exclusión mutua. Se utiliza una variable auxiliar privada para cada hilo, \verb|waiting|, que evita que el mismo hilo aumente el contador varias veces (líneas 16-21). Finalmente, si no se cumple ninguna de las condiciones el hilo puede continuar, pero si había aumentado el contador anteriormente, ahora debe decrementarlo (líneas 25-30).
+Las principales diferencias de esta versión con la secuencial son dos. En primer lugar, la adquisición y liberación de cerrojos al extraer nodos de la lista abierta y en la evaluación de los vecinos de cada nodo, como ya hemos comentado. La segunda diferencia es la condición de terminación que podemos implementar mediante el uso de un contador atómico (Sección \ref{sec:centralizado}). Este contador es la variable \verb|terminated|, y los accesos atómicos se controlan mediante el cerrojo \verb|terminated_lock|, aunque se podrían haber encapsulado también las modificaciones dentro de una directiva \verb|critical| de OpenMP. El código para la detección de la terminación (Código \ref{terminacion}) se ejecuta al comenzar cada iteración del bucle principal. En primer lugar se comprueba si todos los hilos han terminado (líneas 2-7). Si no es así, se obtiene el valor del mejor camino encontrado actualmente (líneas 9-11) con exclusión mutua mediante el cerrojo \verb|m_lock|. Se debe comprobar si la lista abierta está vacía o si el próximo nodo a extraer es peor que la mejor solución encontrada hasta ahora (línea 14). Esta operación también se hace con exclusión mutua sobre la lista abierta, pues puede haber otros hilos insertando nodos en ese momento. Si se cumple alguna de las condiciones, el hilo aumenta el valor de la variable \verb|terminated| también con exclusión mutua. Se utiliza una variable auxiliar privada para cada hilo, \verb|waiting|, que evita que el mismo hilo aumente el contador varias veces (líneas 16-21). Finalmente, si no se cumple ninguna de las condiciones el hilo puede continuar, pero si había aumentado el contador anteriormente, ahora debe decrementarlo (líneas 25-30).
 
 {\lstset{frame=trbl,
          numbers=left,
-         title=Detección de terminación en A* centralizado,
+         caption=Detección de terminación en A* centralizado,
          label=terminacion}
 \begin{lstlisting}
 ...
@@ -976,11 +977,11 @@ Principalmente, cada hilo contará con un \textit{buffer} de recepción que el r
 int omp_test_lock(omp_lock_t *lock);
 \end{lstlisting}
 
-\noindent que devuelve 1 (\textit{true}) si se logrado obtener el cerrojo y 0 (\textit{false}) en caso contrario. Este mecanismo también se aplica cuando un hilo comprueba si ha recibido nodos. Si alguno otro sigue escribiendo nodos en su \verb|incomebuffer|, éste no se bloquea y sigue su ejecución. A continuación podemos ver las primeras líneas del bucle principal (\ref{incomebuffer}), en el que se hace esta comprobación (líneas 2-14):
+\noindent que devuelve 1 (\textit{true}) si se logrado obtener el cerrojo y 0 (\textit{false}) en caso contrario. Este mecanismo también se aplica cuando un hilo comprueba si ha recibido nodos. Si alguno otro sigue escribiendo nodos en su \verb|incomebuffer|, éste no se bloquea y sigue su ejecución. A continuación podemos ver las primeras líneas del bucle principal (Código \ref{incomebuffer}), en el que se hace esta comprobación (líneas 2-14):
 
 {\lstset{frame=trbl,
          numbers=left,
-         title=Comprobación del \textit{buffer} de recepción,
+         caption=Comprobación del \textit{buffer} de recepción,
          label=incomebuffer}
 \begin{lstlisting}
 ...
@@ -1022,7 +1023,7 @@ if (tmp_buffer->size > 0) {
 
 \noindent El valor de \verb|income_threshold| es el número máximo de elementos para forzar la recepción de nodos, al igual que en el envío. En este caso, para evitar bloquear el \textit{buffer} de recepción si otros hilos tienen que insertar nodos, se copia el contenido a un \textit{buffer} temporal, y posteriormente se tratan como si de la expansión en la versión secuencial se tratara (líneas 16-33). En este caso, al contrario que en la versión centralizada, las listas abierta y cerrada son privadas, por lo que esta segunda parte se hace sin necesidad de obtener ningún cerrojo.
 
-A continuación, se realiza la comprobación de la condición de terminación de la misma forma que en la versión centralizada (\ref{terminacion}). Finalmente, se expande el nodo obtenido de la lista abierta local (\ref{expansion}). Para cada vecino se deberá calcular qué hilo es el propietario. Esta operación se implementa en HDA* mediante un función \textit{hash}:
+A continuación, se realiza la comprobación de la condición de terminación de la misma forma que en la versión centralizada (\ref{terminacion}). Finalmente, se expande el nodo obtenido de la lista abierta local (Código \ref{expansion}). Para cada vecino se deberá calcular qué hilo es el propietario. Esta operación se implementa en HDA* mediante un función \textit{hash}:
 
 \begin{lstlisting}
 static inline int hash(int n_id, int k) {
@@ -1036,7 +1037,7 @@ static inline int hash(int n_id, int k) {
 
 {\lstset{frame=trbl,
          numbers=left,
-         title=Evaluación de los nodos vecinos en HDA*,
+         caption=Evaluación de los nodos vecinos en HDA*,
          label=expansion}
 \begin{lstlisting}
 ...
