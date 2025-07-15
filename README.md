@@ -20,7 +20,7 @@ Para poder usar las implementaciones se debe definir una estructura `AStarSource
 - `void (*get_neighbors)(neighbors_list *neighbors, int n_id)`. Esta función es llamada por el algoritmo para obtener los vecinos del nodo `n_id`. Se deben añadir los vecinos a la lista `neighbors` utilizando el método `void add_neighbor(neighbors_list *neighbors, int n_id, float cost)`.
 - `float (*heuristic)(int n1_id, int n2_id)`. Esta función debe implementar el cálculo del valor heurístico para dos nodos.
 
-Para ejecutar los algoritmos cada uno de los algoritmos tenemos las siguientes opciones:
+Para ejecutar cada uno de los algoritmos tenemos las siguientes opciones:
 
 ```{bash}
 ./main seq <scen_file.scen>             # Algoritmo secuencial (A*)
