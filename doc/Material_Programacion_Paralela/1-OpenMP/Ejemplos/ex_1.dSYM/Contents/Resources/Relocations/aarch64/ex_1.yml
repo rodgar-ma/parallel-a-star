@@ -1,8 +1,0 @@
----
-triple:          'arm64-apple-darwin'
-binary-path:     '/Users/rodgar/Documents/TFG/Material_Programacion_Paralela/1-OpenMP/Ejemplos/ex_1'
-relocations:
-  - { offset: 0x19, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100003E98, symSize: 0x38 }
-  - { offset: 0x8D, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100003E98, symSize: 0x38 }
-  - { offset: 0xA4, size: 0x8, addend: 0x0, symName: _main._omp_fn.0, symObjAddr: 0x38, symBinAddr: 0x100003ED0, symSize: 0x48 }
-...
